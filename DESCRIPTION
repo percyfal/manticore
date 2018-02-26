@@ -1,0 +1,23 @@
+Package: nonmodelr
+Title: Utility functions for analysis of non model organism data
+Version: 0.0.0.9000
+Authors@R: person("Per", "Unneberg", email = "per.unneberg@scilifelab.se", role = c("aut", "cre"))
+Description: nonmodelr provides utility functions for dealing with
+	     output from various R packages that analyse variation
+	     data, typically in the variant call format (vcf). Despite
+	     the name, nonmodelr can be used with model organism data.
+	     However, the motivation for the package is that non model
+	     organism data display certain features that often require
+	     hacks, such as a large number of scaffolds without
+	     linkage map information. In particular, the majority of
+	     functions in nonmodelr facilitate creating genome-wide
+	     plots of various types of data.
+Depends: R (>= 3.3.2)
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Suggests:
+	PopGenome,
+	testthat,
+	vcfR
+RoxygenNote: 6.0.1

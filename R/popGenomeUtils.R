@@ -1,102 +1,3 @@
-.GENOME.class.slots <- c(
-    "nucleotide.F_ST",                  # get.F_ST, get.diversity, F_ST.stats; get.F_ST gets overall stats, get.diversity between-population stats
-    "nuc.diversity.between",             #
-    "nuc.diversity.within",
-    "nuc.F_ST.pairwise",
-    "nuc.F_ST.vs.all",
-    "n.haplotypes",
-    "hap.diversity.within",
-    "hap.diversity.between",
-    "Pi",
-    "PIA_nei",
-    "haplotype.counts",
-    "haplotype.F_ST",
-    "hap.F_ST.pairwise",
-    "Nei.G_ST.pairwise",
-    "hap.F_ST.vs.all",
-    "Nei.G_ST",
-    "Hudson.G_ST",
-    "Hudson.H_ST",
-    "Hudson.K_ST",
-    "Hudson.Snn",
-    "Phi_ST",
-    "hap.pair.F_ST",
-    "MKT",
-    "Tajima.D",
-    "SLIDE",
-    "Fay.Wu.H",
-    "Zeng.E",
-    "theta_Tajima",
-    "theta_Watterson",
-    "theta_Fu.Li",
-    "theta_Achaz.Watterson",
-    "theta_Achaz.Tajima",
-    "theta_Fay.Wu",
-    "theta_Zeng",
-    "Fu.Li.F",
-    "Fu.Li.D",
-    "Yach",
-    "n.segregating.sites",
-    "Rozas.R_2",
-    "Fu.F_S",
-    "Strobeck.S",
-    "Kelly.Z_nS",
-    "Rozas.ZZ",
-    "Rozas.ZA",
-    "Wall.B",
-    "Wall.Q",
-    "mult.Linkage",
-    "RM",
-    "CL",
-    "CLmax",
-    "CLR",
-    "MDSD",
-    "MDG1",
-    "MDG2",
-    "D",
-    "BD",
-    "BDF",
-    "BDF_bayes",
-    "alpha_ABBA",
-    "alpha_BABA",
-    "beta_BBAA",
-    "Bd_clr",
-    "Bd_dir",
-    "P.Bd_clr",
-    "f",
-    "RNDmin",
-    "D.z",
-    "D.pval",
-    "jack.knife",
-    "missing.freqs",
-    "n.fixed.sites",
-    "n.shared.sites",
-    "n.monomorphic.sites",
-    "genes"
-)
-.GENOME.class.slots.blacklist <- c("BIG.BIAL", "SLIDE.POS",
-                                   "big.data","gff.info", "snp.data",
-                                   "basepath", "project",
-                                   "populations", "poppairs",
-                                   "outgroup", "region.names",
-                                   "feature.names", "genelength",
-                                   "n.sites", "n.sites2",
-                                   "n.biallelic.sites", "n.gaps",
-                                   "n.unknowns", "n.valid.sites",
-                                   "n.polyallelic.sites",
-                                   "trans.transv.ratio",
-                                   "keep.start.pos", "Coding.region",
-                                   "UTR.region", "Intron.region",
-                                   "Exon.region", "Gene.region",
-                                   "Pop_Neutrality", "Pop_FSTN",
-                                   "Pop_FSTH", "Pop_Linkage",
-                                   "Pop_Slide", "Pop_MK",
-                                   "Pop_Detail", "Pop_Recomb",
-                                   "Pop_Sweeps", "FSTNLISTE",
-                                   "nucleotide.F_ST2", "region.data",
-                                   "region.stats")
-.region.stats.slots <- c()
-
 ##' Get stats from a PopGenome GENOME object
 ##'
 ##' Retrieve genome stats for a PopGenome GENOME instance. Note that
@@ -110,12 +11,13 @@
 ##' @param stats statistic to return
 ##' @param use.population.names use population names of object for plotting labels
 ##' @param use.region.names Use the region names as row names
-##' @param ...
-##' @return A data frame in long format, suitable for plotting with
+##' @param long.format Return data frame in long output format
+##' @param ... Arguments to pass to data access functions
+##' @return A data frame in long or wide format, suitable for plotting with
 ##'     ggplot2
 ##' @author Per Unneberg
 ##' @export
-setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.names=FALSE, use.region.names=FALSE, ...) standardGeneric("getGenomeStats"))
+setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.names=FALSE, use.region.names=FALSE, long.format=TRUE, ...) standardGeneric("getGenomeStats"))
 
 ##' @describeIn getGenomeStats Retrieve and concatenate data from a list of PopGenome GENOME instances.
 ##'
@@ -127,7 +29,7 @@ setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.
 ##' scaffold13 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold13")
 ##' slist <- list(scaffold1=scaffold1, scaffold13=scaffold13)
 ##'
-setMethod("getGenomeStats", "list", function(object, stats, use.population.names, use.region.names, ...) {
+setMethod("getGenomeStats", "list", function(object, stats, use.population.names, use.region.names, long.format, ...) {
     if (!requireNamespace("PopGenome", quietly = TRUE)) {
         stop("Package \"PopGenome\" needed for this function to work. Please install it.",
              call. = FALSE)
@@ -154,6 +56,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
                 get.sweeps, recomb = get.recomb)
 
     f <- fun[[stats]]
+    gather.key = "key"
     for (name in names(object)) {
         regions <- object[[name]]@region.names
         if (stats %in% c("detail", "neutrality", "diversity", "linkage", "sweeps", "recomb")) {
@@ -161,27 +64,25 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             if (use.population.names) {
                 rownames(tmp) <- populations
             }
-            tmp <- do.call("rbind", lapply(rownames(tmp), function(x){data.frame(population=x, region=rownames(tmp[x,][[1]]), tmp[x,][[1]])}))
-            message("adding plot positions")
-            tmp$pos <- rep(seq(i, i + length(regions) - 1), length(populations))
-            i <- i + length(regions)
+            pos <- seq(i, i + length(regions) - 1)
+            tmp <- do.call("rbind", lapply(rownames(tmp), function(x){data.frame(population=x, region=rownames(tmp[x,][[1]]), tmp[x,][[1]], pos = pos)}))
             tmp$name <- name
-            tmp <- gather(tmp, key, value, -population, -region, -name, -pos)
+            rownames(tmp) <- NULL
+            gather.exclude <- c("population", "region", "name", "pos")
         } else if (stats %in% c("fixed.shared", "diversity.between")) {
             tmp <- as.data.frame(f(object[[name]], ...))
             if (use.population.names) {
                 colnames(tmp) <- pairs
             }
-            tmp <- gather(tmp, population, value)
             tmp$name <- name
             tmp$region <- regions
             tmp$pos <- seq(i, i + length(regions) - 1)
-            i <- i + length(regions)
+            gather.key <- "population"
+            gather.exclude <- c("region", "name", "pos")
         } else if (stats %in% c("F_ST.pairwise")) {
             tmp <- f(object[[name]])
             col.names <- colnames(tmp[[1]])
             pos <- seq(i, i + length(regions) - 1)
-            i <- i + length(regions)
             tmp <- do.call(
                 "rbind", lapply(rownames(tmp),
                                 function(x) {
@@ -191,27 +92,34 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             } else {
                 colnames(tmp)[4:dim(tmp)[2]] <- col.names
             }
-            tmp <- gather(tmp, population, value, -key, -region, -pos)
             tmp$name <- name
+            gather.key <- "population"
+            gather.exclude <- c("key", "region", "pos", "name")
         } else if (stats %in% c("summary")) {
             message("Analyzing ", stats, " data")
             ## No population data here; just summary
             ## Result is a matrix that can readily be converted to a data frame
             tmp <- as.data.frame(f(object[[name]]))
+            tmp$name <- name
+            gather.exclude <- c("name")
         } else if (stats %in% c("F_ST")) {
             tmp <- as.data.frame(f(object[[name]]))
-            tmp <- gather(tmp)
             tmp$region <- regions
             tmp$name <- name
             tmp$pos <- seq(i, i + length(regions) - 1)
-            i <- i + length(regions)
+            gather.exclude <- c("region", "name", "pos")
         } else {
             stop("shouldn't end up here")
         }
+        i <- i + length(regions)
         message("Adding data for ", name)
         res <- rbind(res, tmp)
     }
-    class(res) <- c(stats, "data.frame")
+    if (long.format) {
+        res <- gather(res, gather.key, "value", -gather.exclude)
+        colnames(res)[which(colnames(res) == "gather.key")] <- gather.key
+    }
+    class(res) <- c(paste("pg", stats, sep="."), "data.frame")
     return(res)
 })
 
@@ -259,6 +167,7 @@ setMethod("get.F_ST.pairwise", "GENOME", function(object, which, ...) {
 ##' @param ...
 ##' @return Updated object
 ##' @author Per Unneberg
+##' @export
 setGeneric("genomewide.stats", function(object, which=c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage"), biallelic.structure=TRUE, ...) standardGeneric("genomewide.stats"))
 
 setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
@@ -295,3 +204,78 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
     }
     return (object)
 })
+
+
+##' plot.pg
+##'
+##' Generic plotting function for PopGenome results
+##' @title plot.pg
+##' @param data long format from getGenomeStats function
+##' @param ...
+##' @return ggplot
+##' @author Per Unneberg
+plot.pg <- function(data, x="pos", y="value", colour="name", wrap=TRUE, wrap.formula="key ~ population", wrap.ncol=1, plot.type="point",
+                    x.lab=NULL, y.lab=NULL, main=NULL, colour.scale=NULL, compact.facet=TRUE,
+                    strip.position="right", scales="free_y", ...) {
+    plot.type <- match.arg(plot.type, c("point", "line"))
+    p <- ggplot(data, aes_string(x = x, y = y, colour = colour))
+    if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
+    if (plot.type == "point") {
+        p <- p + geom_point()
+    } else if (plot.type == "line") {
+        p <- p + geom_line()
+    }
+    if (!is.null(x.lab)) p <- p + xlab(x.lab)
+    if (!is.null(y.lab)) p <- p + ylab(y.lab)
+    if (!is.null(main)) p <- p + ggtitle(main)
+    if (compact.facet) {
+        p <- p + theme(panel.spacing = unit(0, "lines"))
+    }
+    p
+}
+
+##' @export
+plot.pg.summary <- function(data, x="name", y="value", wrap.formula="~ key", which=c("n.sites", "trans.transv.ratio"), ...) {
+    which <- match.arg(which, c("n.sites", "n.biallelic.sites", "n.gaps", "n.unknowns", "n.valid.sites", "n.polyallelic.sites", "trans.transv.ratio"), several.ok=TRUE)
+    plot.pg(subset(data, key %in% which), x = x, y = y, wrap.formula = wrap.formula, ...)
+}
+
+##' @export
+plot.pg.detail <- function(data, which=c("MDG1", "MDG2", "MDSD"), ...) {
+    which = match.arg(which, c("MDG1", "MDG2", "MDSD"), several.ok = TRUE)
+    plot.pg(subset(data, key %in% which), ...)
+}
+
+##' @export
+plot.pg.neutrality <- function(data, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), ...) {
+    which = match.arg(which, c("Tajima.D", "n.segregating.sites", "Rozas.R_2", "Fu.Li.F", "Fu.Li.D", "Fu.F_S", "Fay.Wu.H", "Zeng.E", "Strobeck.S"), several.ok = TRUE)
+    plot.pg(subset(data, key %in% which), ...)
+}
+
+##' @export
+plot.pg.fixed.shared <- function(data, wrap.formula="~ population", ...) {
+    plot.pg(data, wrap.formula = wrap.formula, ...)
+}
+
+##' @export
+plot.pg.diversity <- function(data, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"),  ...) {
+    which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok=TRUE)
+    plot.pg(subset(data, key %in% which), ...)
+}
+
+##' @export
+plot.pg.diversity.between <- function(data, wrap.formula="~ population", colour="name", ...) {
+    plot.pg(data, wrap.formula = wrap.formula, colour = colour, ...)
+}
+
+##' @export
+plot.pg.F_ST <- function(data, wrap.formula="~ key", which=c("nucleotide.F_ST", "Nei.G_ST"), ...) {
+    which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok=TRUE)
+    plot.pg(subset(data, key %in% which), wrap.formula = wrap.formula, ...)
+}
+
+##' @export
+plot.pg.F_ST.pairwise <- function(data, ...) {
+    plot.pg(data, ...)
+}
+

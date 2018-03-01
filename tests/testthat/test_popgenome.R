@@ -42,63 +42,85 @@ context("Test getGenomeStats functions")
 
 test_that("summary data", {
     check_popgenome()
-    data <- getGenomeStats(scaffolds, "summary")
-    expect_is(data, "summary")
+    data <- getGenomeStats(scaffolds, "summary", long.format=FALSE)
+    expect_is(data, "pg.summary")
     expect_equal(data$n.sites, c(340000, 10000))
+    expect_equal(sort(colnames(data)), sort(c("n.sites", "n.biallelic.sites", "n.gaps",
+                                              "n.unknowns", "n.valid.sites", "n.polyallelic.sites",
+                                              "trans.transv.ratio", "name")))
 })
 
 test_that("detail data", {
     check_popgenome()
     data <- getGenomeStats(scaffolds, "detail")
-    expect_is(data, "detail")
+    expect_is(data, "pg.detail")
     expect_true("pop 1" %in% levels(as.factor(data$population)))
     expect_true("MDSD" %in% levels(as.factor(data$key)))
+    expect_equal(sort(colnames(data)),
+                 sort(c("population", "region", "pos", "name", "key", "value")))
 })
 
 test_that("neutrality data", {
     check_popgenome()
     data <- getGenomeStats(scaffolds, "neutrality")
-    expect_is(data, "neutrality")
+    expect_is(data, "pg.neutrality")
     expect_true("pop 1" %in% levels(as.factor(data$population)))
     expect_true("Tajima.D" %in% levels(as.factor(data$key)))
+    expect_equal(sort(colnames(data)),
+                 sort(c("population", "region", "pos", "name", "key", "value")))
 })
 
 test_that("fixed / shared", {
     check_popgenome()
     data.fixed <- getGenomeStats(scaffolds, "fixed.shared")
-    expect_is(data.fixed, "fixed.shared")
+    expect_is(data.fixed, "pg.fixed.shared")
     expect_true("pop1/pop2" %in% levels(as.factor(data.fixed$population)))
+    expect_equal(sort(colnames(data.fixed)),
+                 sort(c("population", "region", "pos", "name", "value")))
+
     data.shared <- getGenomeStats(scaffolds, "fixed.shared", which="shared")
-    expect_is(data.shared, "fixed.shared")
+    expect_is(data.shared, "pg.fixed.shared")
     expect_true("pop1/pop2" %in% levels(as.factor(data.shared$population)))
+    expect_equal(sort(colnames(data.shared)),
+                 sort(c("population", "region", "pos", "name", "value")))
+
     expect_false(identical(data.fixed, data.shared))
+
 })
 
 test_that("diversity data", {
     check_popgenome()
     data <- getGenomeStats(scaffolds, "diversity")
-    expect_is(data, "diversity")
+    expect_is(data, "pg.diversity")
     expect_true("nuc.diversity.within" %in% levels(as.factor(data$key)))
     expect_true("pop 1" %in% levels(as.factor(data$population)))
+    expect_equal(sort(colnames(data)),
+                 sort(c("population", "region", "pos", "name", "key", "value")))
 })
 
 test_that("diversity.between data", {
     check_popgenome()
     data <- getGenomeStats(scaffolds, "diversity.between")
-    expect_is(data, "diversity.between")
+    expect_is(data, "pg.diversity.between")
     expect_true("pop1/pop2" %in% levels(as.factor(data$population)))
+    expect_equal(sort(colnames(data)),
+                 sort(c("population", "region", "pos", "name", "value")))
 })
 
 test_that("F_ST", {
     check_popgenome()
     data <- getGenomeStats(scaffolds, "F_ST")
-    expect_is(data, "F_ST")
+    expect_is(data, "pg.F_ST")
     expect_true(!("population" %in% colnames(data)))
+    expect_equal(sort(colnames(data)),
+                 sort(c("region", "pos", "name", "value", "key")))
 })
 
 test_that("F_ST.pairwise", {
     check_popgenome()
     data <- getGenomeStats(scaffolds, "F_ST.pairwise")
-    expect_is(data, "F_ST.pairwise")
+    expect_is(data, "pg.F_ST.pairwise")
     expect_true("pop1/pop2" %in% levels(as.factor(data$population)))
+    expect_equal(sort(colnames(data)),
+                 sort(c("population", "region", "pos", "name", "value", "key")))
 })

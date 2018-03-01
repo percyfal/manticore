@@ -7,10 +7,11 @@
 \title{getGenomeStats}
 \usage{
 getGenomeStats(object, stats = c("detail"), use.population.names = FALSE,
-  use.region.names = FALSE, ...)
+  use.region.names = FALSE, long.format = TRUE, ...)
 
 \S4method{getGenomeStats}{list}(object, stats = c("detail"),
-  use.population.names = FALSE, use.region.names = FALSE, ...)
+  use.population.names = FALSE, use.region.names = FALSE,
+  long.format = TRUE, ...)
 }
 \arguments{
 \item{object}{An R object}
@@ -20,9 +21,13 @@ getGenomeStats(object, stats = c("detail"), use.population.names = FALSE,
 \item{use.population.names}{use population names of object for plotting labels}
 
 \item{use.region.names}{Use the region names as row names}
+
+\item{long.format}{Return data frame in long output format}
+
+\item{...}{Arguments to pass to data access functions}
 }
 \value{
-A data frame in long format, suitable for plotting with
+A data frame in long or wide format, suitable for plotting with
     ggplot2
 }
 \description{

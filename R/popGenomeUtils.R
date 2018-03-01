@@ -211,19 +211,43 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
 ##' Generic plotting function for PopGenome results
 ##' @title plot.pg
 ##' @param data long format from getGenomeStats function
-##' @param ...
+##' @param x variable to map to x aestethic
+##' @param y variable to map to y aestethic
+##' @param colour colours to use
+##' @param colour.var variable to map to colour aestethic
+##' @param wrap wrap plots
+##' @param wrap.formula wrap formula
+##' @param wrap.ncol number of columns in facet wrap
+##' @param plot.type plot type, either point or line
+##' @param x.lab x label
+##' @param y.lab y label
+##' @param main plot title
+##' @param compact.facet compact facet representation
+##' @param strip.position strip position
+##' @param scales scales
+##' @param size plot size
+##' @param hide.legend whether or not to hide legend
+##' @param text.size text size
+##' @param ... extra arguments
+##' @param name.colours colours to use
 ##' @return ggplot
 ##' @author Per Unneberg
-plot.pg <- function(data, x="pos", y="value", colour="name", wrap=TRUE, wrap.formula="key ~ population", wrap.ncol=1, plot.type="point",
-                    x.lab=NULL, y.lab=NULL, main=NULL, colour.scale=NULL, compact.facet=TRUE,
-                    strip.position="right", scales="free_y", ...) {
+plot.pg <- function(data, x="pos", y="value",
+                    colour=c("black", "gray"), colour.var="name",
+                    wrap=TRUE, wrap.formula="key ~ population",
+                    wrap.ncol=1, plot.type="point", x.lab="window",
+                    y.lab=NULL, main=NULL, colour.scale=NULL,
+                    compact.facet=TRUE, strip.position="right",
+                    scales="free_y", size=1, hide.legend=TRUE,
+                    text.size=14,
+                    ...) {
     plot.type <- match.arg(plot.type, c("point", "line"))
-    p <- ggplot(data, aes_string(x = x, y = y, colour = colour))
+    p <- ggplot(data, aes_string(x = x, y = y, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (plot.type == "point") {
-        p <- p + geom_point()
+        p <- p + geom_point(size = size)
     } else if (plot.type == "line") {
-        p <- p + geom_line()
+        p <- p + geom_line(size = size)
     }
     if (!is.null(x.lab)) p <- p + xlab(x.lab)
     if (!is.null(y.lab)) p <- p + ylab(y.lab)
@@ -231,13 +255,23 @@ plot.pg <- function(data, x="pos", y="value", colour="name", wrap=TRUE, wrap.for
     if (compact.facet) {
         p <- p + theme(panel.spacing = unit(0, "lines"))
     }
+     if (hide.legend) {
+         p <- p + theme(legend.position = "none", axis.text.x = element_blank())
+     }
+    p <- p + theme(text = element_text(size = text.size))
+    # Colouring setup
+    data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
+    nlevels <- length(levels(data[[colour.var]]))
+    nc <- length(colour)
+    n <-  nlevels / nc + nlevels %% nc
+    p <- p + scale_colour_manual(values=rep(colour, n))
     p
 }
 
 ##' @export
-plot.pg.summary <- function(data, x="name", y="value", wrap.formula="~ key", which=c("n.sites", "trans.transv.ratio"), ...) {
-    which <- match.arg(which, c("n.sites", "n.biallelic.sites", "n.gaps", "n.unknowns", "n.valid.sites", "n.polyallelic.sites", "trans.transv.ratio"), several.ok=TRUE)
-    plot.pg(subset(data, key %in% which), x = x, y = y, wrap.formula = wrap.formula, ...)
+plot.pg.summary <- function(data, x="name", y="value", wrap.formula="~ key", which=c("n.sites", "trans.transv.ratio"), x.lab="scaffold", ...) {
+    which <- match.arg(which, c("n.sites", "n.biallelic.sites", "n.gaps", "n.unknowns", "n.valid.sites", "n.polyallelic.sites", "trans.transv.ratio"), several.ok = TRUE)
+    plot.pg(subset(data, key %in% which), x = x, y = y, wrap.formula = wrap.formula, x.lab = x.lab, ...)
 }
 
 ##' @export
@@ -278,4 +312,3 @@ plot.pg.F_ST <- function(data, wrap.formula="~ key", which=c("nucleotide.F_ST", 
 plot.pg.F_ST.pairwise <- function(data, ...) {
     plot.pg(data, ...)
 }
-

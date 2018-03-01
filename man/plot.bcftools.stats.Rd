@@ -4,8 +4,8 @@
 \alias{plot.bcftools.stats}
 \title{plot.bcftools.stats}
 \usage{
-\method{plot}{bcftools.stats}(obj, which = c("SN", "TSTV", "SiS", "AF",
-  "QUAL", "IDD", "ST", "DP"), ncol = 2, ...)
+plot.bcftools.stats(obj, which = c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD",
+  "ST", "DP"), ncol = 2, ...)
 }
 \arguments{
 \item{obj}{bcftools.stats object}

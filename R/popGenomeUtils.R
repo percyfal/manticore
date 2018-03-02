@@ -276,9 +276,9 @@ plot.pg <- function(data, x="pos", y="value",
     if (compact.facet) {
         p <- p + theme(panel.spacing = unit(0, "lines"))
     }
-     if (hide.legend) {
+    if (hide.legend) {
          p <- p + theme(legend.position = "none", axis.text.x = element_blank())
-     }
+    }
     p <- p + theme(text = element_text(size = text.size))
     # Colouring setup
     data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
@@ -340,6 +340,6 @@ plot.pg.F_ST.pairwise <- function(data, ...) {
 }
 
 ##' @export
-plot.pg.segregating.sites <- function(data, ...) {
-    plot.pg(data, ...)
+plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
+    plot.pg(data, wrap.formula = wrap.formula, ...)
 }

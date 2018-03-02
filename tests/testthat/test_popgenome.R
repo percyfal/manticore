@@ -96,8 +96,8 @@ test_that("fixed / shared", {
 
 test_that("sites", {
     check_popgenome()
-    data <- getGenomeStats(scaffolds, "sites")
-    expect_is(data, "pg.sites")
+    data <- getGenomeStats(scaffolds, "segregating.sites")
+    expect_is(data, "pg.segregating.sites")
     expect_true("pop 1" %in% levels(as.factor(data$population)))
     expect_equal(sort(colnames(data)),
                  sort(c("population", "region", "pos", "name", "value")))

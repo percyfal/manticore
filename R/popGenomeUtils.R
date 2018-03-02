@@ -43,7 +43,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
     stats <- match.arg(stats, c("summary", "detail", "neutrality",
                                 "fixed", "shared", "diversity",
                                 "diversity.between", "F_ST",
-                                "F_ST.pairwise", "sites",
+                                "F_ST.pairwise", "segregating.sites",
                                 "linkage", "sweeps", "recomb"))
     res <- data.frame()
     i <- 1
@@ -53,7 +53,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
                 fixed = get.fixed, shared = get.shared,
                 diversity = get.diversity, diversity.between = get.diversity.between,
                 F_ST = get.F_ST, F_ST.pairwise = get.F_ST.pairwise, linkage = get.linkage,
-                sweeps = get.sweeps, recomb = get.recomb, sites = get.segregating.sites)
+                sweeps = get.sweeps, recomb = get.recomb, segregating.sites = get.segregating.sites)
 
     f <- fun[[stats]]
     gather.key = "key"
@@ -111,7 +111,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             tmp$name <- name
             tmp$pos <- seq(i, i + length(regions) - 1)
             gather.exclude <- c("region", "name", "pos")
-        } else if (stats %in% c("sites")) {
+        } else if (stats %in% c("segregating.sites")) {
             ## Result is matrix with populations in columns
             tmp <- as.data.frame(f(object[[name]]))
             if (use.population.names) {

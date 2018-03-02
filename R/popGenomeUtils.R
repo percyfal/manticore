@@ -263,6 +263,7 @@ plot.pg <- function(data, x="pos", y="value",
                     text.size=14,
                     ...) {
     plot.type <- match.arg(plot.type, c("point", "line"))
+    data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
     p <- ggplot(data, aes_string(x = x, y = y, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (plot.type == "point") {
@@ -281,7 +282,6 @@ plot.pg <- function(data, x="pos", y="value",
     }
     p <- p + theme(text = element_text(size = text.size))
     # Colouring setup
-    data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
     nlevels <- length(levels(data[[colour.var]]))
     nc <- length(colour)
     n <-  nlevels / nc + nlevels %% nc

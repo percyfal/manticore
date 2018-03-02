@@ -60,6 +60,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
     for (name in names(object)) {
         regions <- object[[name]]@region.names
         if (stats %in% c("detail", "neutrality", "diversity", "linkage", "sweeps", "recomb")) {
+            ## Result is matrix with populations as row names
             tmp <- f(object[[name]])
             if (use.population.names) {
                 rownames(tmp) <- populations
@@ -69,7 +70,8 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             tmp$name <- name
             rownames(tmp) <- NULL
             gather.exclude <- c("population", "region", "name", "pos")
-        } else if (stats %in% c("fixed", "shared", "diversity.between", "sites")) {
+        } else if (stats %in% c("fixed", "shared", "diversity.between")) {
+            ## Result is data frame with population pairs in columns
             tmp <- as.data.frame(f(object[[name]], ...))
             if (use.population.names) {
                 colnames(tmp) <- pairs
@@ -80,6 +82,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             gather.key <- "population"
             gather.exclude <- c("region", "name", "pos")
         } else if (stats %in% c("F_ST.pairwise")) {
+            ## Result is matrix with statistic as row names
             tmp <- f(object[[name]])
             col.names <- colnames(tmp[[1]])
             pos <- seq(i, i + length(regions) - 1)
@@ -96,17 +99,28 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             gather.key <- "population"
             gather.exclude <- c("key", "region", "pos", "name")
         } else if (stats %in% c("summary")) {
+            ## Result is matrix with statistic in columns, region in rows
             if (!quiet) message("Analyzing ", stats, " data")
-            ## No population data here; just summary
-            ## Result is a matrix that can readily be converted to a data frame
             tmp <- as.data.frame(f(object[[name]]))
             tmp$name <- name
             gather.exclude <- c("name")
         } else if (stats %in% c("F_ST")) {
+            ## Result is matrix with statistic in column, regions in rows
             tmp <- as.data.frame(f(object[[name]]))
             tmp$region <- regions
             tmp$name <- name
             tmp$pos <- seq(i, i + length(regions) - 1)
+            gather.exclude <- c("region", "name", "pos")
+        } else if (stats %in% c("sites")) {
+            ## Result is matrix with populations in columns
+            tmp <- as.data.frame(f(object[[name]]))
+            if (use.population.names) {
+                colnames(tmp) <- populations
+            }
+            tmp$region <- regions
+            tmp$name <- name
+            tmp$pos <- seq(i, i + length(regions) - 1)
+            gather.key <- "population"
             gather.exclude <- c("region", "name", "pos")
         } else {
             stop("shouldn't end up here")

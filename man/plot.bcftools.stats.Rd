@@ -4,8 +4,8 @@
 \alias{plot.bcftools.stats}
 \title{plot.bcftools.stats}
 \usage{
-plot.bcftools.stats(obj, which = c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD",
-  "ST", "DP"), ncol = 2, ...)
+\method{plot}{bcftools.stats}(obj, which = c("SN", "TSTV", "SiS", "AF",
+  "QUAL", "IDD", "ST", "DP"), ncol = 2, ...)
 }
 \arguments{
 \item{obj}{bcftools.stats object}
@@ -28,3 +28,4 @@ Plot summary of bcftools stats results
 \author{
 Per Unneberg
 }
+

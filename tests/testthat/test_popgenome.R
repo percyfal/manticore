@@ -5,6 +5,8 @@ check_popgenome <- function() {
 }
 
 if (requireNamespace("PopGenome", quietly = TRUE)) {
+    library("PopGenome")
+    library("tidyr")
     ## TODO: prepare this data in a data file
     populations.list <- list(
         CHS = c("CHS.HG00512", "CHS.HG00513"),
@@ -72,20 +74,29 @@ test_that("neutrality data", {
 
 test_that("fixed / shared", {
     check_popgenome()
-    data.fixed <- getGenomeStats(scaffolds, "fixed.shared")
-    expect_is(data.fixed, "pg.fixed.shared")
+    data.fixed <- getGenomeStats(scaffolds, "fixed")
+    expect_is(data.fixed, "pg.fixed")
     expect_true("pop1/pop2" %in% levels(as.factor(data.fixed$population)))
     expect_equal(sort(colnames(data.fixed)),
                  sort(c("population", "region", "pos", "name", "value")))
 
-    data.shared <- getGenomeStats(scaffolds, "fixed.shared", which="shared")
-    expect_is(data.shared, "pg.fixed.shared")
+    data.shared <- getGenomeStats(scaffolds, "shared")
+    expect_is(data.shared, "pg.shared")
     expect_true("pop1/pop2" %in% levels(as.factor(data.shared$population)))
     expect_equal(sort(colnames(data.shared)),
                  sort(c("population", "region", "pos", "name", "value")))
 
     expect_false(identical(data.fixed, data.shared))
 
+})
+
+test_that("sites", {
+    check_popgenome()
+    data <- getGenomeStats(scaffolds, "sites")
+    expect_is(data, "pg.sites")
+    expect_true("pop 1" %in% levels(as.factor(data.fixed$population)))
+    expect_equal(sort(colnames(data)),
+                 sort(c("population", "region", "pos", "name", "value")))
 })
 
 test_that("diversity data", {

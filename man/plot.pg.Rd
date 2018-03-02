@@ -4,12 +4,12 @@
 \alias{plot.pg}
 \title{plot.pg}
 \usage{
-plot.pg(data, x = "pos", y = "value", colour = c("black", "gray"),
-  colour.var = "name", wrap = TRUE, wrap.formula = "key ~ population",
-  wrap.ncol = 1, plot.type = "point", x.lab = "window", y.lab = NULL,
-  main = NULL, colour.scale = NULL, compact.facet = TRUE,
-  strip.position = "right", scales = "free_y", size = 1,
-  hide.legend = TRUE, text.size = 14, ...)
+\method{plot}{pg}(data, x = "pos", y = "value", colour = c("black",
+  "gray"), colour.var = "name", wrap = TRUE,
+  wrap.formula = "key ~ population", wrap.ncol = 1, plot.type = "point",
+  x.lab = "window", y.lab = NULL, main = NULL, colour.scale = NULL,
+  compact.facet = TRUE, strip.position = "right", scales = "free_y",
+  size = 1, hide.legend = TRUE, text.size = 14, ...)
 }
 \arguments{
 \item{data}{long format from getGenomeStats function}
@@ -64,3 +64,4 @@ Generic plotting function for PopGenome results
 \author{
 Per Unneberg
 }
+

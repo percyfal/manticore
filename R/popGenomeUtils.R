@@ -12,12 +12,13 @@
 ##' @param use.population.names use population names of object for plotting labels
 ##' @param use.region.names Use the region names as row names
 ##' @param long.format Return data frame in long output format
+##' @param quiet suppress messages
 ##' @param ... Arguments to pass to data access functions
 ##' @return A data frame in long or wide format, suitable for plotting with
 ##'     ggplot2
 ##' @author Per Unneberg
 ##' @export
-setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.names=FALSE, use.region.names=FALSE, long.format=TRUE, ...) standardGeneric("getGenomeStats"))
+setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.names=FALSE, use.region.names=FALSE, long.format=TRUE, quiet=FALSE, ...) standardGeneric("getGenomeStats"))
 
 ##' @describeIn getGenomeStats Retrieve and concatenate data from a list of PopGenome GENOME instances.
 ##'
@@ -29,7 +30,7 @@ setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.
 ##' scaffold13 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold13")
 ##' slist <- list(scaffold1=scaffold1, scaffold13=scaffold13)
 ##'
-setMethod("getGenomeStats", "list", function(object, stats, use.population.names, use.region.names, long.format, ...) {
+setMethod("getGenomeStats", "list", function(object, stats, use.population.names, use.region.names, long.format, quiet, ...) {
     if (!requireNamespace("PopGenome", quietly = TRUE)) {
         stop("Package \"PopGenome\" needed for this function to work. Please install it.",
              call. = FALSE)
@@ -40,20 +41,19 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
     }
     stopifnot(all(unlist(lapply(object, function(x){inherits(x, "GENOME")}))))
     stats <- match.arg(stats, c("summary", "detail", "neutrality",
-                                "fixed.shared", "diversity",
+                                "fixed", "shared", "diversity",
                                 "diversity.between", "F_ST",
-                                "F_ST.pairwise",
+                                "F_ST.pairwise", "sites",
                                 "linkage", "sweeps", "recomb"))
     res <- data.frame()
     i <- 1
     populations <- names(object[[1]]@populations)
     pairs <- combn(populations, 2, function(x){paste(x, collapse="/")})
     fun <- list(summary = get.sum.data, detail = get.detail, neutrality = get.neutrality,
-                fixed.shared = get.fixed.shared, diversity =
-                get.diversity, diversity.between =
-                get.diversity.between, F_ST = get.F_ST, F_ST.pairwise
-                = get.F_ST.pairwise, linkage = get.linkage, sweeps =
-                get.sweeps, recomb = get.recomb)
+                fixed = get.fixed, shared = get.shared,
+                diversity = get.diversity, diversity.between = get.diversity.between,
+                F_ST = get.F_ST, F_ST.pairwise = get.F_ST.pairwise, linkage = get.linkage,
+                sweeps = get.sweeps, recomb = get.recomb, sites = get.segregating.sites)
 
     f <- fun[[stats]]
     gather.key = "key"
@@ -69,7 +69,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             tmp$name <- name
             rownames(tmp) <- NULL
             gather.exclude <- c("population", "region", "name", "pos")
-        } else if (stats %in% c("fixed.shared", "diversity.between")) {
+        } else if (stats %in% c("fixed", "shared", "diversity.between", "sites")) {
             tmp <- as.data.frame(f(object[[name]], ...))
             if (use.population.names) {
                 colnames(tmp) <- pairs
@@ -96,7 +96,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             gather.key <- "population"
             gather.exclude <- c("key", "region", "pos", "name")
         } else if (stats %in% c("summary")) {
-            message("Analyzing ", stats, " data")
+            if (!quiet) message("Analyzing ", stats, " data")
             ## No population data here; just summary
             ## Result is a matrix that can readily be converted to a data frame
             tmp <- as.data.frame(f(object[[name]]))
@@ -112,7 +112,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             stop("shouldn't end up here")
         }
         i <- i + length(regions)
-        message("Adding data for ", name)
+        if (!quiet) message("Adding data for ", name)
         res <- rbind(res, tmp)
     }
     if (long.format) {
@@ -127,12 +127,14 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
 
 ## Write new functions for each case, and a function for annotating
 ## data, as in bioodo
-setGeneric("get.fixed.shared", function(object, which="fixed", ...) standardGeneric("get.fixed.shared"))
-setMethod("get.fixed.shared", "GENOME", function(object, which, ...) {
-    which <- match.arg(which, c("fixed", "shared"))
-    message("Getting ", which, " counts")
-    slots <- list(fixed = "n.fixed.sites", shared = "n.shared.sites")
-    return (slot(object, slots[[which]]))
+setGeneric("get.fixed", function(object, which="fixed", ...) standardGeneric("get.fixed"))
+setMethod("get.fixed", "GENOME", function(object, which, ...) {
+    return (slot(object, "n.fixed.sites"))
+})
+
+setGeneric("get.shared", function(object, which="fixed", ...) standardGeneric("get.shared"))
+setMethod("get.shared", "GENOME", function(object, which, ...) {
+    return (slot(object, "n.shared.sites"))
 })
 
 setGeneric("get.diversity.between", function(object, which="nuc", ...) standardGeneric("get.diversity.between"))
@@ -157,6 +159,11 @@ setMethod("get.F_ST.pairwise", "GENOME", function(object, which, ...) {
     return (df)
 })
 
+setGeneric("get.segregating.sites", function(object, ...) standardGeneric("get.segregating.sites"))
+setMethod("get.segregating.sites", "GENOME", function(object, ...) {
+    return (object@n.segregating.sites)
+})
+
 ##' genomewide.stats
 ##'
 ##' Calculate genome wide statistics
@@ -164,7 +171,7 @@ setMethod("get.F_ST.pairwise", "GENOME", function(object, which, ...) {
 ##' @param object GENOME object on which to perform calculations
 ##' @param which statistics to calculate
 ##' @param biallelic.structure calculate biallelic structure
-##' @param ...
+##' @param ... extra arguments
 ##' @return Updated object
 ##' @author Per Unneberg
 ##' @export
@@ -173,7 +180,7 @@ setGeneric("genomewide.stats", function(object, which=c("detail", "neutrality", 
 setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
     which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok=TRUE)
     if ("detail" %in% which) {
-        object <- detail.stats(object, biallelic.structure=biallelic.structure, ...)
+        object <- detail.stats(object, biallelic.structure = biallelic.structure, ...)
     }
     if ("neutrality" %in% which) {
         object <- neutrality.stats(object, ...)
@@ -287,7 +294,12 @@ plot.pg.neutrality <- function(data, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), 
 }
 
 ##' @export
-plot.pg.fixed.shared <- function(data, wrap.formula="~ population", ...) {
+plot.pg.fixed <- function(data, wrap.formula="~ population", ...) {
+    plot.pg(data, wrap.formula = wrap.formula, ...)
+}
+
+##' @export
+plot.pg.shared <- function(data, wrap.formula="~ population", ...) {
     plot.pg(data, wrap.formula = wrap.formula, ...)
 }
 
@@ -310,5 +322,10 @@ plot.pg.F_ST <- function(data, wrap.formula="~ key", which=c("nucleotide.F_ST", 
 
 ##' @export
 plot.pg.F_ST.pairwise <- function(data, ...) {
+    plot.pg(data, ...)
+}
+
+##' @export
+plot.pg.segregating.sites <- function(data, ...) {
     plot.pg(data, ...)
 }

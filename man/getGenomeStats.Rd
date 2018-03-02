@@ -7,11 +7,11 @@
 \title{getGenomeStats}
 \usage{
 getGenomeStats(object, stats = c("detail"), use.population.names = FALSE,
-  use.region.names = FALSE, long.format = TRUE, ...)
+  use.region.names = FALSE, long.format = TRUE, quiet = FALSE, ...)
 
 \S4method{getGenomeStats}{list}(object, stats = c("detail"),
   use.population.names = FALSE, use.region.names = FALSE,
-  long.format = TRUE, ...)
+  long.format = TRUE, quiet = FALSE, ...)
 }
 \arguments{
 \item{object}{An R object}
@@ -23,6 +23,8 @@ getGenomeStats(object, stats = c("detail"), use.population.names = FALSE,
 \item{use.region.names}{Use the region names as row names}
 
 \item{long.format}{Return data frame in long output format}
+
+\item{quiet}{suppress messages}
 
 \item{...}{Arguments to pass to data access functions}
 }
@@ -44,7 +46,6 @@ but this does not seem to work.
 \itemize{
 \item \code{list}: Retrieve and concatenate data from a list of PopGenome GENOME instances.
 }}
-
 \examples{
 library(PopGenome)
 # Read a vcf and generate two genome objects
@@ -57,3 +58,4 @@ slist <- list(scaffold1=scaffold1, scaffold13=scaffold13)
 \author{
 Per Unneberg
 }
+

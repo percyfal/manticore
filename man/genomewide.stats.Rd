@@ -14,6 +14,8 @@ genomewide.stats(object, which = c("detail", "neutrality", "F_ST",
 \item{which}{statistics to calculate}
 
 \item{biallelic.structure}{calculate biallelic structure}
+
+\item{...}{extra arguments}
 }
 \value{
 Updated object
@@ -27,3 +29,4 @@ Calculate genome wide statistics
 \author{
 Per Unneberg
 }
+

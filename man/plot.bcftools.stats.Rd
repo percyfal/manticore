@@ -28,4 +28,3 @@ Plot summary of bcftools stats results
 \author{
 Per Unneberg
 }
-

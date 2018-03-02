@@ -29,4 +29,3 @@ Calculate genome wide statistics
 \author{
 Per Unneberg
 }
-

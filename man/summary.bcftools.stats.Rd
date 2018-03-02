@@ -21,4 +21,3 @@ Print summary for bcftools stats
 \author{
 Per Unneberg
 }
-

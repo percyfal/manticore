@@ -64,4 +64,3 @@ Generic plotting function for PopGenome results
 \author{
 Per Unneberg
 }
-

@@ -23,4 +23,3 @@ Read output from bcftools stats
 \author{
 Per Unneberg
 }
-

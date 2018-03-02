@@ -46,6 +46,7 @@ but this does not seem to work.
 \itemize{
 \item \code{list}: Retrieve and concatenate data from a list of PopGenome GENOME instances.
 }}
+
 \examples{
 library(PopGenome)
 # Read a vcf and generate two genome objects
@@ -58,4 +59,3 @@ slist <- list(scaffold1=scaffold1, scaffold13=scaffold13)
 \author{
 Per Unneberg
 }
-

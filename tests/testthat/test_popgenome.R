@@ -2,6 +2,10 @@ check_popgenome <- function() {
     if (!requireNamespace("PopGenome", quietly = TRUE)) {
         skip("PopGenome package not available")
     }
+    if (!requireNamespace("tidyr", quietly = TRUE)) {
+        skip("tidyr package not available")
+    }
+
 }
 
 if (requireNamespace("PopGenome", quietly = TRUE)) {
@@ -94,7 +98,7 @@ test_that("sites", {
     check_popgenome()
     data <- getGenomeStats(scaffolds, "sites")
     expect_is(data, "pg.sites")
-    expect_true("pop 1" %in% levels(as.factor(data.fixed$population)))
+    expect_true("pop 1" %in% levels(as.factor(data$population)))
     expect_equal(sort(colnames(data)),
                  sort(c("population", "region", "pos", "name", "value")))
 })

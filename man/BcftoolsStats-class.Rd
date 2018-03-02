@@ -2,8 +2,8 @@
 % Please edit documentation in R/bcftools.R
 \docType{class}
 \name{BcftoolsStats-class}
-\alias{BcftoolsStats}
 \alias{BcftoolsStats-class}
+\alias{BcftoolsStats}
 \title{BcftoolsStats}
 \description{
 BcftoolsStats object

@@ -1,5 +1,5 @@
 context("Test parsing bcftools output, S4")
-fn <- file.path("../../inst/extdata/medium.call.stats")
+fn <- system.file("extdata", "medium.call.stats", package="nonmodelr")
 S4stats <- readBcftoolsStats(fn)
 
 test_that("new S4 bcftools instance", {

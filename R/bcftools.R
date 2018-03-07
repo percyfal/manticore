@@ -102,7 +102,7 @@ summary.bcftools.stats <- function(obj) {
 }
 
 
-##' plot.bcftools.stats
+##' gplot.bcftools.stats
 ##'
 ##' Plot summary of bcftools stats results
 ##' @title plot.bcftools.stats
@@ -112,7 +112,7 @@ summary.bcftools.stats <- function(obj) {
 ##' @param ... parameters passed to generic plot function
 ##' @return ggplot2 object, or a plot
 ##' @author Per Unneberg
-plot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), ncol=2, ...) {
+gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), ncol=2, ...) {
     which <- match.arg(which, c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), several.ok=TRUE)
     message("Producing ", length(which), " plots")
     plist <- list()

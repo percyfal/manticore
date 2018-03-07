@@ -17,8 +17,7 @@ if (requireNamespace("PopGenome", quietly = TRUE)) {
         PUR = c("PUR.HG00731", "PUR.HG00733"),
         YRI = c("YRI.NA19238", "YRI.NA19239")
     )
-
-    fn <- file.path("../../inst/extdata/medium.call.biallelic.vcf.gz")
+    fn <- system.file("extdata", "medium.call.biallelic.vcf.gz", package="nonmodelr")
     scaffold2 <- readVCF(fn, frompos = 1, topos = 340000,
                          numcols = 1000, tid = "scaffold2")
     scaffold13 <- readVCF(fn, frompos = 1, topos = 10000,

@@ -20,7 +20,8 @@ LazyData: true
 Imports:
     ggplot2,
     tidyr,
-    gridExtra
+    gridExtra,
+    methods
 Suggests:
     PopGenome,
     testthat,

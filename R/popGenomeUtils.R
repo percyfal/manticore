@@ -363,10 +363,10 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
     plot.pg(data, wrap.formula = wrap.formula, ...)
 }
 
-##' gboxplot.pg
+##' boxplot.pg
 ##'
 ##' Make a box/violin plot of data
-##' @title gboxplot.pg
+##' @title boxplot.pg
 ##' @param data long format from getGenomeStats function
 ##' @param x.var variable to map to x aestethic
 ##' @param y.var variable to map to y aestethic
@@ -392,7 +392,7 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##' @importFrom graphics boxplot
 ##' @return ggplot object
 ##' @author Per Unneberg
-gboxplot.pg <- function(data, x.var="population", y.var="value",
+boxplot.pg <- function(formula = "value ~ population", data=NULL,
                        colour=c("black", "gray"), colour.var=NULL,
                        wrap=FALSE, wrap.formula=" ~ name",
                        wrap.ncol=1, plot.type="box", x.lab="group",
@@ -401,9 +401,15 @@ gboxplot.pg <- function(data, x.var="population", y.var="value",
                        scales="free_y", hide.legend=TRUE,
                        text.size=14, text.x.angle=45, text.x.hjust=1,
                        ...) {
-    colour.var <- colour.var %||% x.var
+    message("In boxplot.pg")
     plot.type <- match.arg(plot.type, c("box", "violin"))
+    message(plot.type)
+    y.var <- as.character(as.list(as.formula(formula))[[2]])
+    x.var <- as.character(as.list(as.formula(formula))[[3]])
+    colour.var <- colour.var %||% x.var
     data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
+    message(x.var)
+    message(y.var)
     p <- ggplot(data, aes_string(x = x.var, y = y.var, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (plot.type == "box") {
@@ -429,62 +435,62 @@ gboxplot.pg <- function(data, x.var="population", y.var="value",
     p
 }
 
-##' @describeIn gboxplot.pg Make boxplot of detail statistiscs
+##' @describeIn boxplot.pg Make boxplot of detail statistiscs
 ##' @export
-gboxplot.pg.detail <- function(data, which=c("MDG1", "MDG2", "MDSD"), main="detail statistics", ...) {
+boxplot.pg.detail <- function(data, which=c("MDG1", "MDG2", "MDSD"), main="detail statistics", ...) {
     which = match.arg(which, c("MDG1", "MDG2", "MDSD"), several.ok = TRUE)
-    gboxplot.pg(subset(data, key %in% which), ...)
+    boxplot.pg(subset(data, key %in% which), ...)
 }
 
-##' @describeIn gboxplot.pg Make boxplot of netrality statistics
+##' @describeIn boxplot.pg Make boxplot of netrality statistics
 ##' @export
-gboxplot.pg.neutrality <- function(data, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), wrap=TRUE, wrap.formula="~ key", ...) {
+boxplot.pg.neutrality <- function(data=NULL, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), wrap=TRUE, wrap.formula="~ key", ...) {
     which = match.arg(which, c("Tajima.D", "n.segregating.sites", "Rozas.R_2", "Fu.Li.F", "Fu.Li.D", "Fu.F_S", "Fay.Wu.H", "Zeng.E", "Strobeck.S"), several.ok = TRUE)
-    gboxplot.pg(subset(data, key %in% which), wrap=wrap, wrap.formula=wrap.formula, ...)
+    boxplot.pg(data = subset(data, key %in% which), wrap=wrap, wrap.formula=wrap.formula, ...)
 }
 
-##' @describeIn gboxplot.pg Make boxplot of fixed sites
+##' @describeIn boxplot.pg Make boxplot of fixed sites
 ##' @export
-gboxplot.pg.fixed <- function(data, main="Fixed sites", ...) {
-    gboxplot.pg(data, main=main, ...)
+boxplot.pg.fixed <- function(data=NULL, main="Fixed sites", ...) {
+    boxplot.pg(data = data, main = main, ...)
 }
 
-##' @describeIn gboxplot.pg Make boxplot of shared sites
+##' @describeIn boxplot.pg Make boxplot of shared sites
 ##' @export
-gboxplot.pg.shared <- function(data, main="Shared sites", ...) {
-    gboxplot.pg(data, ...)
+boxplot.pg.shared <- function(data=NULL, main="Shared sites", ...) {
+    boxplot.pg(data = data, main = main, ...)
 }
 
-##' @describeIn gboxplot.pg Make boxplot of diversity
+##' @describeIn boxplot.pg Make boxplot of diversity
 ##' @export
-gboxplot.pg.diversity <- function(data, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), wrap=TRUE, wrap.formula="~ key", ...) {
+boxplot.pg.diversity <- function(data=NULL, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), wrap=TRUE, wrap.formula="~ key", ...) {
     which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok=TRUE)
-    gboxplot.pg(subset(data, key %in% which), wrap=wrap, wrap.formula="~ key", ...)
+    boxplot.pg(data = subset(data, key %in% which), wrap = wrap, wrap.formula = "~ key", ...)
 }
 
-##' @describeIn gboxplot.pg Make boxplot of between population diversity
+##' @describeIn boxplot.pg Make boxplot of between population diversity
 ##' @export
-gboxplot.pg.diversity.between <- function(data, ...) {
-    gboxplot.pg(data, ...)
-}
-
-
-##' @describeIn gboxplot.pg Make boxplot of F_ST
-##' @export
-gboxplot.pg.F_ST <- function(data, x.var="name", which=c("nucleotide.F_ST", "Nei.G_ST"), wrap=TRUE, wrap.formula="~ key", ...) {
-    which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok=TRUE)
-    gboxplot.pg(subset(data, key %in% which), x.var=x.var, wrap=wrap, wrap.formula=wrap.formula, ...)
-}
-
-##' @describeIn gboxplot.pg Make boxplot of pairwise F_ST
-##' @export
-gboxplot.pg.F_ST.pairwise <- function(data, ...) {
-    gboxplot.pg(data, ...)
+boxplot.pg.diversity.between <- function(data=NULL, ...) {
+    boxplot.pg(data = data, ...)
 }
 
 
-##' @describeIn gboxplot.pg Make boxplot of segregating sites
+##' @describeIn boxplot.pg Make boxplot of F_ST
 ##' @export
-gboxplot.pg.segregating.sites <- function(data, ...) {
-    gboxplot.pg(data, ...)
+boxplot.pg.F_ST <- function(data=NULL, formula="value ~ name", which=c("nucleotide.F_ST", "Nei.G_ST"), wrap=TRUE, wrap.formula="~ key", ...) {
+    which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok = TRUE)
+    boxplot.pg(formula = formula, data = subset(data, key %in% which), wrap = wrap, wrap.formula = wrap.formula, ...)
+}
+
+##' @describeIn boxplot.pg Make boxplot of pairwise F_ST
+##' @export
+boxplot.pg.F_ST.pairwise <- function(data=NULL, ...) {
+    boxplot.pg(data = data, ...)
+}
+
+
+##' @describeIn boxplot.pg Make boxplot of segregating sites
+##' @export
+boxplot.pg.segregating.sites <- function(data=NULL, ...) {
+    boxplot.pg(data = data, ...)
 }

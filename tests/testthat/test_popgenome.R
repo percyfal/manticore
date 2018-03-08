@@ -11,41 +11,52 @@ check_popgenome <- function() {
 
 }
 
+## Code to save popgenome.rda
+##     populations.list <- list(
+##         CHS = c("CHS.HG00512", "CHS.HG00513"),
+##         PUR = c("PUR.HG00731", "PUR.HG00733"),
+##         YRI = c("YRI.NA19238", "YRI.NA19239")
+##     )
+##     fn <- system.file("extdata", "medium.call.biallelic.vcf.gz", package="nonmodelr")
+##     scaffold2 <- readVCF(fn, frompos = 1, topos = 340000,
+##                          numcols = 1000, tid = "scaffold2")
+##     scaffold13 <- readVCF(fn, frompos = 1, topos = 10000,
+##                           numcols = 1000, tid = "scaffold13")
+##     scaffold2@region.names <- "scaffold2"
+##     scaffold13@region.names <- "scaffold13"
+##     scaffold2 <- set.populations(scaffold2, populations.list, diploid = TRUE)
+##     scaffold13 <- set.populations(scaffold13, populations.list, diploid = TRUE)
+##     scaffold2 <- genomewide.stats(scaffold2)
+##     scaffold13 <- genomewide.stats(scaffold13)
+##     scaffolds <- list(scaffold2 = scaffold2, scaffold13 = scaffold13)
+
+##     slide2 <- sliding.window.transform(scaffold2,
+##                                        10000,
+##                                        10000,
+##                                        type = 2, whole.data = FALSE)
+##     slide13 <- sliding.window.transform(scaffold13,
+##                                         1000,
+##                                         1000,
+##                                         type = 2, whole.data = FALSE)
+##     slide2 <- genomewide.stats(slide2)
+##     slide13 <- genomewide.stats(slide13)
+##     slides <- list(slide2 = slide2, slide13 = slide13)
+##     stats <- c("detail", "neutrality", "fixed", "shared", "diversity", "diversity.between",
+##                "F_ST", "F_ST.pairwise", "segregating.sites")
+##     results <- lapply(c("summary", stats), function(x) {getGenomeStats(scaffolds, x, quietly = TRUE, use.population.names = TRUE)})
+##     names(results) <- c("summary", stats)
+##     results.slide <- lapply(stats, function(x) {getGenomeStats(slides, x, quietly = TRUE, use.population.names = TRUE)})
+##     names(results.slide) <- stats
+##     save(slides, scaffolds, results, results.slide, scaffold2, scaffold13, slide2, slide13, populations.list, file="inst/extdata/popgenome.rda")
 if (all(unlist(lapply(c("PopGenome", "tidyr", "GenomicRanges"), requireNamespace, quietly = TRUE)))) {
     library("PopGenome")
     library("GenomicRanges")
     library("tidyr")
-    ## TODO: prepare this data in a data file
-    populations.list <- list(
-        CHS = c("CHS.HG00512", "CHS.HG00513"),
-        PUR = c("PUR.HG00731", "PUR.HG00733"),
-        YRI = c("YRI.NA19238", "YRI.NA19239")
-    )
-    fn <- system.file("extdata", "medium.call.biallelic.vcf.gz", package="nonmodelr")
-    scaffold2 <- readVCF(fn, frompos = 1, topos = 340000,
-                         numcols = 1000, tid = "scaffold2")
-    scaffold13 <- readVCF(fn, frompos = 1, topos = 10000,
-                          numcols = 1000, tid = "scaffold13")
-    scaffold2@region.names <- "scaffold2"
-    scaffold13@region.names <- "scaffold13"
-    scaffold2 <- set.populations(scaffold2, populations.list, diploid = TRUE)
-    scaffold13 <- set.populations(scaffold13, populations.list, diploid = TRUE)
-    scaffold2 <- genomewide.stats(scaffold2)
-    scaffold13 <- genomewide.stats(scaffold13)
-    scaffolds <- list(scaffold2 = scaffold2, scaffold13 = scaffold13)
-
-    slide2 <- sliding.window.transform(scaffold2,
-                                       10000,
-                                       10000,
-                                       type = 2, whole.data = FALSE)
-    slide13 <- sliding.window.transform(scaffold13,
-                                        1000,
-                                        1000,
-                                        type = 2, whole.data = FALSE)
-    slide2 <- genomewide.stats(slide2)
-    slide13 <- genomewide.stats(slide13)
-    slides <- list(slide2 = slide2, slide13 = slide13)
+    fn <- system.file("extdata", "popgenome.rda", package="nonmodelr")
+    load(fn)
 }
+
+
 
 context("Test getGenomeStats functions")
 

@@ -53,7 +53,7 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
     out.format <- match.arg(out.format, c("wide", "long", "GRanges"))
     res <- data.frame()
     populations <- names(object[[1]]@populations)
-    pairs <- combn(populations, 2, function(x){paste(x, collapse="/")})
+    pairs <- combn(populations, 2, function(x){paste(x, collapse = "/")})
     fun <- list(summary = get.sum.data, detail = get.detail, neutrality = get.neutrality,
                 fixed = get.fixed, shared = get.shared,
                 diversity = get.diversity, diversity.between = get.diversity.between,
@@ -82,8 +82,9 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             }
             tmp$seqnames <- name
             tmp$ranges <- ranges
+            tmp$key <- stats
             gather.key <- "population"
-            gather.exclude <- c("ranges", "seqnames")
+            gather.exclude <- c("ranges", "seqnames", "key")
         } else if (stats %in% c("F_ST.pairwise")) {
             ## Result is matrix with statistic as row names
             tmp <- f(object[[name]])
@@ -105,13 +106,16 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             if (!quiet) message("Analyzing ", stats, " data")
             tmp <- as.data.frame(f(object[[name]]))
             tmp$seqnames <- name
-            gather.exclude <- c("seqnames")
+            tmp$ranges <- ranges
+            tmp$population <- "__all__"
+            gather.exclude <- c("seqnames", "ranges", "population")
         } else if (stats %in% c("F_ST")) {
             ## Result is matrix with statistic in column, regions in rows
             tmp <- as.data.frame(f(object[[name]]))
             tmp$ranges <- ranges
             tmp$seqnames <- name
-            gather.exclude <- c("ranges", "seqnames")
+            tmp$population <- "__all__"
+            gather.exclude <- c("ranges", "seqnames", "population")
         } else if (stats %in% c("segregating.sites")) {
             ## Result is matrix with populations in columns
             tmp <- as.data.frame(f(object[[name]]))
@@ -120,22 +124,36 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
             }
             tmp$ranges <- ranges
             tmp$seqnames <- name
+            tmp$key <- stats
             gather.key <- "population"
-            gather.exclude <- c("ranges", "seqnames")
+            gather.exclude <- c("ranges", "seqnames", "key")
         } else {
             stop("shouldn't end up here")
         }
         if (!quiet) message("Adding data for ", name)
         res <- rbind(res, tmp)
     }
-    if (out.format == "long") {
-        res <- gather(res, gather.key, "value", -gather.exclude)
+    if (out.format != "wide") {
+        message("Converting to long format")
+        res <- gather(res, gather.key, "value", -one_of(gather.exclude))
         colnames(res)[which(colnames(res) == "gather.key")] <- gather.key
-    } else if (out.format == "GRanges") {
-        message("Setting up GRanges object")
     }
-
-    class(res) <- c(paste("pg", stats, sep="."), "data.frame")
+    if (out.format == "GRanges") {
+        message("Setting up GRanges object")
+        ## Parse the start/stop positions; we assume the format "name start - end :"
+        res.ranges <- strsplit(as.character(res$ranges), " ")
+        if (all(lapply(res.ranges, length) == 5)) {
+            start <- unlist(lapply(res.ranges, function(x) {as.integer(x[[2]])}))
+            end <- unlist(lapply(res.ranges, function(x) {as.integer(x[[4]])}))
+        } else {
+            start <- as.integer(rep(1, length(res.ranges)))
+            end <- as.integer(unlist(lapply(res$seqnames, function(x) {object[[x]]@n.sites})))
+        }
+        gr <- GRanges(seqnames = Rle(res$seqnames, rep(1, length(res$seqnames))),
+                      ranges = IRanges(start, end = end), key = res$key,
+                      value = res$value, population = res$population)
+    }
+    if (out.format != "GRanges") class(res) <- c(paste("pg", stats, sep = "."), "data.frame") else res <- gr
     return(res)
 })
 
@@ -370,8 +388,6 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##' Make a box/violin plot of data
 ##' @title boxplot.pg
 ##' @param data long format from getGenomeStats function
-##' @param x.var variable to map to x aestethic
-##' @param y.var variable to map to y aestethic
 ##' @param colour colours to use
 ##' @param colour.var variable to map to colour aestethic
 ##' @param wrap wrap plots
@@ -403,15 +419,11 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
                        scales="free_y", hide.legend=TRUE,
                        text.size=14, text.x.angle=45, text.x.hjust=1,
                        ...) {
-    message("In boxplot.pg")
     plot.type <- match.arg(plot.type, c("box", "violin"))
-    message(plot.type)
     y.var <- as.character(as.list(as.formula(formula))[[2]])
     x.var <- as.character(as.list(as.formula(formula))[[3]])
     colour.var <- colour.var %||% x.var
     data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
-    message(x.var)
-    message(y.var)
     p <- ggplot(data, aes_string(x = x.var, y = y.var, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (plot.type == "box") {

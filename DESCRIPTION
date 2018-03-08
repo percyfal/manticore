@@ -23,8 +23,7 @@ Imports:
     gridExtra,
     methods
 Suggests:
-
-GRanges,
+    GRanges,
     PopGenome,
     testthat,
     vcfR

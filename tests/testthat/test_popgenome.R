@@ -2,14 +2,18 @@ check_popgenome <- function() {
     if (!requireNamespace("PopGenome", quietly = TRUE)) {
         skip("PopGenome package not available")
     }
+    if (!requireNamespace("GenomicRanges", quietly = TRUE)) {
+        skip("GenomicRanges package not available")
+    }
     if (!requireNamespace("tidyr", quietly = TRUE)) {
         skip("tidyr package not available")
     }
 
 }
 
-if (requireNamespace("PopGenome", quietly = TRUE)) {
+if (all(unlist(lapply(c("PopGenome", "tidyr", "GenomicRanges"), requireNamespace, quietly = TRUE)))) {
     library("PopGenome")
+    library("GenomicRanges")
     library("tidyr")
     ## TODO: prepare this data in a data file
     populations.list <- list(

@@ -227,10 +227,10 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
 })
 
 
-##' gplot.pg
+##' plot.pg
 ##'
 ##' Generic plotting function for PopGenome results
-##' @title gplot.pg
+##' @title plot.pg
 ##' @param data long format from getGenomeStats function
 ##' @param x variable to map to x aestethic
 ##' @param y variable to map to y aestethic
@@ -248,22 +248,28 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
 ##' @param scales scales
 ##' @param size plot size
 ##' @param hide.legend whether or not to hide legend
+##' @param hide.xaxis hide x axis tick marks and labels
 ##' @param text.size text size
+##' @param text.x.angle x text angle
+##' @param text.x.hjust x text horizontal justification
 ##' @param ... extra arguments
 ##' @param which statistic to plot
 ##' @return ggplot
 ##' @author Per Unneberg
-gplot.pg <- function(data, x="pos", y="value",
+plot.pg <- function(data, x="region", y="value",
                     colour=c("black", "gray"), colour.var="name",
                     wrap=TRUE, wrap.formula="key ~ population",
                     wrap.ncol=1, plot.type="point", x.lab="window",
                     y.lab=NULL, main=NULL,
                     compact.facet=TRUE, strip.position="right",
                     scales="free_y", size=1, hide.legend=TRUE,
-                    text.size=14,
+                    hide.xaxis=TRUE,
+                    text.size=14, text.x.angle=45, text.x.hjust=1,
                     ...) {
     plot.type <- match.arg(plot.type, c("point", "line"))
     data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
+    ## Make sure factor is ordered according to order of occurrence
+    if (!is.factor(data[[x]])) data[[x]] <- factor(data[[x]], levels=unique(data[[x]]))
     p <- ggplot(data, aes_string(x = x, y = y, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (plot.type == "point") {
@@ -277,8 +283,11 @@ gplot.pg <- function(data, x="pos", y="value",
     if (compact.facet) {
         p <- p + theme(panel.spacing = unit(0, "lines"))
     }
-    if (hide.legend) {
-         p <- p + theme(legend.position = "none", axis.text.x = element_blank())
+    if (hide.legend) p <- p + theme(legend.position = "none")
+    if (hide.xaxis) {
+        p <- p + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+    } else {
+        p <- p + theme(axis.text.x = element_text(angle=text.x.angle, hjust=text.x.hjust))
     }
     p <- p + theme(text = element_text(size = text.size))
     # Colouring setup
@@ -289,70 +298,71 @@ gplot.pg <- function(data, x="pos", y="value",
     p
 }
 
-##' @describeIn gplot.pg Make plot of summary
+##' @describeIn plot.pg Make plot of summary
 ##' @export
-gplot.pg.summary <- function(data, x="name", y="value", wrap.formula="~ key", which=c("n.sites", "trans.transv.ratio"), x.lab="scaffold", ...) {
+plot.pg.summary <- function(data, x="name", y="value", wrap.formula="~ key", which=c("n.sites", "trans.transv.ratio"), x.lab="scaffold", hide.xaxis=FALSE, ...) {
     which <- match.arg(which, c("n.sites", "n.biallelic.sites", "n.gaps", "n.unknowns", "n.valid.sites", "n.polyallelic.sites", "trans.transv.ratio"), several.ok = TRUE)
-    gplot.pg(subset(data, key %in% which), x = x, y = y, wrap.formula = wrap.formula, x.lab = x.lab, ...)
+    plot.pg(subset(data, key %in% which), x = x, y = y, wrap.formula = wrap.formula, x.lab = x.lab, hide.xaxis = hide.xaxis, ...)
 }
 
-##' @describeIn gplot.pg Make plot of details
+##' @describeIn plot.pg Make plot of details
 ##' @export
-gplot.pg.detail <- function(data, which=c("MDG1", "MDG2", "MDSD"), ...) {
+plot.pg.detail <- function(data, which=c("MDG1", "MDG2", "MDSD"), ...) {
     which = match.arg(which, c("MDG1", "MDG2", "MDSD"), several.ok = TRUE)
-    gplot.pg(subset(data, key %in% which), ...)
+    plot.pg(subset(data, key %in% which), ...)
 }
 
-##' @describeIn gplot.pg Make plot of neutrality statistics
+##' @describeIn plot.pg Make plot of neutrality statistics
 ##' @export
-gplot.pg.neutrality <- function(data, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), ...) {
+plot.pg.neutrality <- function(data, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), ...) {
     which = match.arg(which, c("Tajima.D", "n.segregating.sites", "Rozas.R_2", "Fu.Li.F", "Fu.Li.D", "Fu.F_S", "Fay.Wu.H", "Zeng.E", "Strobeck.S"), several.ok = TRUE)
-    gplot.pg(subset(data, key %in% which), ...)
+    plot.pg(subset(data, key %in% which), ...)
 }
 
-##' @describeIn gplot.pg Make plot of fixed sites
+##' @describeIn plot.pg Make plot of fixed sites
 ##' @export
-gplot.pg.fixed <- function(data, wrap.formula="~ population", ...) {
-    gplot.pg(data, wrap.formula = wrap.formula, ...)
+plot.pg.fixed <- function(data, wrap.formula="~ population", ...) {
+    plot.pg(data, wrap.formula = wrap.formula, ...)
 }
 
-##' @describeIn gplot.pg Make plot of shared sites
+##' @describeIn plot.pg Make plot of shared sites
 ##' @export
-gplot.pg.shared <- function(data, wrap.formula="~ population", ...) {
-    gplot.pg(data, wrap.formula = wrap.formula, ...)
+plot.pg.shared <- function(data, wrap.formula="~ population", ...) {
+    plot.pg(data, wrap.formula = wrap.formula, ...)
 }
 
-##' @describeIn gplot.pg Make plot of diversity
+##' @describeIn plot.pg Make plot of diversity
 ##' @export
-gplot.pg.diversity <- function(data, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"),  ...) {
+plot.pg.diversity <- function(data, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"),  ...) {
     which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok=TRUE)
-    gplot.pg(subset(data, key %in% which), ...)
+    plot.pg(subset(data, key %in% which), ...)
 }
 
-##' @describeIn gplot.pg Make plot of between population diversity
+##' @describeIn plot.pg Make plot of between population diversity
 ##' @export
-gplot.pg.diversity.between <- function(data, wrap.formula="~ population", colour="name", ...) {
-    gplot.pg(data, wrap.formula = wrap.formula, colour = colour, ...)
+plot.pg.diversity.between <- function(data, wrap.formula="~ population", colour="name", ...) {
+    plot.pg(data, wrap.formula = wrap.formula, colour = colour, ...)
 }
 
-##' @describeIn gplot.pg Make plot of F_ST
+##' @describeIn plot.pg Make plot of F_ST
 ##' @export
-gplot.pg.F_ST <- function(data, wrap.formula="~ key", which=c("nucleotide.F_ST", "Nei.G_ST"), ...) {
+plot.pg.F_ST <- function(data, wrap.formula="~ key", which=c("nucleotide.F_ST", "Nei.G_ST"), ...) {
     which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok=TRUE)
-    gplot.pg(subset(data, key %in% which), wrap.formula = wrap.formula, ...)
+    plot.pg(subset(data, key %in% which), wrap.formula = wrap.formula, ...)
 }
 
-##' @describeIn gplot.pg Make plot of pairwise F_ST
+##' @describeIn plot.pg Make plot of pairwise F_ST
 ##' @export
-gplot.pg.F_ST.pairwise <- function(data, ...) {
-    gplot.pg(data, ...)
+plot.pg.F_ST.pairwise <- function(data, ...) {
+    plot.pg(data, ...)
 }
 
-##' @describeIn gplot.pg Make plot of segregating sites
+##' @describeIn plot.pg Make plot of segregating sites
 ##' @export
-gplot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
-    gplot.pg(data, wrap.formula = wrap.formula, ...)
+plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
+    plot.pg(data, wrap.formula = wrap.formula, ...)
 }
+
 ##' gboxplot.pg
 ##'
 ##' Make a box/violin plot of data

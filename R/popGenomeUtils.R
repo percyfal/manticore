@@ -31,18 +31,11 @@ setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.
 ##' slist <- list(scaffold1=scaffold1, scaffold13=scaffold13)
 ##'
 setMethod("getGenomeStats", "list", function(object, stats, use.population.names, use.region.names, out.format, quiet, ...) {
-    if (!requireNamespace("PopGenome", quietly = TRUE)) {
-        stop("Package \"PopGenome\" needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
-    if (!requireNamespace("tidyr", quietly = TRUE)) {
-        stop("Package \"tidyr\" needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
-    if (!requireNamespace("GenomicRanges", quietly = TRUE)) {
-        stop("Package \"GenomicRanges\" needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
+    lapply(c("PopGenome", "tidyr", "tidyselect", "GenomicRanges"), function(pkg) {
+        if (!requireNamespace(pkg, quietly = TRUE)) {
+            stop(paste("Package \"", pkg, "\" needed for this function to work. Please install it.", sep=""),
+                 call. = FALSE)
+        }})
 
     stopifnot(all(unlist(lapply(object, function(x){inherits(x, "GENOME")}))))
     stats <- match.arg(stats, c("summary", "detail", "neutrality",

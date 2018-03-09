@@ -20,6 +20,7 @@ LazyData: true
 Imports:
     ggplot2,
     tidyr,
+    tidyselect,
     gridExtra,
     methods
 Suggests:

@@ -24,7 +24,7 @@ Imports:
     gridExtra,
     methods
 Suggests:
-    GRanges,
+    GenomicRanges,
     PopGenome,
     testthat,
     vcfR

@@ -276,8 +276,8 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
 ##' @param which statistic to plot
 ##' @return ggplot
 ##' @author Per Unneberg
-plot.pg <- function(data, x="region", y="value",
-                    colour=c("black", "gray"), colour.var="name",
+plot.pg <- function(data, x="ranges", y="value",
+                    colour=c("black", "gray"), colour.var="seqnames",
                     wrap=TRUE, wrap.formula="key ~ population",
                     wrap.ncol=1, plot.type="point", x.lab="window",
                     y.lab=NULL, main=NULL,
@@ -288,8 +288,10 @@ plot.pg <- function(data, x="region", y="value",
                     ...) {
     plot.type <- match.arg(plot.type, c("point", "line"))
     data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
-    ## Make sure factor is ordered according to order of occurrence
-    if (!is.factor(data[[x]])) data[[x]] <- factor(data[[x]], levels=unique(data[[x]]))
+    ## Make sure factor is ordered according to order of occurrence if not numeric
+    if (!is.numeric(data[[x]])) {
+        if (!is.factor(data[[x]])) data[[x]] <- factor(data[[x]], levels=unique(data[[x]]))
+    }
     p <- ggplot(data, aes_string(x = x, y = y, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (plot.type == "point") {
@@ -307,20 +309,29 @@ plot.pg <- function(data, x="region", y="value",
     if (hide.xaxis) {
         p <- p + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
     } else {
-        p <- p + theme(axis.text.x = element_text(angle=text.x.angle, hjust=text.x.hjust))
+        p <- p + theme(axis.text.x = element_text(angle = text.x.angle, hjust = text.x.hjust))
     }
     p <- p + theme(text = element_text(size = text.size))
     # Colouring setup
     nlevels <- length(levels(data[[colour.var]]))
     nc <- length(colour)
     n <-  nlevels / nc + nlevels %% nc
-    p <- p + scale_colour_manual(values=rep(colour, n))
+    p <- p + scale_colour_manual(values = rep(colour, n))
     p
+}
+##' @describeIn plot.pg
+##'
+##' @export
+plot.GRanges <- function(data, which=levels(factor(data$key)), ...) {
+    which <- match.arg(which, levels(factor(data$key)), several.ok = TRUE)
+    df <- cbind(seqnames = as.character(seqnames(data)), as.data.frame(values(data)))
+    df$ranges <- paste(as.character(seqnames(data)), start(data), "-", end(data), ":", sep = " ")
+    plot.pg(subset(df, key %in% which), ...)
 }
 
 ##' @describeIn plot.pg Make plot of summary
 ##' @export
-plot.pg.summary <- function(data, x="name", y="value", wrap.formula="~ key", which=c("n.sites", "trans.transv.ratio"), x.lab="scaffold", hide.xaxis=FALSE, ...) {
+plot.pg.summary <- function(data, x="seqnames", y="value", wrap.formula="~ key", which=c("n.sites", "trans.transv.ratio"), x.lab="scaffold", hide.xaxis=FALSE, ...) {
     which <- match.arg(which, c("n.sites", "n.biallelic.sites", "n.gaps", "n.unknowns", "n.valid.sites", "n.polyallelic.sites", "trans.transv.ratio"), several.ok = TRUE)
     plot.pg(subset(data, key %in% which), x = x, y = y, wrap.formula = wrap.formula, x.lab = x.lab, hide.xaxis = hide.xaxis, ...)
 }
@@ -412,7 +423,7 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##' @author Per Unneberg
 boxplot.pg <- function(formula = "value ~ population", data=NULL,
                        colour=c("black", "gray"), colour.var=NULL,
-                       wrap=FALSE, wrap.formula=" ~ name",
+                       wrap=FALSE, wrap.formula=" ~ key",
                        wrap.ncol=1, plot.type="box", x.lab="group",
                        y.lab=NULL, main=NULL,
                        compact.facet=TRUE, strip.position="right",
@@ -449,18 +460,28 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
     p
 }
 
+##' @describeIn plot.pg
+##'
+##' @export
+boxplot.GRanges <- function(data=NULL, which=levels(factor(data$key)), ...) {
+    which <- match.arg(which, levels(factor(data$key)), several.ok = TRUE)
+    df <- cbind(seqnames = as.character(seqnames(data)), as.data.frame(values(data)))
+    df$ranges <- paste(as.character(seqnames(data)), start(data), "-", end(data), ":", sep = " ")
+    boxplot.pg(data=subset(df, key %in% which), ...)
+}
+
 ##' @describeIn boxplot.pg Make boxplot of detail statistiscs
 ##' @export
 boxplot.pg.detail <- function(data, which=c("MDG1", "MDG2", "MDSD"), main="detail statistics", ...) {
     which = match.arg(which, c("MDG1", "MDG2", "MDSD"), several.ok = TRUE)
-    boxplot.pg(subset(data, key %in% which), ...)
+    boxplot.pg(data=subset(data, key %in% which), ...)
 }
 
 ##' @describeIn boxplot.pg Make boxplot of netrality statistics
 ##' @export
-boxplot.pg.neutrality <- function(data=NULL, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), wrap=TRUE, wrap.formula="~ key", ...) {
+boxplot.pg.neutrality <- function(data=NULL, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), wrap=TRUE, ...) {
     which = match.arg(which, c("Tajima.D", "n.segregating.sites", "Rozas.R_2", "Fu.Li.F", "Fu.Li.D", "Fu.F_S", "Fay.Wu.H", "Zeng.E", "Strobeck.S"), several.ok = TRUE)
-    boxplot.pg(data = subset(data, key %in% which), wrap=wrap, wrap.formula=wrap.formula, ...)
+    boxplot.pg(data = subset(data, key %in% which), wrap = wrap, ...)
 }
 
 ##' @describeIn boxplot.pg Make boxplot of fixed sites
@@ -477,9 +498,9 @@ boxplot.pg.shared <- function(data=NULL, main="Shared sites", ...) {
 
 ##' @describeIn boxplot.pg Make boxplot of diversity
 ##' @export
-boxplot.pg.diversity <- function(data=NULL, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), wrap=TRUE, wrap.formula="~ key", ...) {
+boxplot.pg.diversity <- function(data=NULL, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), wrap=TRUE, ...) {
     which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok=TRUE)
-    boxplot.pg(data = subset(data, key %in% which), wrap = wrap, wrap.formula = "~ key", ...)
+    boxplot.pg(data = subset(data, key %in% which), wrap = wrap, ...)
 }
 
 ##' @describeIn boxplot.pg Make boxplot of between population diversity
@@ -491,9 +512,9 @@ boxplot.pg.diversity.between <- function(data=NULL, ...) {
 
 ##' @describeIn boxplot.pg Make boxplot of F_ST
 ##' @export
-boxplot.pg.F_ST <- function(data=NULL, formula="value ~ name", which=c("nucleotide.F_ST", "Nei.G_ST"), wrap=TRUE, wrap.formula="~ key", ...) {
+boxplot.pg.F_ST <- function(data=NULL, formula="value ~ seqnames", which=c("nucleotide.F_ST", "Nei.G_ST"), wrap=TRUE, ...) {
     which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok = TRUE)
-    boxplot.pg(formula = formula, data = subset(data, key %in% which), wrap = wrap, wrap.formula = wrap.formula, ...)
+    boxplot.pg(formula = formula, data = subset(data, key %in% which), wrap = wrap, ...)
 }
 
 ##' @describeIn boxplot.pg Make boxplot of pairwise F_ST

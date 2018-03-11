@@ -312,7 +312,8 @@ plot.pg <- function(data, x="ranges", y="value",
     p <- p + scale_colour_manual(values = rep(colour, n))
     p
 }
-##' @describeIn plot.pg
+##' @title plot.GRanges
+##' @describeIn plot.pg Make plot of GRanges object
 ##' @export
 plot.GRanges <- function(data, which=levels(factor(data$key)), ...) {
     which <- match.arg(which, levels(factor(data$key)), several.ok = TRUE)
@@ -320,66 +321,66 @@ plot.GRanges <- function(data, which=levels(factor(data$key)), ...) {
     df$ranges <- paste(as.character(seqnames(data)), start(data), "-", end(data), ":", sep = " ")
     plot.pg(subset(df, key %in% which), ...)
 }
-
+##' @title plot.pg.summary
 ##' @describeIn plot.pg Make plot of summary
 ##' @export
 plot.pg.summary <- function(data, x="seqnames", y="value", wrap.formula="~ key", which=c("n.sites", "trans.transv.ratio"), x.lab="scaffold", hide.xaxis=FALSE, ...) {
     which <- match.arg(which, c("n.sites", "n.biallelic.sites", "n.gaps", "n.unknowns", "n.valid.sites", "n.polyallelic.sites", "trans.transv.ratio"), several.ok = TRUE)
     plot.pg(subset(data, key %in% which), x = x, y = y, wrap.formula = wrap.formula, x.lab = x.lab, hide.xaxis = hide.xaxis, ...)
 }
-
+##' @title plot.pg.detail
 ##' @describeIn plot.pg Make plot of details
 ##' @export
 plot.pg.detail <- function(data, which=c("MDG1", "MDG2", "MDSD"), ...) {
     which = match.arg(which, c("MDG1", "MDG2", "MDSD"), several.ok = TRUE)
     plot.pg(subset(data, key %in% which), ...)
 }
-
+##' @title plot.pg.neutrality
 ##' @describeIn plot.pg Make plot of neutrality statistics
 ##' @export
 plot.pg.neutrality <- function(data, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), ...) {
     which = match.arg(which, c("Tajima.D", "n.segregating.sites", "Rozas.R_2", "Fu.Li.F", "Fu.Li.D", "Fu.F_S", "Fay.Wu.H", "Zeng.E", "Strobeck.S"), several.ok = TRUE)
     plot.pg(subset(data, key %in% which), ...)
 }
-
+##' @title plot.pg.fixed
 ##' @describeIn plot.pg Make plot of fixed sites
 ##' @export
 plot.pg.fixed <- function(data, wrap.formula="~ population", ...) {
     plot.pg(data, wrap.formula = wrap.formula, ...)
 }
-
+##' @title plot.pg.shared
 ##' @describeIn plot.pg Make plot of shared sites
 ##' @export
 plot.pg.shared <- function(data, wrap.formula="~ population", ...) {
     plot.pg(data, wrap.formula = wrap.formula, ...)
 }
-
+##' @title plot.pg.diversity
 ##' @describeIn plot.pg Make plot of diversity
 ##' @export
 plot.pg.diversity <- function(data, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"),  ...) {
     which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok=TRUE)
     plot.pg(subset(data, key %in% which), ...)
 }
-
+##' @title plot.pg.diversity.between
 ##' @describeIn plot.pg Make plot of between population diversity
 ##' @export
 plot.pg.diversity.between <- function(data, wrap.formula="~ population", colour="name", ...) {
     plot.pg(data, wrap.formula = wrap.formula, colour = colour, ...)
 }
-
+##' @title plot.pg.F_ST
 ##' @describeIn plot.pg Make plot of F_ST
 ##' @export
 plot.pg.F_ST <- function(data, wrap.formula="~ key", which=c("nucleotide.F_ST", "Nei.G_ST"), ...) {
     which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok=TRUE)
     plot.pg(subset(data, key %in% which), wrap.formula = wrap.formula, ...)
 }
-
+##' @title plot.pg.F_ST.pairwise
 ##' @describeIn plot.pg Make plot of pairwise F_ST
 ##' @export
 plot.pg.F_ST.pairwise <- function(data, ...) {
     plot.pg(data, ...)
 }
-
+##' @title plot.pg.segregating.sites
 ##' @describeIn plot.pg Make plot of segregating sites
 ##' @export
 plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
@@ -451,8 +452,8 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
     p <- p + scale_colour_manual(values=rep(colour, n))
     p
 }
-
-##' @describeIn plot.pg
+##' @title boxplot.GRanges
+##' @describeIn boxplot.pg Make boxplot of GRanges object
 ##' @export
 boxplot.GRanges <- function(data=NULL, which=levels(factor(data$key)), ...) {
     which <- match.arg(which, levels(factor(data$key)), several.ok = TRUE)
@@ -460,61 +461,61 @@ boxplot.GRanges <- function(data=NULL, which=levels(factor(data$key)), ...) {
     df$ranges <- paste(as.character(seqnames(data)), start(data), "-", end(data), ":", sep = " ")
     boxplot.pg(data=subset(df, key %in% which), ...)
 }
-
+##' @title boxplot.pg.detail
 ##' @describeIn boxplot.pg Make boxplot of detail statistiscs
 ##' @export
 boxplot.pg.detail <- function(data, which=c("MDG1", "MDG2", "MDSD"), main="detail statistics", ...) {
     which = match.arg(which, c("MDG1", "MDG2", "MDSD"), several.ok = TRUE)
     boxplot.pg(data=subset(data, key %in% which), ...)
 }
-
+##' @title boxplot.pg.neutrality
 ##' @describeIn boxplot.pg Make boxplot of netrality statistics
 ##' @export
 boxplot.pg.neutrality <- function(data=NULL, which=c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), wrap=TRUE, ...) {
     which = match.arg(which, c("Tajima.D", "n.segregating.sites", "Rozas.R_2", "Fu.Li.F", "Fu.Li.D", "Fu.F_S", "Fay.Wu.H", "Zeng.E", "Strobeck.S"), several.ok = TRUE)
     boxplot.pg(data = subset(data, key %in% which), wrap = wrap, ...)
 }
-
+##' @title boxplot.pg.fixed
 ##' @describeIn boxplot.pg Make boxplot of fixed sites
 ##' @export
 boxplot.pg.fixed <- function(data=NULL, main="Fixed sites", ...) {
     boxplot.pg(data = data, main = main, ...)
 }
-
+##' @title boxplot.pg.shared
 ##' @describeIn boxplot.pg Make boxplot of shared sites
 ##' @export
 boxplot.pg.shared <- function(data=NULL, main="Shared sites", ...) {
     boxplot.pg(data = data, main = main, ...)
 }
-
+##' @title boxplot.pg.diversity
 ##' @describeIn boxplot.pg Make boxplot of diversity
 ##' @export
 boxplot.pg.diversity <- function(data=NULL, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), wrap=TRUE, ...) {
     which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok=TRUE)
     boxplot.pg(data = subset(data, key %in% which), wrap = wrap, ...)
 }
-
+##' @title boxplot.pg.diversity.between
 ##' @describeIn boxplot.pg Make boxplot of between population diversity
 ##' @export
 boxplot.pg.diversity.between <- function(data=NULL, ...) {
     boxplot.pg(data = data, ...)
 }
 
-
+##' @title boxplot.pg.F_ST
 ##' @describeIn boxplot.pg Make boxplot of F_ST
 ##' @export
 boxplot.pg.F_ST <- function(data=NULL, formula="value ~ seqnames", which=c("nucleotide.F_ST", "Nei.G_ST"), wrap=TRUE, ...) {
     which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok = TRUE)
     boxplot.pg(formula = formula, data = subset(data, key %in% which), wrap = wrap, ...)
 }
-
+##' @title boxplot.pg.F_ST.pairwise
 ##' @describeIn boxplot.pg Make boxplot of pairwise F_ST
 ##' @export
 boxplot.pg.F_ST.pairwise <- function(data=NULL, ...) {
     boxplot.pg(data = data, ...)
 }
 
-
+##' @title boxplot.pg.segregating.sites
 ##' @describeIn boxplot.pg Make boxplot of segregating sites
 ##' @export
 boxplot.pg.segregating.sites <- function(data=NULL, ...) {

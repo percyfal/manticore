@@ -22,7 +22,8 @@ Imports:
     tidyr,
     tidyselect,
     gridExtra,
-    methods
+    methods,
+    RColorBrewer
 Suggests:
     GenomicRanges,
     PopGenome,

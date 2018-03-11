@@ -271,7 +271,7 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
 ##' @return ggplot
 ##' @author Per Unneberg
 plot.pg <- function(data, x="ranges", y="value",
-                    colour=c("black", "gray"), colour.var="seqnames",
+                    colour=brewer.pal(3, "Dark2"), colour.var="seqnames",
                     wrap=TRUE, wrap.formula="key ~ population",
                     wrap.ncol=1, plot.type="point", x.lab="window",
                     y.lab=NULL, main=NULL,
@@ -310,8 +310,13 @@ plot.pg <- function(data, x="ranges", y="value",
     # Colouring setup
     nlevels <- length(levels(data[[colour.var]]))
     nc <- length(colour)
-    n <-  nlevels / nc + nlevels %% nc
-    p <- p + scale_colour_manual(values = rep(colour, n))
+    n <- floor(nlevels / nc)
+    nmod <- nlevels %% nc
+    if (nmod == 0) {
+        p <- p + scale_colour_manual(values = rep(colour, n))
+    } else {
+        p <- p + scale_colour_manual(values = c(rep(colour, n), colour[1:nmod]))
+    }
     p
 }
 ##' @title plot.GRanges
@@ -419,7 +424,7 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##' @return ggplot object
 ##' @author Per Unneberg
 boxplot.pg <- function(formula = "value ~ population", data=NULL,
-                       colour=c("black", "gray"), colour.var=NULL,
+                       colour=brewer.pal(3, "Dark2"), colour.var=NULL,
                        wrap=FALSE, wrap.formula=" ~ key",
                        wrap.ncol=1, plot.type="box", x.lab="group",
                        y.lab=NULL, main=NULL,
@@ -431,7 +436,7 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
     y.var <- as.character(as.list(as.formula(formula))[[2]])
     x.var <- as.character(as.list(as.formula(formula))[[3]])
     colour.var <- colour.var %||% x.var
-    data[[colour.var]] <- factor(data[[colour.var]], levels=unique(data[[colour.var]]))
+    data[[colour.var]] <- factor(data[[colour.var]], levels = unique(data[[colour.var]]))
     p <- ggplot(data, aes_string(x = x.var, y = y.var, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (plot.type == "box") {
@@ -453,8 +458,13 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
     # Colouring setup
     nlevels <- length(levels(data[[colour.var]]))
     nc <- length(colour)
-    n <-  nlevels / nc + nlevels %% nc
-    p <- p + scale_colour_manual(values=rep(colour, n))
+    n <-  floor(nlevels / nc)
+    nmod <- nlevels %% nc
+    if (nmod == 0) {
+        p <- p + scale_colour_manual(values=rep(colour, n))
+    } else {
+        p <- p + scale_colour_manual(values=c(rep(colour, n), colour[1:n]))
+    }
     p
 }
 ##' @title boxplot.GRanges

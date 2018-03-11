@@ -5,13 +5,16 @@
 \title{boxplot.pg}
 \usage{
 \method{boxplot}{pg}(formula = "value ~ population", data = NULL,
-  colour = c("black", "gray"), colour.var = NULL, wrap = FALSE,
+  colour = brewer.pal(3, "Dark2"), colour.var = NULL, wrap = FALSE,
   wrap.formula = " ~ key", wrap.ncol = 1, plot.type = "box",
   x.lab = "group", y.lab = NULL, main = NULL, compact.facet = TRUE,
   strip.position = "right", scales = "free_y", hide.legend = TRUE,
-  text.size = 14, text.x.angle = 45, text.x.hjust = 1, ...)
+  grid = FALSE, text.size = 14, text.x.angle = 45, text.x.hjust = 1,
+  ...)
 }
 \arguments{
+\item{formula}{a formula, such as y ~ grp}
+
 \item{data}{long format from getGenomeStats function}
 
 \item{colour}{colours to use}
@@ -39,6 +42,8 @@
 \item{scales}{scales}
 
 \item{hide.legend}{whether or not to hide legend}
+
+\item{grid}{include grid lines}
 
 \item{text.size}{text size}
 

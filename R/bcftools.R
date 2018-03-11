@@ -34,6 +34,7 @@ setMethod("initialize", "BcftoolsStats", function(.Object, ...) {
 ##' @param label Label to assign object (e.g. sample)
 ##' @return BcftoolsStats object
 ##' @author Per Unneberg
+##' @export
 setGeneric("readBcftoolsStats", function(filename, label=NULL) {standardGeneric("readBcftoolsStats")})
 
 setMethod("readBcftoolsStats", signature="character", definition=function(filename, label) {
@@ -66,6 +67,7 @@ setMethod("readBcftoolsStats", signature="character", definition=function(filena
 ##' @param label Label to assign object (e.g. sample)
 ##' @return bcftools.stats object
 ##' @author Per Unneberg
+##' @export
 read.bcftools.stats <- function(filename, label=NULL) {
     con <- file(filename, open = "r")
     lines <- readLines(con)
@@ -112,6 +114,7 @@ summary.bcftools.stats <- function(obj) {
 ##' @param ... parameters passed to generic plot function
 ##' @return ggplot2 object, or a plot
 ##' @author Per Unneberg
+##' @export
 gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), ncol=2, ...) {
     which <- match.arg(which, c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), several.ok=TRUE)
     message("Producing ", length(which), " plots")

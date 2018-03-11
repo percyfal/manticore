@@ -1,6 +1,6 @@
 Package: nonmodelr
 Title: Utility functions for analysis of non model organism data
-Version: 0.0.0.9001
+Version: 0.0.0.9002
 Authors@R: person("Per", "Unneberg", email = "per.unneberg@scilifelab.se", role = c("aut", "cre"))
 Description: nonmodelr provides utility functions for dealing with
     output from various R packages that analyse variation
@@ -20,9 +20,12 @@ LazyData: true
 Imports:
     ggplot2,
     tidyr,
+    tidyselect,
     gridExtra,
-    methods
+    methods,
+    RColorBrewer
 Suggests:
+    GenomicRanges,
     PopGenome,
     testthat,
     vcfR

@@ -7,11 +7,11 @@
 \title{getGenomeStats}
 \usage{
 getGenomeStats(object, stats = c("detail"), use.population.names = FALSE,
-  use.region.names = FALSE, long.format = TRUE, quiet = FALSE, ...)
+  use.region.names = FALSE, out.format = "long", quiet = FALSE, ...)
 
 \S4method{getGenomeStats}{list}(object, stats = c("detail"),
   use.population.names = FALSE, use.region.names = FALSE,
-  long.format = TRUE, quiet = FALSE, ...)
+  out.format = "long", quiet = FALSE, ...)
 }
 \arguments{
 \item{object}{An R object}
@@ -22,14 +22,14 @@ getGenomeStats(object, stats = c("detail"), use.population.names = FALSE,
 
 \item{use.region.names}{Use the region names as row names}
 
-\item{long.format}{Return data frame in long output format}
+\item{out.format}{Return data in long, wide, or GRanges format}
 
 \item{quiet}{suppress messages}
 
 \item{...}{Arguments to pass to data access functions}
 }
 \value{
-A data frame in long or wide format, suitable for plotting with
+A data frame in long or wide format, or a GRanges object, suitable for plotting with
     ggplot2
 }
 \description{
@@ -50,7 +50,7 @@ but this does not seem to work.
 \examples{
 library(PopGenome)
 # Read a vcf and generate two genome objects
-vcf_file <- system.file("extdata", "medium.call.vcf.gz")
+vcf_file <- system.file("extdata", "medium.call.biallelic.vcf.gz", package="nonmodelr")
 scaffold1 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold1")
 scaffold13 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold13")
 slist <- list(scaffold1=scaffold1, scaffold13=scaffold13)

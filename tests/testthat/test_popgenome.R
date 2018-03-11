@@ -58,11 +58,14 @@ check_popgenome <- function() {
 ##     save(slides, scaffolds, scaffold2, scaffold13, slide2, slide13, populations.list, file="inst/extdata/popgenome.rda")
 ## }
 
-if (all(unlist(lapply(c("PopGenome", "tidyr", "GenomicRanges"),
+if (all(unlist(lapply(c("PopGenome", "tidyr", "GenomicRanges", "tidyselect"),
                       requireNamespace, quietly = TRUE)))) {
     library("PopGenome")
     library("GenomicRanges")
     library("tidyr")
+    library("tidyselect")
+    library("ggplot2")
+    library("RColorBrewer")
     fn <- system.file("extdata", "popgenome.rda", package = "nonmodelr")
     load(fn)
 }

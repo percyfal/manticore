@@ -1,5 +1,4 @@
-[![Travis-CI Build Status](https://travis-ci.org/percyfal/nonmodelr.svg?branch=master)](https://travis-ci.org/percyfal/nonmodelr)
-
+[![Build Status](https://travis-ci.org/percyfal/nonmodelr.svg?branch=develop)](https://travis-ci.org/percyfal/nonmodelr)
 # nonmodelr
 
 nonmodelr provides utility functions for dealing with output from

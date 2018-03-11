@@ -4,12 +4,12 @@
 \alias{plot.pg}
 \title{plot.pg}
 \usage{
-\method{plot}{pg}(data, x = "region", y = "value", colour = c("black",
-  "gray"), colour.var = "name", wrap = TRUE,
+\method{plot}{pg}(data, x = "ranges", y = "value", colour = brewer.pal(3,
+  "Dark2"), colour.var = "seqnames", wrap = TRUE,
   wrap.formula = "key ~ population", wrap.ncol = 1, plot.type = "point",
   x.lab = "window", y.lab = NULL, main = NULL, compact.facet = TRUE,
   strip.position = "right", scales = "free_y", size = 1,
-  hide.legend = TRUE, hide.xaxis = TRUE, text.size = 14,
+  hide.legend = TRUE, hide.xaxis = TRUE, grid = FALSE, text.size = 14,
   text.x.angle = 45, text.x.hjust = 1, ...)
 }
 \arguments{
@@ -48,6 +48,8 @@
 \item{hide.legend}{whether or not to hide legend}
 
 \item{hide.xaxis}{hide x axis tick marks and labels}
+
+\item{grid}{include grid lines}
 
 \item{text.size}{text size}
 

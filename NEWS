@@ -1,6 +1,7 @@
-nonmodelr v0.0.0.9002 (Release date: 2018-03-08)
+nonmodelr v0.0.0.9002 (Release date: 2018-03-11)
 =================================================
 
+Add support for GRanges output.
 
 
 nonmodelr v0.0.0.9001 (Release date: 2018-03-08)

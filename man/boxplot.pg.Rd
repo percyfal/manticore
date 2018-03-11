@@ -5,13 +5,16 @@
 \title{boxplot.pg}
 \usage{
 \method{boxplot}{pg}(formula = "value ~ population", data = NULL,
-  colour = c("black", "gray"), colour.var = NULL, wrap = FALSE,
-  wrap.formula = " ~ name", wrap.ncol = 1, plot.type = "box",
+  colour = brewer.pal(3, "Dark2"), colour.var = NULL, wrap = FALSE,
+  wrap.formula = " ~ key", wrap.ncol = 1, plot.type = "box",
   x.lab = "group", y.lab = NULL, main = NULL, compact.facet = TRUE,
   strip.position = "right", scales = "free_y", hide.legend = TRUE,
-  text.size = 14, text.x.angle = 45, text.x.hjust = 1, ...)
+  grid = FALSE, text.size = 14, text.x.angle = 45, text.x.hjust = 1,
+  ...)
 }
 \arguments{
+\item{formula}{a formula, such as y ~ grp}
+
 \item{data}{long format from getGenomeStats function}
 
 \item{colour}{colours to use}
@@ -40,6 +43,8 @@
 
 \item{hide.legend}{whether or not to hide legend}
 
+\item{grid}{include grid lines}
+
 \item{text.size}{text size}
 
 \item{text.x.angle}{angle of x tick labels}
@@ -47,10 +52,6 @@
 \item{text.x.hjust}{horizontal adjustment of x tick labels}
 
 \item{...}{arguments passed on to facet_wrap}
-
-\item{x.var}{variable to map to x aestethic}
-
-\item{y.var}{variable to map to y aestethic}
 
 \item{size}{plot size}
 

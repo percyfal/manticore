@@ -6,7 +6,7 @@
 \usage{
 \method{boxplot}{pg}(formula = "value ~ population", data = NULL,
   colour = c("black", "gray"), colour.var = NULL, wrap = FALSE,
-  wrap.formula = " ~ name", wrap.ncol = 1, plot.type = "box",
+  wrap.formula = " ~ key", wrap.ncol = 1, plot.type = "box",
   x.lab = "group", y.lab = NULL, main = NULL, compact.facet = TRUE,
   strip.position = "right", scales = "free_y", hide.legend = TRUE,
   text.size = 14, text.x.angle = 45, text.x.hjust = 1, ...)
@@ -47,10 +47,6 @@
 \item{text.x.hjust}{horizontal adjustment of x tick labels}
 
 \item{...}{arguments passed on to facet_wrap}
-
-\item{x.var}{variable to map to x aestethic}
-
-\item{y.var}{variable to map to y aestethic}
 
 \item{size}{plot size}
 

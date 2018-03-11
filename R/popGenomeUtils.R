@@ -313,7 +313,6 @@ plot.pg <- function(data, x="ranges", y="value",
     p
 }
 ##' @describeIn plot.pg
-##'
 ##' @export
 plot.GRanges <- function(data, which=levels(factor(data$key)), ...) {
     which <- match.arg(which, levels(factor(data$key)), several.ok = TRUE)
@@ -454,7 +453,6 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
 }
 
 ##' @describeIn plot.pg
-##'
 ##' @export
 boxplot.GRanges <- function(data=NULL, which=levels(factor(data$key)), ...) {
     which <- match.arg(which, levels(factor(data$key)), several.ok = TRUE)

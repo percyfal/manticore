@@ -4,8 +4,8 @@
 \alias{plot.pg}
 \title{plot.pg}
 \usage{
-\method{plot}{pg}(data, x = "region", y = "value", colour = c("black",
-  "gray"), colour.var = "name", wrap = TRUE,
+\method{plot}{pg}(data, x = "ranges", y = "value", colour = c("black",
+  "gray"), colour.var = "seqnames", wrap = TRUE,
   wrap.formula = "key ~ population", wrap.ncol = 1, plot.type = "point",
   x.lab = "window", y.lab = NULL, main = NULL, compact.facet = TRUE,
   strip.position = "right", scales = "free_y", size = 1,

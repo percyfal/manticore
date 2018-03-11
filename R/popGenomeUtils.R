@@ -262,6 +262,7 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
 ##' @param size plot size
 ##' @param hide.legend whether or not to hide legend
 ##' @param hide.xaxis hide x axis tick marks and labels
+##' @param grid include grid lines
 ##' @param text.size text size
 ##' @param text.x.angle x text angle
 ##' @param text.x.hjust x text horizontal justification
@@ -276,7 +277,7 @@ plot.pg <- function(data, x="ranges", y="value",
                     y.lab=NULL, main=NULL,
                     compact.facet=TRUE, strip.position="right",
                     scales="free_y", size=1, hide.legend=TRUE,
-                    hide.xaxis=TRUE,
+                    hide.xaxis=TRUE, grid=FALSE,
                     text.size=14, text.x.angle=45, text.x.hjust=1,
                     ...) {
     plot.type <- match.arg(plot.type, c("point", "line"))
@@ -299,6 +300,7 @@ plot.pg <- function(data, x="ranges", y="value",
         p <- p + theme(panel.spacing = unit(0, "lines"))
     }
     if (hide.legend) p <- p + theme(legend.position = "none")
+    if (!grid) p <- p + theme(panel.grid = element_blank())
     if (hide.xaxis) {
         p <- p + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
     } else {
@@ -391,6 +393,7 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##'
 ##' Make a box/violin plot of data
 ##' @title boxplot.pg
+##' @param formula a formula, such as y ~ grp
 ##' @param data long format from getGenomeStats function
 ##' @param colour colours to use
 ##' @param colour.var variable to map to colour aestethic
@@ -402,14 +405,15 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##' @param y.lab y label
 ##' @param main plot title
 ##' @param compact.facet compact facet representation
-##' @param size plot size
 ##' @param strip.position strip position
 ##' @param scales scales
 ##' @param hide.legend whether or not to hide legend
+##' @param grid include grid lines
 ##' @param text.size text size
 ##' @param text.x.angle angle of x tick labels
 ##' @param text.x.hjust horizontal adjustment of x tick labels
 ##' @param ... arguments passed on to facet_wrap
+##' @param size plot size
 ##' @param which statistic to plot
 ##' @importFrom graphics boxplot
 ##' @return ggplot object
@@ -420,7 +424,7 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
                        wrap.ncol=1, plot.type="box", x.lab="group",
                        y.lab=NULL, main=NULL,
                        compact.facet=TRUE, strip.position="right",
-                       scales="free_y", hide.legend=TRUE,
+                       scales="free_y", hide.legend=TRUE, grid=FALSE,
                        text.size=14, text.x.angle=45, text.x.hjust=1,
                        ...) {
     plot.type <- match.arg(plot.type, c("box", "violin"))
@@ -444,6 +448,7 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
     if (hide.legend) {
          p <- p + theme(legend.position = "none")
     }
+    if (!grid) p <- p + theme(panel.grid = element_blank())
     p <- p + theme(text = element_text(size = text.size), axis.text.x = element_text(angle=text.x.angle, hjust=text.x.hjust))
     # Colouring setup
     nlevels <- length(levels(data[[colour.var]]))

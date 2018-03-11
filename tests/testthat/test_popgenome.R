@@ -65,6 +65,7 @@ if (all(unlist(lapply(c("PopGenome", "tidyr", "GenomicRanges", "tidyselect"),
     library("tidyr")
     library("tidyselect")
     library("ggplot2")
+    library("RColorBrewer")
     fn <- system.file("extdata", "popgenome.rda", package = "nonmodelr")
     load(fn)
 }

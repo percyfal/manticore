@@ -25,7 +25,7 @@ setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.
 ##' @examples
 ##' library(PopGenome)
 ##' # Read a vcf and generate two genome objects
-##' vcf_file <- system.file("extdata", "medium.call.vcf.gz")
+##' vcf_file <- system.file("extdata", "medium.call.biallelic.vcf.gz", package="nonmodelr")
 ##' scaffold1 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold1")
 ##' scaffold13 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold13")
 ##' slist <- list(scaffold1=scaffold1, scaffold13=scaffold13)

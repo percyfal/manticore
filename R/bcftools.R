@@ -99,8 +99,9 @@ read.bcftools.stats <- function(filename, label=NULL) {
 ##' @param obj bcftools.stats object
 ##' @return data frame summary
 ##' @author Per Unneberg
+##' @export
 summary.bcftools.stats <- function(obj) {
-    obj$SN
+    as.data.frame(obj$SN)
 }
 
 
@@ -126,7 +127,7 @@ gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL",
     if ("TSTV" %in% which) {
         data <- gather(obj$TSTV, key, value, -id)
         tstv <- c("ts.tv", "ts.tv..1st.ALT.")
-        plist$TSTV <- grid.arrange(
+        plist$TSTV <- arrangeGrob(
             ggplot(data=subset(data, key %in% tstv), aes(y=key, x=value)) + geom_point() + ggtitle("Ti/Tv") + theme_bw(),
             ggplot(data=subset(data, !(key %in% tstv)), aes(y=key, x=value)) + geom_point() + ggtitle("Ti/Tv, counts") + theme_bw(),
             nrow=2)
@@ -157,7 +158,7 @@ gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL",
     }
 
     if (length(plist) > 1) {
-        p <- grid.arrange(grobs=plist, ncol=ncol)
+        p <- arrangeGrob(grobs=plist, ncol=ncol)
     } else {
         p <- plist[[1]]
     }

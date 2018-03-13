@@ -7,14 +7,23 @@
 \title{plot_seqlengths_stats}
 \usage{
 plot_seqlengths_stats(object, wrap = TRUE, agg.fun = c("sum", "mean"),
-  theme.default = theme_bw(), text.size = 12, ...)
+  text.size = 12, which = NULL, ...)
 
 \S4method{plot_seqlengths_stats}{GRanges}(object, wrap = TRUE,
-  agg.fun = c("sum", "mean"), theme.default = theme_bw(), text.size = 12,
-  ...)
+  agg.fun = c("sum", "mean"), text.size = 12, which = NULL, ...)
 }
 \arguments{
 \item{object}{GRanges object}
+
+\item{wrap}{wrap plot}
+
+\item{agg.fun}{aggregation functions}
+
+\item{text.size}{text size}
+
+\item{which}{which plots to include. Choose from population levels and aggregation function}
+
+\item{...}{additional arguments to pass to geom_point()}
 }
 \value{
 ggplot

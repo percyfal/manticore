@@ -18,7 +18,7 @@ identify_outliers <- function(data, formula, key=NULL, method="loess", level=0.9
     if (!is.null(key)) {
         conf <- do.call("rbind", lapply(levels(factor(data[[key]])),
                                         function(ll) {
-                                     x <- subset(data, key == ll);
+                                     x <- data[data[[key]] == ll, ];
                                      fit <- f(formula, x);
                                      y <- predict(fit, se = TRUE);
                                      se.fit <- y$se.fit * qt(level / 2 + .5, y$df);

@@ -2,15 +2,53 @@
 % Please edit documentation in R/popGenomeUtils.R
 \name{plot.pg}
 \alias{plot.pg}
+\alias{plot.GRanges}
+\alias{plot.pg.summary}
+\alias{plot.pg.detail}
+\alias{plot.pg.neutrality}
+\alias{plot.pg.fixed}
+\alias{plot.pg.shared}
+\alias{plot.pg.diversity}
+\alias{plot.pg.diversity.between}
+\alias{plot.pg.F_ST}
+\alias{plot.pg.F_ST.pairwise}
+\alias{plot.pg.segregating.sites}
 \title{plot.pg}
 \usage{
-\method{plot}{pg}(data, x = "ranges", y = "value", colour = brewer.pal(3,
-  "Dark2"), colour.var = "seqnames", wrap = TRUE,
-  wrap.formula = "key ~ population", wrap.ncol = 1, plot.type = "point",
-  x.lab = "window", y.lab = NULL, main = NULL, compact.facet = TRUE,
-  strip.position = "right", scales = "free_y", size = 1,
-  hide.legend = TRUE, hide.xaxis = TRUE, grid = FALSE, text.size = 14,
-  text.x.angle = 45, text.x.hjust = 1, ...)
+plot.pg(data, x = "ranges", y = "value", colour = brewer.pal(3, "Dark2"),
+  colour.var = "seqnames", wrap = TRUE, wrap.formula = "key ~ population",
+  wrap.ncol = 1, plot.type = "point", x.lab = "window", y.lab = NULL,
+  main = NULL, compact.facet = TRUE, strip.position = "right",
+  scales = "free_y", size = 1, hide.legend = TRUE, hide.xaxis = TRUE,
+  grid = FALSE, text.size = 14, text.x.angle = 45, text.x.hjust = 1,
+  ...)
+
+plot.GRanges(data, which = levels(factor(data$key)), ...)
+
+plot.pg.summary(data, x = "seqnames", y = "value", wrap.formula = "~ key",
+  which = c("n.sites", "trans.transv.ratio"), x.lab = "scaffold",
+  hide.xaxis = FALSE, ...)
+
+plot.pg.detail(data, which = c("MDG1", "MDG2", "MDSD"), ...)
+
+plot.pg.neutrality(data, which = c("Tajima.D", "Fu.Li.F", "Fu.Li.F"), ...)
+
+plot.pg.fixed(data, wrap.formula = "~ population", ...)
+
+plot.pg.shared(data, wrap.formula = "~ population", ...)
+
+plot.pg.diversity(data, which = c("nuc.diversity.within", "nuc.F_ST.vs.all",
+  "Pi"), ...)
+
+plot.pg.diversity.between(data, wrap.formula = "~ population",
+  colour = "name", ...)
+
+plot.pg.F_ST(data, wrap.formula = "~ key", which = c("nucleotide.F_ST",
+  "Nei.G_ST"), ...)
+
+plot.pg.F_ST.pairwise(data, ...)
+
+plot.pg.segregating.sites(data, wrap.formula = "~ population", ...)
 }
 \arguments{
 \item{data}{long format from getGenomeStats function}
@@ -70,6 +108,31 @@ plot.pg
 \details{
 Generic plotting function for PopGenome results
 }
+\section{Functions}{
+\itemize{
+\item \code{plot.GRanges}: Make plot of GRanges object
+
+\item \code{plot.pg.summary}: Make plot of summary
+
+\item \code{plot.pg.detail}: Make plot of details
+
+\item \code{plot.pg.neutrality}: Make plot of neutrality statistics
+
+\item \code{plot.pg.fixed}: Make plot of fixed sites
+
+\item \code{plot.pg.shared}: Make plot of shared sites
+
+\item \code{plot.pg.diversity}: Make plot of diversity
+
+\item \code{plot.pg.diversity.between}: Make plot of between population diversity
+
+\item \code{plot.pg.F_ST}: Make plot of F_ST
+
+\item \code{plot.pg.F_ST.pairwise}: Make plot of pairwise F_ST
+
+\item \code{plot.pg.segregating.sites}: Make plot of segregating sites
+}}
+
 \author{
 Per Unneberg
 }

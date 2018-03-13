@@ -7,10 +7,13 @@
 \title{plot_seqlengths_stats}
 \usage{
 plot_seqlengths_stats(object, wrap = TRUE, agg.fun = c("sum", "mean"),
-  text.size = 12, which = NULL, ...)
+  text.size = 12, which = NULL, label.outlier = FALSE, n.se = 5,
+  label.hjust = 1, label.vjust = 1, ...)
 
 \S4method{plot_seqlengths_stats}{GRanges}(object, wrap = TRUE,
-  agg.fun = c("sum", "mean"), text.size = 12, which = NULL, ...)
+  agg.fun = c("sum", "mean"), text.size = 12, which = NULL,
+  label.outlier = FALSE, n.se = 5, label.hjust = 1, label.vjust = 1,
+  ...)
 }
 \arguments{
 \item{object}{GRanges object}
@@ -22,6 +25,14 @@ plot_seqlengths_stats(object, wrap = TRUE, agg.fun = c("sum", "mean"),
 \item{text.size}{text size}
 
 \item{which}{which plots to include. Choose from population levels and aggregation function}
+
+\item{label.outlier}{label outlier points}
+
+\item{n.se}{number of standard errors to use as cutoff for identifying outliers}
+
+\item{label.hjust}{horizontal adjustment for labels}
+
+\item{label.vjust}{vertical adjustment for labels}
 
 \item{...}{additional arguments to pass to geom_point()}
 }

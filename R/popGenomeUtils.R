@@ -205,7 +205,7 @@ setMethod("get.segregating.sites", "GENOME", function(object, ...) {
 setGeneric("genomewide.stats", function(object, which=c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage"), biallelic.structure=TRUE, ...) standardGeneric("genomewide.stats"))
 ##' @describeIn genomewide.stats Calculate genome wide statistics for a GENOME object
 setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
-    which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok=TRUE)
+    which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok = TRUE)
     if ("detail" %in% which) {
         object <- detail.stats(object, biallelic.structure = biallelic.structure, ...)
     }
@@ -270,6 +270,7 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
 ##' @param which statistic to plot
 ##' @return ggplot
 ##' @author Per Unneberg
+##' @export
 plot.pg <- function(data, x="ranges", y="value",
                     colour=brewer.pal(3, "Dark2"), colour.var="seqnames",
                     wrap=TRUE, wrap.formula="key ~ population",
@@ -365,7 +366,7 @@ plot.pg.shared <- function(data, wrap.formula="~ population", ...) {
 ##' @describeIn plot.pg Make plot of diversity
 ##' @export
 plot.pg.diversity <- function(data, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"),  ...) {
-    which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok=TRUE)
+    which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok = TRUE)
     plot.pg(subset(data, key %in% which), ...)
 }
 ##' @title plot.pg.diversity.between
@@ -378,7 +379,7 @@ plot.pg.diversity.between <- function(data, wrap.formula="~ population", colour=
 ##' @describeIn plot.pg Make plot of F_ST
 ##' @export
 plot.pg.F_ST <- function(data, wrap.formula="~ key", which=c("nucleotide.F_ST", "Nei.G_ST"), ...) {
-    which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok=TRUE)
+    which <- match.arg(which, c("haplotype.F_ST", "nucleotide.F_ST", "Nei.G_ST", "Hudson.G_ST", "Hudson.H_ST", "Hudson.K_ST"), several.ok = TRUE)
     plot.pg(subset(data, key %in% which), wrap.formula = wrap.formula, ...)
 }
 ##' @title plot.pg.F_ST.pairwise
@@ -393,6 +394,7 @@ plot.pg.F_ST.pairwise <- function(data, ...) {
 plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
     plot.pg(data, wrap.formula = wrap.formula, ...)
 }
+
 ##' plot_seqlengths_stats
 ##'
 ##' Plot seqlengths stats
@@ -402,13 +404,18 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##' @param agg.fun aggregation functions
 ##' @param text.size text size
 ##' @param which which plots to include. Choose from population levels and aggregation function
+##' @param label.outlier label outlier points
+##' @param n.se number of standard errors to use as cutoff for identifying outliers
+##' @param label.hjust horizontal adjustment for labels
+##' @param label.vjust vertical adjustment for labels
 ##' @param ... additional arguments to pass to geom_point()
 ##' @return ggplot
 ##' @author Per Unneberg
 ##' @export
-setGeneric("plot_seqlengths_stats", function(object, wrap=TRUE, agg.fun=c("sum", "mean"), text.size=12, which=NULL, ...) standardGeneric("plot_seqlengths_stats"))
+setGeneric("plot_seqlengths_stats", function(object, wrap=TRUE, agg.fun=c("sum", "mean"), text.size=12, which=NULL, label.outlier=FALSE, n.se=5, label.hjust=1, label.vjust=1, ...) standardGeneric("plot_seqlengths_stats"))
 ##' @describeIn plot_seqlengths_stats Plot statistics versus seqlengths for GRanges instance
-setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, text.size, which, ...) {
+setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, text.size, which, label.outlier, n.se, label.hjust, label.vjust, ...) {
+    if (any(is.na(seqlengths(object)))) stop("no seqlengths defined for object; must be set for this function to work")
     which.options <- c(levels(as.factor(values(object)[, "population"])), agg.fun)
     if (is.null(which)) {
         which <- which.options
@@ -430,7 +437,20 @@ setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, te
     data <- rbind(data, agg.res)
     data$seqlengths <- seqlengths(object)
     data$population <- factor(data$population, levels = unique(data$population))
+    # See https://stackoverflow.com/questions/33082901/find-points-over-and-under-the-confidence-interval-when-using-geom-stat-geom-s for loess solution
+    if (label.outlier) {
+        conf <- do.call("rbind", lapply(levels(factor(data$population)),
+                                        function(ll) {
+                                     x <- subset(data, population == ll);
+                                     fit <- loess(value ~ seqlengths, x);
+                                     y <- predict(fit, se = TRUE);
+                                     se.fit <- y$se.fit * qt(level / 2 + .5, y$df);
+                                     data.frame(fit = y$fit, se.fit = se.fit, upper = y$fit + se.fit, lower = y$fit - se.fit, residuals = residuals(fit), population = ll)}))
+        data$outlier <- ifelse(abs(conf$residuals/conf$se.fit) > n.se, as.character(data$seqnames), "")
+    }
+
     p <- ggplot(subset(data, population %in% which), aes(x = seqlengths, y = value)) + geom_point(...) + theme(text = element_text(size = text.size))
+    if (label.outlier) p <- p + geom_text(aes(label = outlier), hjust = label.hjust, vjust = label.vjust)
     if (length(which) == 1) wrap <- FALSE
     if (wrap) p <- p + facet_wrap(~ population)
     p
@@ -465,6 +485,7 @@ setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, te
 ##' @importFrom graphics boxplot
 ##' @return ggplot object
 ##' @author Per Unneberg
+##' @export
 boxplot.pg <- function(formula = "value ~ population", data=NULL,
                        colour=brewer.pal(3, "Dark2"), colour.var=NULL,
                        wrap=FALSE, wrap.formula=" ~ key",
@@ -548,7 +569,7 @@ boxplot.pg.shared <- function(data=NULL, main="Shared sites", ...) {
 ##' @describeIn boxplot.pg Make boxplot of diversity
 ##' @export
 boxplot.pg.diversity <- function(data=NULL, which=c("nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), wrap=TRUE, ...) {
-    which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok=TRUE)
+    which <- match.arg(which, c("hap.diversity.within", "hap.F_ST.vs.all", "nuc.diversity.within", "nuc.F_ST.vs.all", "Pi"), several.ok = TRUE)
     boxplot.pg(data = subset(data, key %in% which), wrap = wrap, ...)
 }
 ##' @title boxplot.pg.diversity.between

@@ -18,8 +18,11 @@
 ##'     ggplot2
 ##' @author Per Unneberg
 ##' @export
-setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.names=FALSE, use.region.names=FALSE, out.format="long", quiet=FALSE, ...) standardGeneric("getGenomeStats"))
-
+setGeneric("getGenomeStats",
+           function(object, stats=c("detail"),
+                    use.population.names=FALSE, use.region.names=FALSE,
+                    out.format="long", quiet=FALSE, ...)
+    standardGeneric("getGenomeStats"))
 ##' @describeIn getGenomeStats Retrieve and concatenate data from a list of PopGenome GENOME instances.
 ##'
 ##' @examples
@@ -29,8 +32,10 @@ setGeneric("getGenomeStats", function(object, stats=c("detail"), use.population.
 ##' scaffold1 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold1")
 ##' scaffold13 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold13")
 ##' slist <- list(scaffold1=scaffold1, scaffold13=scaffold13)
-##'
-setMethod("getGenomeStats", "list", function(object, stats, use.population.names, use.region.names, out.format, quiet, ...) {
+##' @export
+setMethod("getGenomeStats", "list",
+          function(object, stats, use.population.names,
+                   use.region.names, out.format, quiet, ...) {
     lapply(c("PopGenome", "tidyr", "tidyselect", "GenomicRanges"), function(pkg) {
         if (!requireNamespace(pkg, quietly = TRUE)) {
             stop(paste("Package \"", pkg, "\" needed for this function to work. Please install it.", sep=""),
@@ -154,17 +159,20 @@ setMethod("getGenomeStats", "list", function(object, stats, use.population.names
 
 ## Write new functions for each case, and a function for annotating
 ## data, as in bioodo
-setGeneric("get.fixed", function(object, which="fixed", ...) standardGeneric("get.fixed"))
+setGeneric("get.fixed",
+           function(object, which="fixed", ...) standardGeneric("get.fixed"))
 setMethod("get.fixed", "GENOME", function(object, which, ...) {
     return (slot(object, "n.fixed.sites"))
 })
 
-setGeneric("get.shared", function(object, which="fixed", ...) standardGeneric("get.shared"))
+setGeneric("get.shared",
+           function(object, which="fixed", ...) standardGeneric("get.shared"))
 setMethod("get.shared", "GENOME", function(object, which, ...) {
     return (slot(object, "n.shared.sites"))
 })
 
-setGeneric("get.diversity.between", function(object, which="nuc", ...) standardGeneric("get.diversity.between"))
+setGeneric("get.diversity.between",
+           function(object, which="nuc", ...) standardGeneric("get.diversity.between"))
 setMethod("get.diversity.between", "GENOME", function(object, which, ...) {
     which <- match.arg(which, c("nuc", "hap"))
     slots <- list(nuc = "nuc.diversity.between", hap = "hap.diversity.between")
@@ -180,13 +188,15 @@ setMethod("get.diversity.between", "GENOME", function(object, which, ...) {
     return (df)
 })
 
-setGeneric("get.F_ST.pairwise", function(object, ...) standardGeneric("get.F_ST.pairwise"))
+setGeneric("get.F_ST.pairwise",
+           function(object, ...) standardGeneric("get.F_ST.pairwise"))
 setMethod("get.F_ST.pairwise", "GENOME", function(object, which, ...) {
     df <- get.F_ST(object, pairwise = TRUE)
     return (df)
 })
 
-setGeneric("get.segregating.sites", function(object, ...) standardGeneric("get.segregating.sites"))
+setGeneric("get.segregating.sites",
+           function(object, ...) standardGeneric("get.segregating.sites"))
 setMethod("get.segregating.sites", "GENOME", function(object, ...) {
     return (object@n.segregating.sites)
 })
@@ -394,59 +404,95 @@ plot.pg.F_ST.pairwise <- function(data, ...) {
 plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
     plot.pg(data, wrap.formula = wrap.formula, ...)
 }
-
-##' plot_seqlengths_stats
+##' aggregate_region_stats
 ##'
-##' Plot seqlengths stats
-##' @title plot_seqlengths_stats
-##' @param object GRanges object
+##' Aggregate statistics over regions, where the regions typically are
+##' scaffolds or windows. Aggregation is performed over the list of
+##' components seqnames, key (i.e. statistic), region start, region
+##' end, and region width
+##' @title aggregate_region_stats
+##' @param object object
+##' @param agg.fun aggregation functions
+##' @param ... additional arguments
+##' @return GRanges with augmented values
+##' @author Per Unneberg
+##' @export
+setGeneric("aggregate_region_stats", function(object, agg.fun=c("sum", "mean"), ...) standardGeneric("aggregate_region_stats"))
+##' destribeIn aggregate_region_stats Aggregate statistics for GRanges instance
+setMethod("aggregate_region_stats", "GRanges", function(object, agg.fun=c("sum", "mean"), ...) {
+    agg.res <- do.call("rbind", lapply(agg.fun, function(x) {
+                                    y <- cbind(aggregate(object$value,
+                                                         by = list(seqnames = as.factor(seqnames(object)),
+                                                                   key = as.factor(object$key),
+                                                                   start = start(object),
+                                                                   end = end(object),
+                                                                   width = width(object)), FUN = x, ...), x);
+                                    colnames(y) <- c("seqnames", "key", "start", "end", "width", "value", "population");
+                                    y
+                                }))
+    gr <- GRanges(seqnames = agg.res$seqnames,
+                  ranges = IRanges(agg.res$start, end = agg.res$end), key = agg.res$key,
+                  value = agg.res$value, population = agg.res$population)
+    c(object, gr)
+})
+
+##' plot_region_stats
+##'
+##' Plot region stats
+##' @title plot_region_stats
+##' @param object object
+##' @param x.var a name identifying a variable to plot values against
 ##' @param wrap wrap plot
 ##' @param agg.fun aggregation functions
 ##' @param text.size text size
 ##' @param which which plots to include. Choose from population levels and aggregation function
 ##' @param label.outlier label outlier points
+##' @param label.format use short (default) or long format for window labels
 ##' @param n.se number of standard errors to use as cutoff for identifying outliers, based on confidence interval level
 ##' @param label.hjust horizontal adjustment for labels
 ##' @param label.vjust vertical adjustment for labels
 ##' @param level level of confidence interval to use
+##' @param method method to use for fitting
+##' @param scales scales for facet plots
 ##' @param ... additional arguments to pass to geom_point()
 ##' @return ggplot
 ##' @author Per Unneberg
 ##' @export
-setGeneric("plot_seqlengths_stats", function(object, wrap=TRUE, agg.fun=c("sum", "mean"), text.size=12, which=NULL, label.outlier=FALSE, n.se=5, label.hjust=1, label.vjust=1, level=0.99, ...) standardGeneric("plot_seqlengths_stats"))
-##' @describeIn plot_seqlengths_stats Plot statistics versus seqlengths for GRanges instance
-setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, text.size, which, label.outlier, n.se, label.hjust, label.vjust, level, ...) {
-    if (any(is.na(seqlengths(object)))) stop("no seqlengths defined for object; must be set for this function to work")
-    which.options <- c(levels(as.factor(values(object)[, "population"])), agg.fun)
-    if (is.null(which)) {
-        which <- which.options
-    } else {
-        which <- match.arg(which, which.options)
-    }
+setGeneric("plot_region_stats", function(object, x.var="width", wrap=TRUE, agg.fun=c("sum", "mean"), text.size=12, which=NULL, label.outlier=FALSE, label.format="short", n.se=5, label.hjust=1, label.vjust=1, level=0.99, method="loess", scales="free_y", ...) standardGeneric("plot_region_stats"))
+##' @describeIn plot_region_stats Plot statistics versus region for GRanges instance
+setMethod("plot_region_stats", "GRanges", function(object, x.var, wrap, agg.fun, text.size, which, label.outlier, n.se, label.hjust, label.vjust, level, method, scales, ...) {
     if (!requireNamespace("GenomicRanges", quietly = TRUE)) {
         stop(paste(
             "Package \"GenomicRanges\" needed for this function to work.",
             "Please install it.", sep = ""),
             call. = FALSE)
     }
-    agg.res <- do.call("rbind", lapply(agg.fun, function(x) {
-                                    y <- cbind(aggregate(object$value, by = list(seqnames = as.factor(seqnames(object))), FUN = x), x);
-                                    colnames(y) <- c("seqnames", "value", "population");
-                                    y
-                                }))
-    data <- as.data.frame(object)[,c("seqnames", "value", "population")]
-    data <- rbind(data, agg.res)
-    data$seqlengths <- seqlengths(object)
-    data$population <- factor(data$population, levels = unique(data$population))
-    if (label.outlier) {
-        conf <- identify_outliers(data, value ~ seqlengths)
-        data$outlier <- ifelse(abs(conf$residuals/conf$se.fit) > n.se, as.character(data$seqnames), "")
+    x.var <- match.arg(x.var, c("width", "seqlengths", setdiff(colnames(values(object)), c("key", "value", "population"))))
+    label.format <- match.arg(label.format, c("long", "short"))
+    if (x.var == "seqlengths") {
+        if (any(is.na(seqlengths(object)))) stop("no seqlengths defined for object; must be set for this function to work")
+        values(object)[[x.var]] <- seqlengths(object)
     }
-
-    p <- ggplot(subset(data, population %in% which), aes(x = seqlengths, y = value)) + geom_point(...) + theme(text = element_text(size = text.size))
+    which.options <- levels(as.factor(object$population))
+    if (is.null(which)) {
+        which <- which.options
+    } else {
+        which <- match.arg(which, which.options)
+    }
+    if (label.outlier & !("outlier" %in% colnames(values(object)))) {
+        message("no outlier column in values data frame; calling function identify_outliers")
+        conf <- identify_outliers(as.data.frame(object), paste("value ~ ", x.var), key="population", method=method, level=level)
+        if (label.format=="long") {
+            label <- paste(seqnames(object), start(object), end(object), sep="-")
+        } else {
+            label <- seqnames(object)
+        }
+        object$outlier <- ifelse(abs(conf$residuals/conf$se.fit) > n.se, label, "")
+    }
+    p <- ggplot(subset(as.data.frame(object), population %in% which), aes_string(x = x.var, y = "value")) + geom_point(...) + theme(text = element_text(size = text.size))
     if (label.outlier) p <- p + geom_text(aes(label = outlier), hjust = label.hjust, vjust = label.vjust)
     if (length(which) == 1) wrap <- FALSE
-    if (wrap) p <- p + facet_wrap(~ population)
+    if (wrap) p <- p + facet_wrap(~ population, scales = scales)
     p
 })
 

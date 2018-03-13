@@ -219,3 +219,14 @@ test_that("F_ST.pairwise", {
 
     expect_ggplot(data, gr)
 })
+
+
+## test_that("aggregate_seqlengths_stats",  {
+##     check_popgenome()
+##     data <- getGenomeStats(scaffolds, "segregating.sites", out.format="GRanges")
+##     expect_error(aggregate_seqlengths_stats(data))
+##     data.summary <- getGenomeStats(scaffolds, "summary", out.format="GRanges")
+##     seqlengths(data) <- subset(data.summary, key=="n.sites")$value
+##     gr <- aggregate_seqlengths_stats(data)
+##     expect_is(gr, "GRanges")
+## })

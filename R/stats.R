@@ -13,6 +13,7 @@
 ##' @export
 identify_outliers <- function(data, formula, key=NULL, method="loess", level=0.99, ...) {
     ## See https://stackoverflow.com/questions/33082901/find-points-over-and-under-the-confidence-interval-when-using-geom-stat-geom-s for loess solution
+    if (!inherits(data, "data.frame")) data <- as.data.frame(data)
     method <- match.arg(method, c("loess", "lm"))
     f <- match.fun(method)
     if (!is.null(key)) {
@@ -24,7 +25,7 @@ identify_outliers <- function(data, formula, key=NULL, method="loess", level=0.9
                                      se.fit <- y$se.fit * qt(level / 2 + .5, y$df);
                                      data.frame(fit = y$fit, se.fit = se.fit, upper = y$fit + se.fit, lower = y$fit - se.fit, residuals = residuals(fit), key = ll)}))
     } else {
-        fit <- f(value ~ seqlengths, data);
+        fit <- f(formula, data);
         y <- predict(fit, se = TRUE);
         se.fit <- y$se.fit * qt(level / 2 + .5, y$df);
         conf <- data.frame(fit = y$fit, se.fit = se.fit, upper = y$fit + se.fit, lower = y$fit - se.fit, residuals = residuals(fit), key = NA);

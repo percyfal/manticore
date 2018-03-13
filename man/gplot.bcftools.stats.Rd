@@ -5,7 +5,7 @@
 \title{plot.bcftools.stats}
 \usage{
 gplot.bcftools.stats(obj, which = c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD",
-  "ST", "DP"), ncol = 2, ...)
+  "ST", "DP"), ncol = 2, text.size = 12, theme.default = theme_bw(), ...)
 }
 \arguments{
 \item{obj}{bcftools.stats object}
@@ -13,6 +13,10 @@ gplot.bcftools.stats(obj, which = c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD",
 \item{which}{which plots to produce (defalt all)}
 
 \item{ncol}{number of columns in grid plot}
+
+\item{text.size}{text size of plots}
+
+\item{theme.default}{default theme (theme_bw)}
 
 \item{...}{parameters passed to generic plot function}
 }

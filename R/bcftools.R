@@ -99,8 +99,9 @@ read.bcftools.stats <- function(filename, label=NULL) {
 ##' @param obj bcftools.stats object
 ##' @return data frame summary
 ##' @author Per Unneberg
+##' @export
 summary.bcftools.stats <- function(obj) {
-    obj$SN
+    as.data.frame(obj$SN)
 }
 
 
@@ -111,55 +112,60 @@ summary.bcftools.stats <- function(obj) {
 ##' @param obj bcftools.stats object
 ##' @param which which plots to produce (defalt all)
 ##' @param ncol number of columns in grid plot
+##' @param text.size text size of plots
+##' @param theme.default default theme (theme_bw)
 ##' @param ... parameters passed to generic plot function
 ##' @return ggplot2 object, or a plot
 ##' @author Per Unneberg
 ##' @export
-gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), ncol=2, ...) {
+gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), ncol=2, text.size=12, theme.default=theme_bw(), ...) {
     which <- match.arg(which, c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), several.ok=TRUE)
     message("Producing ", length(which), " plots")
+    old <- theme_set(theme.default)
+    theme_update(text = element_text(size = text.size))
     plist <- list()
     if ("SN" %in% which) {
         data <- obj$SN
-        plist$SN <- ggplot(data=data, aes(y=key, x=value)) + geom_point() + ggtitle("Summary numbers") + theme_bw()
+        plist$SN <- ggplot(data = data, aes(y = key, x = value)) + geom_point(...) + ggtitle("Summary numbers")
     }
     if ("TSTV" %in% which) {
         data <- gather(obj$TSTV, key, value, -id)
         tstv <- c("ts.tv", "ts.tv..1st.ALT.")
-        plist$TSTV <- grid.arrange(
-            ggplot(data=subset(data, key %in% tstv), aes(y=key, x=value)) + geom_point() + ggtitle("Ti/Tv") + theme_bw(),
-            ggplot(data=subset(data, !(key %in% tstv)), aes(y=key, x=value)) + geom_point() + ggtitle("Ti/Tv, counts") + theme_bw(),
-            nrow=2)
+        plist$TSTV <- arrangeGrob(
+            ggplot(data = subset(data, key %in% tstv), aes(y = key, x = value)) + geom_point(...) + ggtitle("Ti/Tv") ,
+            ggplot(data = subset(data, !(key %in% tstv)), aes(y = key, x = value)) + geom_point(...) + ggtitle("Ti/Tv, counts") ,
+            nrow = 2)
     }
     if ("SiS" %in% which) {
         data <- gather(obj$SiS, key, value, -id)
-        plist$SiS <- ggplot(data=data, aes(y=key, x=value)) + geom_point() + ggtitle("Singleton stats") + theme_bw()
+        plist$SiS <- ggplot(data = data, aes(y = key, x = value)) + geom_point(...) + ggtitle("Singleton stats")
     }
     if ("AF" %in% which) {
         data <- gather(obj$AF, key, value, -allele.frequency, -id)
-        plist$AF <- ggplot(data=data, aes(x=allele.frequency, y=value, color=key)) + geom_point() + ggtitle("Stats non-reference allele frequency") + theme_bw()
+        plist$AF <- ggplot(data = data, aes(x = allele.frequency, y = value, color = key)) + geom_point(...) + ggtitle("Stats non-reference allele frequency")
     }
     if ("QUAL" %in% which) {
         data <- gather(obj$QUAL, key, value, -Quality, -id)
-        plist$QUAL <- ggplot(data=data, aes(x=Quality, y=value, color=key)) + geom_point() + ggtitle("Stats by quality") + theme_bw()
+        plist$QUAL <- ggplot(data = data, aes(x = Quality, y = value, color = key)) + geom_point(...) + ggtitle("Stats by quality")
     }
     if ("IDD" %in% which) {
         data <- obj$IDD
-        plist$IDD <- ggplot(data=data, aes(x=length..deletions.negative., y=count)) + geom_point() + ggtitle("InDel distribution") + xlab("Length (deletions negative)") + theme_bw()
+        plist$IDD <- ggplot(data = data, aes(x = length..deletions.negative., y = count)) + geom_point(...) + ggtitle("InDel distribution") + xlab("Length (deletions negative)")
     }
     if ("ST" %in% which) {
         data <- obj$ST
-        plist$ST <- ggplot(data=data, aes(x=type, y=count)) + geom_point() + ggtitle("Substitution types") + theme_bw()
+        plist$ST <- ggplot(data = data, aes(x = type, y = count)) + geom_point(...) + ggtitle("Substitution types")
     }
     if ("DP" %in% which) {
         data <- gather(obj$DP, key, value, -bin, -id)
-        plist$DP <- ggplot(data=data, aes(x=bin, y=value, color=key)) + geom_point() + ggtitle("Depth distribution") + theme_bw()
+        plist$DP <- ggplot(data = data, aes(x = bin, y = value, color = key)) + geom_point(...) + ggtitle("Depth distribution")
     }
 
     if (length(plist) > 1) {
-        p <- grid.arrange(grobs=plist, ncol=ncol)
+        p <- arrangeGrob(grobs = plist, ncol = ncol)
     } else {
         p <- plist[[1]]
     }
+    theme_set(old)
     p
 }

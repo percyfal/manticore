@@ -393,6 +393,33 @@ plot.pg.F_ST.pairwise <- function(data, ...) {
 plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
     plot.pg(data, wrap.formula = wrap.formula, ...)
 }
+##' plot_seqlengths_stats
+##'
+##' Plot seqlengths stats
+##' @title plot_seqlengths_stats
+##' @param object GRanges object
+##' @param ...
+##' @return ggplot
+##' @author Per Unneberg
+##' @export
+setGeneric("plot_seqlengths_stats", function(object, wrap=TRUE, agg.fun=c("sum", "mean"), theme.default=theme_bw(), text.size=12, ...) standardGeneric("plot_seqlengths_stats"))
+setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, ...) {
+    old <- theme_set(theme.default)
+    theme_update(text = element_text(size = text.size))
+    agg.res <- do.call("rbind", lapply(agg.fun, function(x) {
+                                    y <- cbind(aggregate(object$value, by = list(seqnames = as.factor(seqnames(object))), FUN = x), x);
+                                    colnames(y) <- c("seqnames", "value", "population");
+                                    y
+                                }))
+    x <- as.data.frame(object)[,c("seqnames", "value", "population")]
+    x <- rbind(x, agg.res)
+    x$seqlengths <- seqlengths(object)
+    x$population <- factor(x$population, levels = unique(x$population))
+    p <- ggplot(x, aes(x = seqlengths, y = value)) + geom_point(...)
+    if (wrap) p <- p + facet_wrap(~ population)
+    theme_set(old)
+    p
+})
 
 ##' boxplot.pg
 ##'

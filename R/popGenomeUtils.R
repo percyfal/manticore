@@ -403,7 +403,12 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##' @author Per Unneberg
 ##' @export
 setGeneric("plot_seqlengths_stats", function(object, wrap=TRUE, agg.fun=c("sum", "mean"), theme.default=theme_bw(), text.size=12, ...) standardGeneric("plot_seqlengths_stats"))
-setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, ...) {
+##' @describeIn plot_seqlengths_stats Plot statistics versus seqlengths for GRanges instance
+setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, theme.default, text.size, ...) {
+    if (!requireNamespace("GenomicRanges", quietly = TRUE)) {
+        stop(paste("Package \"GenomicRanges\" needed for this function to work. Please install it.", sep=""),
+             call. = FALSE)
+    }
     old <- theme_set(theme.default)
     theme_update(text = element_text(size = text.size))
     agg.res <- do.call("rbind", lapply(agg.fun, function(x) {

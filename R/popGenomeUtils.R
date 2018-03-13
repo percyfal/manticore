@@ -405,16 +405,17 @@ plot.pg.segregating.sites <- function(data, wrap.formula="~ population", ...) {
 ##' @param text.size text size
 ##' @param which which plots to include. Choose from population levels and aggregation function
 ##' @param label.outlier label outlier points
-##' @param n.se number of standard errors to use as cutoff for identifying outliers
+##' @param n.se number of standard errors to use as cutoff for identifying outliers, based on confidence interval level
 ##' @param label.hjust horizontal adjustment for labels
 ##' @param label.vjust vertical adjustment for labels
+##' @param level level of confidence interval to use
 ##' @param ... additional arguments to pass to geom_point()
 ##' @return ggplot
 ##' @author Per Unneberg
 ##' @export
-setGeneric("plot_seqlengths_stats", function(object, wrap=TRUE, agg.fun=c("sum", "mean"), text.size=12, which=NULL, label.outlier=FALSE, n.se=5, label.hjust=1, label.vjust=1, ...) standardGeneric("plot_seqlengths_stats"))
+setGeneric("plot_seqlengths_stats", function(object, wrap=TRUE, agg.fun=c("sum", "mean"), text.size=12, which=NULL, label.outlier=FALSE, n.se=5, label.hjust=1, label.vjust=1, level=0.99, ...) standardGeneric("plot_seqlengths_stats"))
 ##' @describeIn plot_seqlengths_stats Plot statistics versus seqlengths for GRanges instance
-setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, text.size, which, label.outlier, n.se, label.hjust, label.vjust, ...) {
+setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, text.size, which, label.outlier, n.se, label.hjust, label.vjust, level, ...) {
     if (any(is.na(seqlengths(object)))) stop("no seqlengths defined for object; must be set for this function to work")
     which.options <- c(levels(as.factor(values(object)[, "population"])), agg.fun)
     if (is.null(which)) {

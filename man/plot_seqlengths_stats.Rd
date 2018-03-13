@@ -8,12 +8,12 @@
 \usage{
 plot_seqlengths_stats(object, wrap = TRUE, agg.fun = c("sum", "mean"),
   text.size = 12, which = NULL, label.outlier = FALSE, n.se = 5,
-  label.hjust = 1, label.vjust = 1, ...)
+  label.hjust = 1, label.vjust = 1, level = 0.99, ...)
 
 \S4method{plot_seqlengths_stats}{GRanges}(object, wrap = TRUE,
   agg.fun = c("sum", "mean"), text.size = 12, which = NULL,
   label.outlier = FALSE, n.se = 5, label.hjust = 1, label.vjust = 1,
-  ...)
+  level = 0.99, ...)
 }
 \arguments{
 \item{object}{GRanges object}
@@ -28,11 +28,13 @@ plot_seqlengths_stats(object, wrap = TRUE, agg.fun = c("sum", "mean"),
 
 \item{label.outlier}{label outlier points}
 
-\item{n.se}{number of standard errors to use as cutoff for identifying outliers}
+\item{n.se}{number of standard errors to use as cutoff for identifying outliers, based on confidence interval level}
 
 \item{label.hjust}{horizontal adjustment for labels}
 
 \item{label.vjust}{vertical adjustment for labels}
+
+\item{level}{level of confidence interval to use}
 
 \item{...}{additional arguments to pass to geom_point()}
 }

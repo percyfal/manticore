@@ -438,15 +438,8 @@ setMethod("plot_seqlengths_stats", "GRanges", function(object, wrap, agg.fun, te
     data <- rbind(data, agg.res)
     data$seqlengths <- seqlengths(object)
     data$population <- factor(data$population, levels = unique(data$population))
-    # See https://stackoverflow.com/questions/33082901/find-points-over-and-under-the-confidence-interval-when-using-geom-stat-geom-s for loess solution
     if (label.outlier) {
-        conf <- do.call("rbind", lapply(levels(factor(data$population)),
-                                        function(ll) {
-                                     x <- subset(data, population == ll);
-                                     fit <- loess(value ~ seqlengths, x);
-                                     y <- predict(fit, se = TRUE);
-                                     se.fit <- y$se.fit * qt(level / 2 + .5, y$df);
-                                     data.frame(fit = y$fit, se.fit = se.fit, upper = y$fit + se.fit, lower = y$fit - se.fit, residuals = residuals(fit), population = ll)}))
+        conf <- identify_outliers(data, value ~ seqlengths)
         data$outlier <- ifelse(abs(conf$residuals/conf$se.fit) > n.se, as.character(data$seqnames), "")
     }
 

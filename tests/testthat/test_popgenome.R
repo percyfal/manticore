@@ -73,11 +73,11 @@ if (all(unlist(lapply(c("PopGenome", "tidyr", "GenomicRanges", "tidyselect"),
 expect_ggplot <- function(data, gr) {
     p <- plot(data)
     eval(bquote(expect_is(p, "ggplot")))
-    p <- boxplot(data)
+    p <- boxplot(data=data)
     eval(bquote(expect_is(p, "ggplot")))
     p <- plot(data)
     eval(bquote(expect_is(p, "ggplot")))
-    p <- boxplot(gr)
+    p <- boxplot(data=gr)
     eval(bquote(expect_is(p, "ggplot")))
 }
 

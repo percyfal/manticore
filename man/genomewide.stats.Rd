@@ -8,11 +8,11 @@
 \usage{
 genomewide.stats(object, which = c("detail", "neutrality", "F_ST",
   "diversity", "diversity.between", "fixed.shared", "linkage"),
-  biallelic.structure = TRUE, ...)
+  biallelic.structure = TRUE, pi = TRUE, ...)
 
 \S4method{genomewide.stats}{GENOME}(object, which = c("detail", "neutrality",
   "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage"),
-  biallelic.structure = TRUE, ...)
+  biallelic.structure = TRUE, pi = TRUE, ...)
 }
 \arguments{
 \item{object}{object on which to perform calculations}
@@ -20,6 +20,8 @@ genomewide.stats(object, which = c("detail", "neutrality", "F_ST",
 \item{which}{statistics to calculate}
 
 \item{biallelic.structure}{calculate biallelic structure}
+
+\item{pi}{Nei's calculation of pi}
 
 \item{...}{extra arguments}
 }

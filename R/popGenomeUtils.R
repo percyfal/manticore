@@ -208,16 +208,17 @@ setMethod("get.segregating.sites", "GENOME", function(object, ...) {
 ##' @param object object on which to perform calculations
 ##' @param which statistics to calculate
 ##' @param biallelic.structure calculate biallelic structure
+##' @param pi Nei's calculation of pi
 ##' @param ... extra arguments
 ##' @return Updated object
 ##' @author Per Unneberg
 ##' @export
-setGeneric("genomewide.stats", function(object, which=c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage"), biallelic.structure=TRUE, ...) standardGeneric("genomewide.stats"))
+setGeneric("genomewide.stats", function(object, which=c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage"), biallelic.structure=TRUE, pi=TRUE, ...) standardGeneric("genomewide.stats"))
 ##' @describeIn genomewide.stats Calculate genome wide statistics for a GENOME object
 setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
     which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok = TRUE)
     if ("detail" %in% which) {
-        object <- detail.stats(object, biallelic.structure = biallelic.structure, ...)
+        object <- detail.stats(object, biallelic.structure = biallelic.structure, pi = pi, ...)
     }
     if ("neutrality" %in% which) {
         object <- neutrality.stats(object, ...)

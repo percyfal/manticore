@@ -218,7 +218,7 @@ setGeneric("genomewide.stats", function(object, which=c("detail", "neutrality", 
 setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
     which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok = TRUE)
     if ("detail" %in% which) {
-        object <- detail.stats(object, biallelic.structure = biallelic.structure, pi = pi, ...)
+        object <- detail.stats(object, biallelic.structure = biallelic.structure, ...)
     }
     if ("neutrality" %in% which) {
         object <- neutrality.stats(object, ...)
@@ -227,7 +227,7 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
         object <- F_ST.stats(object, ...)
     }
     if ("diversity" %in% which) {
-        object <- diversity.stats(object, ...)
+        object <- diversity.stats(object, pi = pi, ...)
     }
     if ("diversity.between" %in% which) {
         object <- diversity.stats.between(object, ...)

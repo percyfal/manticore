@@ -23,7 +23,8 @@ plot.pg(data, x = "ranges", y = "value", colour = brewer.pal(3, "Dark2"),
   grid = FALSE, text.size = 14, text.x.angle = 45, text.x.hjust = 1,
   ...)
 
-plot.GRanges(data, which = levels(factor(data$key)), ...)
+plot.GRanges(data, which = levels(factor(data$key)), per.site = TRUE,
+  y = "value", ...)
 
 plot.pg.summary(data, x = "seqnames", y = "value", wrap.formula = "~ key",
   which = c("n.sites", "trans.transv.ratio"), x.lab = "scaffold",
@@ -98,6 +99,8 @@ plot.pg.segregating.sites(data, wrap.formula = "~ population", ...)
 \item{...}{extra arguments}
 
 \item{which}{statistic to plot}
+
+\item{per.site}{normalize statistics to per-site values}
 }
 \value{
 ggplot

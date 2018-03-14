@@ -248,6 +248,23 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
     }
     return (object)
 })
+##' summary.GRanges
+##'
+##' Summarize the statistics of a GRanges object
+##' @title summary.GRanges
+##' @param gr GRanges object
+##' @param per.site calculate per site values
+##' @param ... additional arguments
+##' @return a data frame
+##' @author Per Unneberg
+##' @export
+summary.GRanges <- function(gr, per.site=TRUE, fun="mean", ...) {
+    fun <- match.arg(fun, c("mean", "sd"))
+    df <- as.data.frame(gr)
+    if (per.site) df$value <- df$value / width(gr)
+    tab <- tapply(df$value, list(df$population, df$key), fun)
+    as.data.frame(tab)
+}
 
 
 ##' plot.pg
@@ -297,6 +314,7 @@ plot.pg <- function(data, x="ranges", y="value",
     if (!is.numeric(data[[x]])) {
         if (!is.factor(data[[x]])) data[[x]] <- factor(data[[x]], levels=unique(data[[x]]))
     }
+
     p <- ggplot(data, aes_string(x = x, y = y, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (plot.type == "point") {
@@ -332,12 +350,14 @@ plot.pg <- function(data, x="ranges", y="value",
 }
 ##' @title plot.GRanges
 ##' @describeIn plot.pg Make plot of GRanges object
+##' @param per.site normalize statistics to per-site values
 ##' @export
-plot.GRanges <- function(data, which=levels(factor(data$key)), ...) {
+plot.GRanges <- function(data, which=levels(factor(data$key)), per.site=TRUE, y="value", ...) {
     which <- match.arg(which, levels(factor(data$key)), several.ok = TRUE)
     df <- cbind(seqnames = as.character(seqnames(data)), as.data.frame(values(data)))
     df$ranges <- paste(as.character(seqnames(data)), start(data), "-", end(data), ":", sep = " ")
-    plot.pg(subset(df, key %in% which), ...)
+    if (per.site) df[[y]] <- df[[y]] / width(data)
+    plot.pg(subset(df, key %in% which), y = y, ...)
 }
 ##' @title plot.pg.summary
 ##' @describeIn plot.pg Make plot of summary
@@ -572,12 +592,16 @@ boxplot.pg <- function(formula = "value ~ population", data=NULL,
 }
 ##' @title boxplot.GRanges
 ##' @describeIn boxplot.pg Make boxplot of GRanges object
+##' @param per.site normalize statistics to per-site values
+##' @param ... arguments to pass to boxplot.pg
 ##' @export
-boxplot.GRanges <- function(data=NULL, which=levels(factor(data$key)), ...) {
+boxplot.GRanges <- function(formula = "value ~ population", data=NULL, which=levels(factor(data$key)), per.site=TRUE, ...) {
     which <- match.arg(which, levels(factor(data$key)), several.ok = TRUE)
     df <- cbind(seqnames = as.character(seqnames(data)), as.data.frame(values(data)))
     df$ranges <- paste(as.character(seqnames(data)), start(data), "-", end(data), ":", sep = " ")
-    boxplot.pg(data=subset(df, key %in% which), ...)
+    y.var <- as.character(as.list(as.formula(formula))[[2]])
+    if (per.site) df[[y.var]] <- df[[y.var]] / width(data)
+    boxplot.pg(formula = formula, data = subset(df, key %in% which), ...)
 }
 ##' @title boxplot.pg.detail
 ##' @describeIn boxplot.pg Make boxplot of detail statistiscs

@@ -4,6 +4,11 @@
 \alias{boxplot.GRanges}
 \title{boxplot.GRanges}
 \usage{
-\method{boxplot}{GRanges}(data = NULL, which = levels(factor(data$key)),
-  ...)
+\method{boxplot}{GRanges}(formula = "value ~ population", data = NULL,
+  which = levels(factor(data$key)), per.site = TRUE, ...)
+}
+\arguments{
+\item{per.site}{normalize statistics to per-site values}
+
+\item{...}{arguments to pass to boxplot.pg}
 }

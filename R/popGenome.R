@@ -149,12 +149,14 @@ setMethod("GStats", "GENOMEList",
     rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
                                 rowRanges = .ranges)
     .cdata <- DataFrame(
-        expand.grid(population = levels(res$population),
-                    statistic = levels(res$key)),
+        expand.grid(
+            statistic = sort(levels(res$key), decreasing = FALSE),
+            population = sort(levels(res$population), decreasing = FALSE)),
         row.names = colnames(rse))
     colData(rse) <- .cdata
     gs <- new("GStats", rse, statistics = statistics)
-    return(gs)
+                                        #return(gs)
+    return (gs)
 })
 
 
@@ -191,6 +193,7 @@ get.segregating.sites <- function(object, ...) {
     return (object@n.segregating.sites)
 }
 
+
 ##' genomewide.stats
 ##'
 ##' Calculate genome wide statistics
@@ -203,9 +206,13 @@ get.segregating.sites <- function(object, ...) {
 ##' @return Updated object
 ##' @author Per Unneberg
 ##' @export
-setGeneric("genomewide.stats", function(object, which=c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage"), biallelic.structure=TRUE, pi=TRUE, ...) standardGeneric("genomewide.stats"))
-##' @describeIn genomewide.stats Calculate genome wide statistics for a GENOME object
-setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
+##' 
+genomewide.stats <- function(object,
+                             which=c("detail", "neutrality", "F_ST",
+                                     "diversity", "diversity.between",
+                                     "fixed.shared", "linkage"),
+                             biallelic.structure=TRUE, pi=TRUE,
+                             ...) {
     which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok = TRUE)
     if ("detail" %in% which) {
         object <- detail.stats(object, biallelic.structure = biallelic.structure, ...)
@@ -238,23 +245,6 @@ setMethod("genomewide.stats", "GENOME", function(object, which, ...) {
         object <- sweeps.stats(object, ...)
     }
     return (object)
-})
-##' summary.GRanges
-##'
-##' Summarize the statistics of a GRanges object
-##' @title summary.GRanges
-##' @param gr GRanges object
-##' @param per.site calculate per site values
-##' @param ... additional arguments
-##' @return a data frame
-##' @author Per Unneberg
-##' @export
-summary.GRanges <- function(gr, per.site=TRUE, fun="mean", ...) {
-    fun <- match.arg(fun, c("mean", "sd"))
-    df <- as.data.frame(gr)
-    if (per.site) df$value <- df$value / width(gr)
-    tab <- tapply(df$value, list(df$population, df$key), fun)
-    as.data.frame(tab)
 }
 
 

@@ -150,7 +150,7 @@ setMethod("GStats", "GENOMEList",
                                 rowRanges = .ranges)
     .cdata <- DataFrame(
         expand.grid(population = levels(res$population),
-                    statistics = levels(res$key)),
+                    statistic = levels(res$key)),
         row.names = colnames(rse))
     colData(rse) <- .cdata
     gs <- new("GStats", rse, statistics = statistics)
@@ -159,23 +159,15 @@ setMethod("GStats", "GENOMEList",
 
 
 
-## Write new functions for each case, and a function for annotating
-## data, as in bioodo
-setGeneric("get.fixed",
-           function(object, which="fixed", ...) standardGeneric("get.fixed"))
-setMethod("get.fixed", "GENOME", function(object, which, ...) {
+get.fixed <- function(object, ...) {
     return (slot(object, "n.fixed.sites"))
-})
+}
 
-setGeneric("get.shared",
-           function(object, which="fixed", ...) standardGeneric("get.shared"))
-setMethod("get.shared", "GENOME", function(object, which, ...) {
+get.shared <- function(object, ...) {
     return (slot(object, "n.shared.sites"))
-})
+}
 
-setGeneric("get.diversity.between",
-           function(object, which="nuc", ...) standardGeneric("get.diversity.between"))
-setMethod("get.diversity.between", "GENOME", function(object, which, ...) {
+get.diversity.between <- function(object, which="nuc", ...) {
     which <- match.arg(which, c("nuc", "hap"))
     slots <- list(nuc = "nuc.diversity.between", hap = "hap.diversity.between")
     df <- slot(object, slots[[which]])
@@ -188,20 +180,16 @@ setMethod("get.diversity.between", "GENOME", function(object, which, ...) {
                             byrow = TRUE), stringsAsFactors = FALSE)
     colnames(df) <- col.names
     return (df)
-})
+}
 
-setGeneric("get.F_ST.pairwise",
-           function(object, ...) standardGeneric("get.F_ST.pairwise"))
-setMethod("get.F_ST.pairwise", "GENOME", function(object, which, ...) {
+get.F_ST.pairwise <- function(object, which, ...) {
     df <- get.F_ST(object, pairwise = TRUE)
     return (df)
-})
+}
 
-setGeneric("get.segregating.sites",
-           function(object, ...) standardGeneric("get.segregating.sites"))
-setMethod("get.segregating.sites", "GENOME", function(object, ...) {
+get.segregating.sites <- function(object, ...) {
     return (object@n.segregating.sites)
-})
+}
 
 ##' genomewide.stats
 ##'

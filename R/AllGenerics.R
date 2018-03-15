@@ -1,7 +1,7 @@
 ##' Create GStats object
 ##'
-##' Retrieve genome stats for 
-##' 
+##' Retrieve genome stats for
+##'
 ##' @param object An R object
 ##' @param statistics statistics to return
 ##' @param use.population.names use population names of object for plotting labels
@@ -13,7 +13,7 @@
 ##'
 ##' @export
 ##' @rdname GStats
-##' 
+##'
 setGeneric("GStats",
            function(object,
                     statistics=character(0),
@@ -34,3 +34,26 @@ setGeneric("GStats",
 ##' @author Per Unneberg
 ##' @export
 setGeneric("GENOMEList", function(obj, ...) standardGeneric("GENOMEList"))
+
+##' Convert object to GRanges
+##'
+##' @export
+setGeneric("asGRanges", function(x, ...) standardGeneric("asGRanges"))
+
+
+## ##' Aggregate statistics over regions
+## ##'
+## ##' Aggregate statistics over regions, where the regions typically are
+## ##' scaffolds or windows. Aggregation is performed over the list of
+## ##' components seqnames, statistic, region start, region
+## ##' end, and region width
+## ##'
+## ##' @param object object
+## ##' @param agg.fun aggregation functions
+## ##' @param ... additional arguments
+## ##' @return GRanges with augmented values
+## ##' @author Per Unneberg
+## ##'
+## ##' @rdname aggregate_region_stats
+## ##' @export
+## setGeneric("aggregate_region_stats", function(object, agg.fun=c("sum", "mean"), ...) standardGeneric("aggregate_region_stats"))

@@ -24,6 +24,22 @@ summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...)
     ret
 }
 
+
+##' Aggregate GStats statistics
+##'
+##' @param x GStats object
+##' @param formula formula
+##' @param FUN function to apply
+##' @param ... additional arguments passed to aggregate
+##'
+##' @export
+##'
+setMethod("aggregate", "GStats", function(x, formula, FUN, per.site=FALSE, ...) {
+    df <- as.data.frame(asGRanges(x, per.site = per.site))
+    res <- aggregate(formula, df, FUN, ...)
+    res
+})
+
 ##' Convert GStats to GRanges
 ##'
 ##' Convert GStats object to GRanges with values filled by data assay
@@ -61,26 +77,3 @@ setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
     }
     gr
 })
-
-## ##' Aggregate statistics over regions in a GStats object
-## ##'
-## ##'
-## ##'
-## ##' @rdname aggregate_region_stats
-## ##' @export
-## setMethod("aggregate_region_stats", "GStats", function(object, agg.fun=c("sum", "mean"), ...) {
-##     agg.res <- do.call("rbind", lapply(agg.fun, function(x) {
-##                                     y <- cbind(aggregate(object$value,
-##                                                          by = list(seqnames = as.factor(seqnames(object)),
-##                                                                    key = as.factor(object$key),
-##                                                                    start = start(object),
-##                                                                    end = end(object),
-##                                                                    width = width(object)), FUN = x, ...), x);
-##                                     colnames(y) <- c("seqnames", "key", "start", "end", "width", "value", "population");
-##                                     y
-##                                 }))
-##     gr <- GRanges(seqnames = agg.res$seqnames,
-##                   ranges = IRanges(agg.res$start, end = agg.res$end), key = agg.res$key,
-##                   value = agg.res$value, population = agg.res$population)
-##     c(object, gr)
-## })

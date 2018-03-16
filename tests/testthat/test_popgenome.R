@@ -92,3 +92,8 @@ test_that("coldata order corresponds to variable order", {
     cdata <- paste(gs$population, gs$statistic, sep="_")
     expect_equal(rownames(colData(gs)), cdata)
 })
+
+test_that("GStats object with wrong slots fail", {
+    gs <- GStats(scaffolds.gl, "detail")
+    expect_error(gs@foo <- "bar")
+})

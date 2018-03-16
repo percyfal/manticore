@@ -5,6 +5,8 @@
 ##' @export
 ##' @rdname GStats-class
 ##'
+##' @import SummarizedExperiment
+##'
 setClass("GStats",
          contains = c("RangedSummarizedExperiment"),
          representation = representation(
@@ -22,7 +24,7 @@ setClass("GStats",
     }
     NULL
 }
-setValidity2("GStats", .valid.GStats)
+setValidity("GStats", .valid.GStats)
 
 ##' List of GENOME instances
 ##'

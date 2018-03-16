@@ -41,23 +41,6 @@ setGeneric("GENOMEList", function(obj, ...) standardGeneric("GENOMEList"))
 setGeneric("asGRanges", function(x, ...) standardGeneric("asGRanges"))
 
 
-## ##' Aggregate statistics over regions
-## ##'
-## ##' Aggregate statistics over regions, where the regions typically are
-## ##' scaffolds or windows. Aggregation is performed over the list of
-## ##' components seqnames, statistic, region start, region
-## ##' end, and region width
-## ##'
-## ##' @param object object
-## ##' @param agg.fun aggregation functions
-## ##' @param ... additional arguments
-## ##' @return GRanges with augmented values
-## ##' @author Per Unneberg
-## ##'
-## ##' @rdname aggregate_region_stats
-## ##' @export
-## setGeneric("aggregate_region_stats", function(object, agg.fun=c("sum", "mean"), ...) standardGeneric("aggregate_region_stats"))
-
 ##' Generic plot function
 ##'
 ##' @export
@@ -74,4 +57,22 @@ setGeneric("gplot",
                     text.size=integer(0), text.x.angle=integer(0),
                     text.x.hjust=integer(0), which=NULL, ...)
     standardGeneric("gplot"),
+    signature="data")
+
+##' Generic boxplot function
+##'
+##' @export
+setGeneric("gboxplot",
+           function(data, formula=character(0),
+                    type=character(0),
+                    xlim=NULL, ylim=NULL, main=NULL,
+                    xlab=NULL, ylab=NULL,
+                    colour=list(), colour.var=character(0),
+                    wrap=FALSE, wrap.formula=chacarter(0),
+                    wrap.ncol=integer(0), compact.facet=TRUE,
+                    strip.position="right", scales="free_y",
+                    hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
+                    text.size=integer(0), text.x.angle=integer(0),
+                    text.x.hjust=integer(0), which=NULL, ...)
+    standardGeneric("gboxplot"),
     signature="data")

@@ -13,8 +13,6 @@
 )
 
 .getOption <- function(application, statistics, key, default) {
-    if (!(application %in% names(.defaults)))
-        return (default)
     if (!(statistics %in% names(.defaults[[application]])))
         return (default)
     if (!(key %in% names(.defaults[[application]][[statistics]])))
@@ -61,7 +59,7 @@ setMethod("gplot", c(data="GStats"),
                    xlim=NULL, ylim=NULL, main=paste(data@statistics, "statistics"),
                    xlab="window", ylab=NULL, size=1,
                    colour=brewer.pal(3, "Dark2"), colour.var="seqnames",
-                   wrap=TRUE, wrap.formula="statistic ~ population",
+                   wrap=TRUE, wrap.formula="",
                    wrap.ncol=1, compact.facet=TRUE,
                    strip.position="right", scales="free_y",
                    hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
@@ -69,7 +67,8 @@ setMethod("gplot", c(data="GStats"),
                    which=NULL, per.site=FALSE,
                    ...) {
     stopifnot(data@application %in% names(.defaults))
-    wrap.formula <- .getOption(data@application, data@statistics, "wrap.formula", wrap.formula)
+    if (wrap.formula == "")
+        wrap.formula <- .getOption(data@application, data@statistics, "wrap.formula", "statistic ~ population")
     which <- .getOption(data@application, data@statistics, "which", which)
     df <- as.data.frame(asGRanges(data, per.site = per.site, long = TRUE))
     which <- match.arg(which, levels(factor(data$statistic)), several.ok = TRUE)

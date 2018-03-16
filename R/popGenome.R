@@ -1,5 +1,12 @@
-##' @describeIn GENOMEList Convert list to GENOMEList
+##' GENOMEList
+##'
+##' Convert list to GENOMEList
+##'
 ##' @export
+##' @rdname GENOMEList
+##'
+##' @importFrom methods new
+##'
 setMethod("GENOMEList", "list",
           function(obj) new("GENOMEList", listData = obj))
 
@@ -17,12 +24,14 @@ setMethod("GENOMEList", "list",
 ##'
 ##' @examples
 ##' library(PopGenome)
-##' # Read a vcf and generate two genome objects
-##' vcf_file <- system.file("extdata", "medium.call.biallelic.vcf.gz", package="nonmodelr")
-##' scaffold1 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold1")
-##' scaffold13 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold13")
-##' gl <- GENOMEList(list(scaffold1=scaffold1, scaffold13=scaffold13))
+##' fn <- system.file("extdata", "popgenome.rda", package = "nonmodelr")
+##' load(fn)
+##' gl <- GENOMEList(scaffolds)
+##' sessionInfo()
 ##' gs <- GStats(gl)
+##'
+##' @importFrom tidyselect one_of
+##' @importFrom utils combn
 ##'
 setMethod("GStats", "GENOMEList",
           function(object,
@@ -126,13 +135,13 @@ setMethod("GStats", "GENOMEList",
     ## Fix factors
     res$seqnames <- factor(res$seqnames, levels = unique(res$seqnames))
     res$ranges <- factor(res$ranges, levels = unique(res$ranges))
-    res <- res %>% gather(gather.key, "value", -one_of(gather.exclude))
+    res <- res %>% tidyr::gather(gather.key, "value", -one_of(gather.exclude))
     colnames(res)[which(colnames(res) == "gather.key")] <- gather.key
     res$population <- factor(res$population, levels = unique(res$population))
     res$key <- factor(res$key, levels = unique(res$key))
 
-    data <- res %>% unite("population_statistics", population, key) %>%
-        spread("population_statistics", value)
+    data <- res %>% tidyr::unite("population_statistics", population, key) %>%
+        tidyr::spread("population_statistics", value)
     ## Parse the start/stop positions; we assume the format "name start - end :"
     data.ranges <- strsplit(as.character(data$ranges), " ")
     if (all(lapply(data.ranges, length) == 5)) {
@@ -143,13 +152,13 @@ setMethod("GStats", "GENOMEList",
         end <- as.integer(unlist(lapply(data$seqnames, function(x) {object[[as.character(x)]]@n.sites})))
     }
     .values <- subset(data, select = -c(ranges, seqnames))
-    .ranges <- GRanges(seqnames = Rle(data$seqnames, rep(1, length(data$seqnames))),
-                       ranges = IRanges(start, end = end),
-                       feature_id = paste(data$seqnames, start, end, ":", sep=" "))
+    .ranges <- GenomicRanges::GRanges(seqnames = S4Vectors::Rle(data$seqnames, rep(1, length(data$seqnames))),
+                                      ranges = IRanges::IRanges(start, end = end),
+                                      feature_id = paste(data$seqnames, start, end, ":", sep = " "))
     .ranges$feature_id <- factor(.ranges$feature_id, levels=unique(.ranges$feature_id))
     rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
                                 rowRanges = .ranges)
-    .cdata <- DataFrame(
+    .cdata <- S4Vectors::DataFrame(
         expand.grid(
             statistic = sort(levels(res$key), decreasing = FALSE),
             population = sort(levels(res$population), decreasing = FALSE)),
@@ -196,6 +205,8 @@ get.segregating.sites <- function(object, ...) {
 
 ##' genomewide.stats
 ##'
+##' @export
+##' @rdname genomewide.stats
 ##'
 setGeneric("genomewide.stats", function(object, which=character(0), biallelic.structure=TRUE,
                                         pi=TRUE, ...) standardGeneric("genomewide.stats"))
@@ -211,6 +222,7 @@ setGeneric("genomewide.stats", function(object, which=character(0), biallelic.st
 ##' @return Updated object
 ##' @author Per Unneberg
 ##' @export
+##' @rdname genomewide.stats
 ##'
 setMethod("genomewide.stats", "GENOME", function(object,
                                                  which=c("detail", "neutrality", "F_ST",

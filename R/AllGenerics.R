@@ -26,24 +26,30 @@ setGeneric("GStats",
 
 ##' GENOMEList
 ##'
-##' Convert objects to GENOMEList
-##' @title GENOMEList
-##' @param obj passed object
+##' @param obj an R object
 ##' @param ... additional arguments
-##' @return GENOMEList instance
-##' @author Per Unneberg
+##'
+##' @rdname GENOMEList
 ##' @export
+##'
 setGeneric("GENOMEList", function(obj, ...) standardGeneric("GENOMEList"))
 
 ##' Convert object to GRanges
 ##'
+##' @param x an R object
+##' @param ... additional arguments
+##'
+##' @rdname asGRanges
 ##' @export
+##'
 setGeneric("asGRanges", function(x, ...) standardGeneric("asGRanges"))
 
 
 ##' Generic plot function
 ##'
 ##' @export
+##' @rdname gplot
+##'
 setGeneric("gplot",
            function(data, x=NULL, y=NULL,
                     type="point",
@@ -62,6 +68,8 @@ setGeneric("gplot",
 ##' Generic boxplot function
 ##'
 ##' @export
+##' @rdname gboxplot
+##'
 setGeneric("gboxplot",
            function(data, formula=character(0),
                     type=character(0),
@@ -71,7 +79,7 @@ setGeneric("gboxplot",
                     wrap=FALSE, wrap.formula=chacarter(0),
                     wrap.ncol=integer(0), compact.facet=TRUE,
                     strip.position="right", scales="free_y",
-                    hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
+                    hide.legend=TRUE, grid=FALSE,
                     text.size=integer(0), text.x.angle=integer(0),
                     text.x.hjust=integer(0), which=NULL, ...)
     standardGeneric("gboxplot"),

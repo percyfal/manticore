@@ -1,7 +1,7 @@
 ##' identify_outliers
 ##'
-##' ientify outliers in a data frame
-##' @title identify_outliers
+##' identify outliers in a data frame
+##' 
 ##' @param data data frame
 ##' @param formula formula to fit
 ##' @param key factor over which to perform fits
@@ -11,6 +11,9 @@
 ##' @return data frame with fitted model values, se, residuals and key
 ##' @author Per Unneberg
 ##' @export
+##'
+##' @importFrom stats predict qt residuals
+##' 
 identify_outliers <- function(data, formula, key=NULL, method="loess", level=0.99, ...) {
     ## See https://stackoverflow.com/questions/33082901/find-points-over-and-under-the-confidence-interval-when-using-geom-stat-geom-s for loess solution
     if (!inherits(data, "data.frame")) data <- as.data.frame(data)

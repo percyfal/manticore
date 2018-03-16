@@ -3,12 +3,15 @@
 ##' Summarize the statistics of a GStats object by regions or
 ##' populations
 ##'
-##' @param gr GRanges object
+##' @param gs GStats object
 ##' @param per.site calculate per site values
+##' @param fun summary function
+##' @param per.region normalize score by window size
 ##' @param ... additional arguments
 ##' @return a data frame
 ##' @author Per Unneberg
 ##' @export
+##'
 summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...) {
     fun <- match.arg(fun, c("mean", "sd", "median", "var"))
     df <- assay(gs)
@@ -19,7 +22,7 @@ summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...)
         colnames(ret) <- levels(gs$statistic)
     } else {
         m <- do.call("rbind", by(t(df), gs$statistic, function(x) {apply(x, 2, fun, ...)}))
-        ret <- as.data.frame(t(m), row.names = rowData(gs)$feature_id)
+        ret <- as.data.frame(t(m), row.names = SummarizedExperiment::rowData(gs)$feature_id)
     }
     ret
 }
@@ -30,6 +33,7 @@ summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...)
 ##' @param x GStats object
 ##' @param formula formula
 ##' @param FUN function to apply
+##' @param per.site normalize window scores by window length
 ##' @param ... additional arguments passed to aggregate
 ##'
 ##' @export
@@ -45,22 +49,23 @@ setMethod("aggregate", "GStats", function(x, formula, FUN, per.site=FALSE, ...) 
 ##' Convert GStats object to GRanges with values filled by data assay
 ##' values
 ##'
-##' @param x GStats object
 ##' @param long return long format
 ##' @param per.site calculate per site statistics (divide by width)
 ##' @return GRanges instance
 ##' @author Per Unneberg
+##'
+##' @rdname asGRanges
 ##' @export
 ##'
 setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
-    gr <- rowRanges(x)
+    gr <- SummarizedExperiment::rowRanges(x)
     y <- as.data.frame(assay(x))
-    colnames(y) <- make.names(rownames(colData(x)))
+    colnames(y) <- make.names(rownames(SummarizedExperiment::colData(x)))
     if (per.site) y <- y / width(x)
     values(gr) <- cbind(as.data.frame(values(gr)), y)
     if (long) {
-        df <- gather(as.data.frame(values(gr)), statistic, value, -"feature_id")
-        i <- match(df$statistic, make.names(rownames(colData(x))))
+        df <- tidyr::gather(as.data.frame(values(gr)), statistic, value, -"feature_id")
+        i <- match(df$statistic, make.names(rownames(SummarizedExperiment::colData(x))))
         if (any(is.na(i)))
             stop("names in long data frame do not match those of rownames(colData(x)); check for special characters in population names")
         n.rep <- nrow(df) / length(gr)

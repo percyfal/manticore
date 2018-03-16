@@ -24,8 +24,10 @@ Imports:
     gridExtra,
     methods,
     RColorBrewer,
-    SummarizedExperiment,
+    SummarizedExperiment (>= 1.6.4),
     GenomicRanges,
+    IRanges,
+    S4Vectors
 Suggests:
     PopGenome,
     testthat,

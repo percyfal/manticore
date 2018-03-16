@@ -24,17 +24,19 @@
 ##'
 ##' Make a box/violin plot of data
 ##'
-##' @param formula a formula, such as y ~ grp
 ##' @param data long format from GStats function
+##' @param formula a formula, such as y ~ grp
+##' @param type plot type, either point or line
+##' @param xlim x limit
+##' @param ylim y limit
+##' @param main plot title
+##' @param xlab x label
+##' @param ylab y label
 ##' @param colour colours to use
 ##' @param colour.var variable to map to colour aestethic
 ##' @param wrap wrap plots
 ##' @param wrap.formula wrap formula
 ##' @param wrap.ncol number of columns in facet wrap
-##' @param type plot type, either point or line
-##' @param xlab x label
-##' @param ylab y label
-##' @param main plot title
 ##' @param compact.facet compact facet representation
 ##' @param strip.position strip position
 ##' @param scales scales
@@ -43,12 +45,19 @@
 ##' @param text.size text size
 ##' @param text.x.angle angle of x tick labels
 ##' @param text.x.hjust horizontal adjustment of x tick labels
-##' @param ... arguments passed on to facet_wrap
-##' @param size plot size
 ##' @param which statistic to plot
+##' @param per.site normalize statistic by window length
+##' @param ... arguments passed on to facet_wrap
+##' 
 ##' @return ggplot object
 ##' @author Per Unneberg
+##' 
 ##' @export
+##' @rdname gboxplot
+##'
+##' @import ggplot2
+##' @importFrom stats as.formula
+##'
 setMethod("gboxplot", "GStats",
           function(data, formula = "value ~ population",
                    type="box",
@@ -65,7 +74,8 @@ setMethod("gboxplot", "GStats",
     stopifnot(data@application %in% names(.defaults))
     if (wrap.formula == "")
         wrap.formula <- .getOption(data@application, data@statistics, "wrap.formula", "~ statistic")
-    which <- .getOption(data@application, data@statistics, "which", which)
+    if (is.null(which))
+        which <- .getOption(data@application, data@statistics, "which", which)
     df <- as.data.frame(asGRanges(data, per.site = per.site, long = TRUE))
     which <- match.arg(which, levels(factor(data$statistic)), several.ok = TRUE)
     df <- subset(df, statistic %in% which)

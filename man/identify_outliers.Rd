@@ -24,10 +24,7 @@ identify_outliers(data, formula, key = NULL, method = "loess",
 data frame with fitted model values, se, residuals and key
 }
 \description{
-identify_outliers
-}
-\details{
-ientify outliers in a data frame
+identify outliers in a data frame
 }
 \author{
 Per Unneberg

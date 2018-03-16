@@ -6,6 +6,7 @@
 ##' @rdname GStats-class
 ##'
 ##' @import SummarizedExperiment
+##' @importFrom methods validObject
 ##'
 setClass("GStats",
          contains = c("RangedSummarizedExperiment"),
@@ -15,11 +16,11 @@ setClass("GStats",
          )
          )
 
-.valid.GStats <- function(x) {
-    if (length(x)) {
-        if (!identical(sort(colnames(colData(x))), sort(c("population", "statistic"))))
+.valid.GStats <- function(object) {
+    if (length(object)) {
+        if (!identical(sort(colnames(colData(object))), sort(c("population", "statistic"))))
             return("colData must be indexed by factors 'population' and 'statistic'")
-        if (!identical(assayNames(x), c("data")))
+        if (!identical(assayNames(object), c("data")))
             return("only one assay ('data') allowed")
     }
     NULL

@@ -10,9 +10,9 @@ scaffolds.gl <- GENOMEList(scaffolds)
 slides.gl <- GENOMEList(slides)
 
 expect_ggplot <- function(gs) {
-    p <- plot(data = gs)
+    p <- gplot(gs)
     eval(bquote(expect_is(p, "ggplot")))
-    p <- boxplot(data = gs)
+    p <- gboxplot(gs)
     eval(bquote(expect_is(p, "ggplot")))
 }
 
@@ -35,23 +35,23 @@ test_that("getting summary data ok", {
 test_that("getting detail data ok", {
     gs <- GStats(scaffolds.gl, "detail")
     expect_gstats(gs)
-    ##expect_ggplot(data, gr)
+    expect_ggplot(gs)
 })
 
 test_that("getting neutrality data ok", {
     gs <- GStats(scaffolds.gl, "neutrality")
     expect_gstats(gs)
-    ##expect_ggplot(data, gr)
+    expect_ggplot(gs)
 })
 
 test_that("getting fixed / shared data ok", {
     gs.fixed <- GStats(scaffolds.gl, "fixed")
     expect_gstats(gs.fixed)
-    ##expect_ggplot(data.fixed, gr.fixed)
+    expect_ggplot(gs.fixed)
 
     gs.shared <- GStats(scaffolds.gl, "shared")
     expect_gstats(gs.shared)
-    ##expect_ggplot(data.shared, gr.shared)
+    expect_ggplot(gs.shared)
 
     expect_false(identical(gs.fixed, gs.shared))
 })
@@ -59,45 +59,36 @@ test_that("getting fixed / shared data ok", {
 test_that("getting segregating sites ok", {
     gs <- GStats(scaffolds.gl, "segregating.sites")
     expect_gstats(gs)
-    ##expect_ggplot(data, gr)
+    expect_ggplot(gs)
 })
 
 test_that("getting diversity data ok", {
     gs <- GStats(scaffolds.gl, "diversity")
     expect_gstats(gs)
-    ##expect_ggplot(data, gr)
+    expect_ggplot(gs)
 })
 
 test_that("getting diversity.between data works", {
     gs <- GStats(scaffolds.gl, "diversity.between")
     expect_gstats(gs)
-    ##expect_ggplot(data, gr)
+    expect_ggplot(gs)
 })
 
 test_that("getting F_ST data works", {
     gs <- GStats(scaffolds.gl, "F_ST")
     expect_gstats(gs)
-    ##expect_ggplot(data, gr)
+    expect_ggplot(gs)
 })
 
 test_that("getting F_ST.pairwise data works", {
     gs <- GStats(scaffolds.gl, "F_ST.pairwise")
     expect_gstats(gs)
-    ##expect_ggplot(data, gr)
+    expect_ggplot(gs)
 })
 
 
 test_that("coldata order corresponds to variable order", {
     gs <- GStats(slides.gl, "detail")
-    cdata <- paste(tmp$population, tmp$statistic, sep="_")
+    cdata <- paste(gs$population, gs$statistic, sep="_")
     expect_equal(rownames(colData(gs)), cdata)
 })
-
-## test_that("aggregate_region_stats",  {
-##     data <- GStats(scaffolds.gl, "segregating.sites")
-##     expect_error(aggregate_region_stats(data))
-##     data.summary <- GStats(scaffolds.gl, "summary", out.format="GRanges")
-##     seqlengths(data) <- subset(data.summary, key=="n.sites")$value
-##     gr <- aggregate_region_stats(data)
-##     expect_is(gr, "GRanges")
-## })

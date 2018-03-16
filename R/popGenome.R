@@ -146,6 +146,7 @@ setMethod("GStats", "GENOMEList",
     .ranges <- GRanges(seqnames = Rle(data$seqnames, rep(1, length(data$seqnames))),
                        ranges = IRanges(start, end = end),
                        feature_id = paste(data$seqnames, start, end, ":", sep=" "))
+    .ranges$feature_id <- factor(.ranges$feature_id, levels=unique(.ranges$feature_id))
     rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
                                 rowRanges = .ranges)
     .cdata <- DataFrame(
@@ -154,7 +155,7 @@ setMethod("GStats", "GENOMEList",
             population = sort(levels(res$population), decreasing = FALSE)),
         row.names = colnames(rse))
     colData(rse) <- .cdata
-    gs <- new("GStats", rse, statistics = statistics)
+    gs <- new("GStats", rse, statistics = statistics, application = "PopGenome")
     return (gs)
 })
 

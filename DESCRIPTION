@@ -23,9 +23,10 @@ Imports:
     tidyselect,
     gridExtra,
     methods,
-    RColorBrewer
-Suggests:
+    RColorBrewer,
+    SummarizedExperiment,
     GenomicRanges,
+Suggests:
     PopGenome,
     testthat,
     vcfR

@@ -8,7 +8,8 @@
 setClass("GStats",
          contains = c("RangedSummarizedExperiment"),
          representation = representation(
-             statistics = "character"
+             statistics = "character",
+             application = "character"
          )
          )
 
@@ -16,6 +17,8 @@ setClass("GStats",
     if (length(x)) {
         if (!identical(sort(colnames(colData(x))), sort(c("population", "statistic"))))
             return("colData must be indexed by factors 'population' and 'statistic'")
+        if (!identical(assayNames(x), c("data")))
+            return("only one assay ('data') allowed")
     }
     NULL
 }

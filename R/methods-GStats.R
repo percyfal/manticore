@@ -24,26 +24,29 @@ summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...)
     ret
 }
 
-setMethod("as.data.frame", "GStats", function(x, long=FALSE, ...) {
-    df <- as.data.frame(assay(x))
-    if (long) {
-        df.long <- gather(df, statistic, value)
-        i <- match(df.long$statistic, rownames(colData(x)))
-        df <- data.frame(seqnames = seqnames(x),
-                         ranges = rowData(x)$feature_id,
-                         value = df.long$value,
-                         population = x$population[i],
-                         statistic = x$statistic[i])
-    }
-    df
-})
-
-setMethod("asGRanges", "GStats", function(x, long=FALSE, ...) {
+##' Convert GStats to GRanges
+##'
+##' Convert GStats object to GRanges with values filled by data assay
+##' values
+##'
+##' @param x GStats object
+##' @param long return long format
+##' @param per.site calculate per site statistics (divide by width)
+##' @return GRanges instance
+##' @author Per Unneberg
+##' @export
+##'
+setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
     gr <- rowRanges(x)
-    values(gr) <- cbind(as.data.frame(values(gr)), assay(gs))
+    y <- as.data.frame(assay(x))
+    colnames(y) <- make.names(rownames(colData(x)))
+    if (per.site) y <- y / width(x)
+    values(gr) <- cbind(as.data.frame(values(gr)), y)
     if (long) {
         df <- gather(as.data.frame(values(gr)), statistic, value, -"feature_id")
-        i <- match(df$statistic, rownames(colData(x)))
+        i <- match(df$statistic, make.names(rownames(colData(x))))
+        if (any(is.na(i)))
+            stop("names in long data frame do not match those of rownames(colData(x)); check for special characters in population names")
         n.rep <- nrow(df) / length(gr)
         gr <- GRanges(
             ranges = IRanges(start = rep(start(gr), n.rep),
@@ -54,7 +57,7 @@ setMethod("asGRanges", "GStats", function(x, long=FALSE, ...) {
             seqlengths = seqlengths(gr))
         values(gr) <- df
         gr$statistic <- x$statistic[i]
-        gr$population <- x$statistic[i]
+        gr$population <- x$population[i]
     }
     gr
 })

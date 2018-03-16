@@ -57,3 +57,21 @@ setGeneric("asGRanges", function(x, ...) standardGeneric("asGRanges"))
 ## ##' @rdname aggregate_region_stats
 ## ##' @export
 ## setGeneric("aggregate_region_stats", function(object, agg.fun=c("sum", "mean"), ...) standardGeneric("aggregate_region_stats"))
+
+##' Generic plot function
+##'
+##' @export
+setGeneric("gplot",
+           function(data, x=NULL, y=NULL,
+                    type="point",
+                    xlim=NULL, ylim=NULL, main=NULL,
+                    xlab=NULL, ylab=NULL, size=integer(0),
+                    colour=list(), colour.var=character(0),
+                    wrap=FALSE, wrap.formula=character(0),
+                    wrap.ncol=integer(0), compact.facet=TRUE,
+                    strip.position="right", scales="free_y",
+                    hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
+                    text.size=integer(0), text.x.angle=integer(0),
+                    text.x.hjust=integer(0), which=NULL, ...)
+    standardGeneric("gplot"),
+    signature="data")

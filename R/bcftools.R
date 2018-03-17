@@ -12,6 +12,9 @@
 ##' @slot IDD indel distribution
 ##' @slot ST substitution types
 ##' @slot DP depth distribution
+##'
+##' @importFrom methods callNextMethod
+##'
 BcftoolsStats<- setClass("BcftoolsStats", slots=c(ID="data.frame", SN="data.frame",
                                                   TSTV="data.frame",
                                                   SiS="data.frame", AF="data.frame",
@@ -34,7 +37,12 @@ setMethod("initialize", "BcftoolsStats", function(.Object, ...) {
 ##' @param label Label to assign object (e.g. sample)
 ##' @return BcftoolsStats object
 ##' @author Per Unneberg
+##'
 ##' @export
+##'
+##' @importFrom methods slot slot<- slotNames
+##' @importFrom utils read.delim
+##'
 setGeneric("readBcftoolsStats", function(filename, label=NULL) {standardGeneric("readBcftoolsStats")})
 
 setMethod("readBcftoolsStats", signature="character", definition=function(filename, label) {
@@ -118,6 +126,9 @@ summary.bcftools.stats <- function(obj) {
 ##' @return ggplot2 object, or a plot
 ##' @author Per Unneberg
 ##' @export
+##'
+##' @import tidyr
+##'
 gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), ncol=2, text.size=12, theme.default=theme_bw(), ...) {
     which <- match.arg(which, c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), several.ok=TRUE)
     message("Producing ", length(which), " plots")
@@ -126,39 +137,39 @@ gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL",
     plist <- list()
     if ("SN" %in% which) {
         data <- obj$SN
-        plist$SN <- ggplot(data = data, aes(y = key, x = value)) + geom_point(...) + ggtitle("Summary numbers")
+        plist$SN <- ggplot(data = data, aes(y = key, x = value)) + geom_point(...) + ggtitle("Summary numbers") + theme(text = element_text(size = text.size))
     }
     if ("TSTV" %in% which) {
         data <- gather(obj$TSTV, key, value, -id)
         tstv <- c("ts.tv", "ts.tv..1st.ALT.")
         plist$TSTV <- arrangeGrob(
-            ggplot(data = subset(data, key %in% tstv), aes(y = key, x = value)) + geom_point(...) + ggtitle("Ti/Tv") ,
-            ggplot(data = subset(data, !(key %in% tstv)), aes(y = key, x = value)) + geom_point(...) + ggtitle("Ti/Tv, counts") ,
+            ggplot(data = subset(data, key %in% tstv), aes(y = key, x = value)) + geom_point(...) + ggtitle("Ti/Tv") + theme(text = element_text(size = text.size)),
+            ggplot(data = subset(data, !(key %in% tstv)), aes(y = key, x = value)) + geom_point(...) + ggtitle("Ti/Tv, counts") + theme(text = element_text(size = text.size)),
             nrow = 2)
     }
     if ("SiS" %in% which) {
         data <- gather(obj$SiS, key, value, -id)
-        plist$SiS <- ggplot(data = data, aes(y = key, x = value)) + geom_point(...) + ggtitle("Singleton stats")
+        plist$SiS <- ggplot(data = data, aes(y = key, x = value)) + geom_point(...) + ggtitle("Singleton stats") + theme(text = element_text(size = text.size))
     }
     if ("AF" %in% which) {
         data <- gather(obj$AF, key, value, -allele.frequency, -id)
-        plist$AF <- ggplot(data = data, aes(x = allele.frequency, y = value, color = key)) + geom_point(...) + ggtitle("Stats non-reference allele frequency")
+        plist$AF <- ggplot(data = data, aes(x = allele.frequency, y = value, color = key)) + geom_point(...) + ggtitle("Stats non-reference allele frequency") + theme(text = element_text(size = text.size))
     }
     if ("QUAL" %in% which) {
         data <- gather(obj$QUAL, key, value, -Quality, -id)
-        plist$QUAL <- ggplot(data = data, aes(x = Quality, y = value, color = key)) + geom_point(...) + ggtitle("Stats by quality")
+        plist$QUAL <- ggplot(data = data, aes(x = Quality, y = value, color = key)) + geom_point(...) + ggtitle("Stats by quality") + theme(text = element_text(size = text.size))
     }
     if ("IDD" %in% which) {
         data <- obj$IDD
-        plist$IDD <- ggplot(data = data, aes(x = length..deletions.negative., y = count)) + geom_point(...) + ggtitle("InDel distribution") + xlab("Length (deletions negative)")
+        plist$IDD <- ggplot(data = data, aes(x = length..deletions.negative., y = count)) + geom_point(...) + ggtitle("InDel distribution") + xlab("Length (deletions negative)") + theme(text = element_text(size = text.size))
     }
     if ("ST" %in% which) {
         data <- obj$ST
-        plist$ST <- ggplot(data = data, aes(x = type, y = count)) + geom_point(...) + ggtitle("Substitution types")
+        plist$ST <- ggplot(data = data, aes(x = type, y = count)) + geom_point(...) + ggtitle("Substitution types") + theme(text = element_text(size = text.size))
     }
     if ("DP" %in% which) {
         data <- gather(obj$DP, key, value, -bin, -id)
-        plist$DP <- ggplot(data = data, aes(x = bin, y = value, color = key)) + geom_point(...) + ggtitle("Depth distribution")
+        plist$DP <- ggplot(data = data, aes(x = bin, y = value, color = key)) + geom_point(...) + ggtitle("Depth distribution") + theme(text = element_text(size = text.size))
     }
 
     if (length(plist) > 1) {

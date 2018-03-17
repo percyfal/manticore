@@ -29,30 +29,39 @@
 ##' @param data GStats object
 ##' @param x variable to map to x aestethic
 ##' @param y variable to map to y aestethic
+##' @param type plot type
+##' @param xlim x limit
+##' @param ylim y limit
+##' @param main plot title
+##' @param xlab x label
+##' @param ylab y label
+##' @param size plot size
 ##' @param colour colours to use
 ##' @param colour.var variable to map to colour aestethic
 ##' @param wrap wrap plots
 ##' @param wrap.formula wrap formula
 ##' @param wrap.ncol number of columns in facet wrap
-##' @param plot.type plot type, either point or line
-##' @param xlab x label
-##' @param ylab y label
-##' @param main plot title
 ##' @param compact.facet compact facet representation
 ##' @param strip.position strip position
 ##' @param scales scales
-##' @param size plot size
 ##' @param hide.legend whether or not to hide legend
 ##' @param hide.xaxis hide x axis tick marks and labels
 ##' @param grid include grid lines
 ##' @param text.size text size
 ##' @param text.x.angle x text angle
 ##' @param text.x.hjust x text horizontal justification
-##' @param ... extra arguments
 ##' @param which statistic to plot
+##' @param per.site plot statistics normalized by window length
+##' @param ... extra arguments
 ##' @return ggplot
 ##' @author Per Unneberg
 ##' @export
+##'
+##' @import ggplot2
+##' @importFrom RColorBrewer brewer.pal
+##'
+##' @describeIn gplot
+##'
 setMethod("gplot", c(data="GStats"),
           function(data, x="feature_id", y="value",
                    type="point",
@@ -69,9 +78,10 @@ setMethod("gplot", c(data="GStats"),
     stopifnot(data@application %in% names(.defaults))
     if (wrap.formula == "")
         wrap.formula <- .getOption(data@application, data@statistics, "wrap.formula", "statistic ~ population")
-    which <- .getOption(data@application, data@statistics, "which", which)
-    df <- as.data.frame(asGRanges(data, per.site = per.site, long = TRUE))
-    which <- match.arg(which, levels(factor(data$statistic)), several.ok = TRUE)
+    if (is.null(which))
+        which <- .getOption(data@application, data@statistics, "which", which)
+    df <- as.data.frame(asGRanges(data, per.site = per.site))
+    which <- match.arg(which, levels(factor(df$statistic)), several.ok = TRUE)
     df <- subset(df, statistic %in% which)
     type <- match.arg(type, c("point", "line"))
     ## Make sure factor is ordered according to order of occurrence if not numeric

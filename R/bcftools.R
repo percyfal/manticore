@@ -12,6 +12,9 @@
 ##' @slot IDD indel distribution
 ##' @slot ST substitution types
 ##' @slot DP depth distribution
+##'
+##' @importFrom methods callNextMethod
+##'
 BcftoolsStats<- setClass("BcftoolsStats", slots=c(ID="data.frame", SN="data.frame",
                                                   TSTV="data.frame",
                                                   SiS="data.frame", AF="data.frame",
@@ -34,7 +37,12 @@ setMethod("initialize", "BcftoolsStats", function(.Object, ...) {
 ##' @param label Label to assign object (e.g. sample)
 ##' @return BcftoolsStats object
 ##' @author Per Unneberg
+##'
 ##' @export
+##'
+##' @importFrom methods slot slot<- slotNames
+##' @importFrom utils read.delim
+##'
 setGeneric("readBcftoolsStats", function(filename, label=NULL) {standardGeneric("readBcftoolsStats")})
 
 setMethod("readBcftoolsStats", signature="character", definition=function(filename, label) {
@@ -118,6 +126,9 @@ summary.bcftools.stats <- function(obj) {
 ##' @return ggplot2 object, or a plot
 ##' @author Per Unneberg
 ##' @export
+##'
+##' @import tidyr
+##'
 gplot.bcftools.stats <- function(obj, which=c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), ncol=2, text.size=12, theme.default=theme_bw(), ...) {
     which <- match.arg(which, c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD", "ST", "DP"), several.ok=TRUE)
     message("Producing ", length(which), " plots")

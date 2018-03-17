@@ -8,11 +8,15 @@
   per.region = FALSE, ...)
 }
 \arguments{
+\item{gs}{GStats object}
+
 \item{per.site}{calculate per site values}
 
-\item{...}{additional arguments}
+\item{fun}{summary function}
 
-\item{gr}{GRanges object}
+\item{per.region}{normalize score by window size}
+
+\item{...}{additional arguments}
 }
 \value{
 a data frame

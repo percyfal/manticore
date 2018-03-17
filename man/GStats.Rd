@@ -39,11 +39,10 @@ but this does not seem to work.
 }
 \examples{
 library(PopGenome)
-# Read a vcf and generate two genome objects
-vcf_file <- system.file("extdata", "medium.call.biallelic.vcf.gz", package="nonmodelr")
-scaffold1 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold1")
-scaffold13 <- readVCF(vcf_file, 1000, frompos=1, topos=1000000, tid="scaffold13")
-gl <- GENOMEList(list(scaffold1=scaffold1, scaffold13=scaffold13))
+fn <- system.file("extdata", "popgenome.rda", package = "nonmodelr")
+load(fn)
+gl <- GENOMEList(scaffolds)
+sessionInfo()
 gs <- GStats(gl)
 
 }

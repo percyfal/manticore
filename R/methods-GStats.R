@@ -57,10 +57,14 @@ setMethod("aggregate", "GStats", function(x, formula, FUN, per.site=FALSE, ...) 
 ##' @rdname asGRanges
 ##' @export
 ##'
+##' @importFrom GenomicRanges GRanges
+##' @importFrom IRanges IRanges
+##' @importFrom S4Vectors values
+##'
 setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
-    gr <- SummarizedExperiment::rowRanges(x)
+    gr <- rowRanges(x)
     y <- as.data.frame(assay(x))
-    colnames(y) <- make.names(rownames(SummarizedExperiment::colData(x)))
+    colnames(y) <- make.names(rownames(colData(x)))
     if (per.site) y <- y / width(x)
     values(gr) <- cbind(as.data.frame(values(gr)), y)
     if (long) {
@@ -74,8 +78,7 @@ setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
                              end = rep(end(gr), n.rep)),
             seqnames = rep(seqnames(gr), n.rep),
             strand = rep(strand(gr), n.rep),
-            seqinfo = seqinfo(gr),
-            seqlengths = seqlengths(gr))
+            seqinfo = seqinfo(gr))
         values(gr) <- df
         gr$statistic <- x$statistic[i]
         gr$population <- x$population[i]

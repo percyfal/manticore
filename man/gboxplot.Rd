@@ -10,8 +10,8 @@ gboxplot(data, formula = character(0), type = character(0), xlim = NULL,
   ylim = NULL, main = NULL, xlab = NULL, ylab = NULL, colour = list(),
   colour.var = character(0), wrap = FALSE, wrap.formula = chacarter(0),
   wrap.ncol = integer(0), compact.facet = TRUE, strip.position = "right",
-  scales = "free_y", hide.legend = TRUE, hide.xaxis = TRUE,
-  grid = FALSE, text.size = integer(0), text.x.angle = integer(0),
+  scales = "free_y", hide.legend = TRUE, grid = FALSE,
+  text.size = integer(0), text.x.angle = integer(0),
   text.x.hjust = integer(0), which = NULL, ...)
 
 \S4method{gboxplot}{GStats}(data, formula = "value ~ population",

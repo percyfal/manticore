@@ -18,8 +18,6 @@ asGRanges(x, ...)
 \item{long}{return long format}
 
 \item{per.site}{calculate per site statistics (divide by width)}
-
-\item{x}{GStats object}
 }
 \value{
 GRanges instance

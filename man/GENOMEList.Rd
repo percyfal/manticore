@@ -14,8 +14,6 @@ GENOMEList(obj, ...)
 \item{obj}{an R object}
 
 \item{...}{additional arguments}
-
-\item{obj}{list}
 }
 \description{
 GENOMEList

@@ -15,8 +15,8 @@ slides.gl <- GENOMEList(slides)
 expect_ggplot <- function(gs) {
     p <- gplot(gs)
     eval(bquote(expect_is(p, "ggplot")))
-    ## p <- gboxplot(gs)
-    ## eval(bquote(expect_is(p, "ggplot")))
+    p <- gboxplot(gs)
+    eval(bquote(expect_is(p, "ggplot")))
 }
 
 expect_gstats <- function(gs, r.width=c(340000, 10000)) {

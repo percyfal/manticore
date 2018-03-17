@@ -48,15 +48,16 @@
 ##' @param which statistic to plot
 ##' @param per.site normalize statistic by window length
 ##' @param ... arguments passed on to facet_wrap
-##' 
+##'
 ##' @return ggplot object
 ##' @author Per Unneberg
-##' 
+##'
 ##' @export
 ##' @rdname gboxplot
 ##'
 ##' @import ggplot2
 ##' @importFrom stats as.formula
+##' @importFrom RColorBrewer brewer.pal
 ##'
 setMethod("gboxplot", "GStats",
           function(data, formula = "value ~ population",
@@ -76,8 +77,8 @@ setMethod("gboxplot", "GStats",
         wrap.formula <- .getOption(data@application, data@statistics, "wrap.formula", "~ statistic")
     if (is.null(which))
         which <- .getOption(data@application, data@statistics, "which", which)
-    df <- as.data.frame(asGRanges(data, per.site = per.site, long = TRUE))
-    which <- match.arg(which, levels(factor(data$statistic)), several.ok = TRUE)
+    df <- as.data.frame(asGRanges(data, per.site = per.site))
+    which <- match.arg(which, levels(factor(df$statistic)), several.ok = TRUE)
     df <- subset(df, statistic %in% which)
     type <- match.arg(type, c("box", "violin"))
     y.var <- as.character(as.list(as.formula(formula))[[2]])

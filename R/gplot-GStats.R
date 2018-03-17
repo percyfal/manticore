@@ -58,6 +58,7 @@
 ##' @export
 ##'
 ##' @import ggplot2
+##' @importFrom RColorBrewer brewer.pal
 ##'
 ##' @describeIn gplot
 ##'
@@ -79,8 +80,8 @@ setMethod("gplot", c(data="GStats"),
         wrap.formula <- .getOption(data@application, data@statistics, "wrap.formula", "statistic ~ population")
     if (is.null(which))
         which <- .getOption(data@application, data@statistics, "which", which)
-    df <- as.data.frame(asGRanges(data, per.site = per.site, long = TRUE))
-    which <- match.arg(which, levels(factor(data$statistic)), several.ok = TRUE)
+    df <- as.data.frame(asGRanges(data, per.site = per.site))
+    which <- match.arg(which, levels(factor(df$statistic)), several.ok = TRUE)
     df <- subset(df, statistic %in% which)
     type <- match.arg(type, c("point", "line"))
     ## Make sure factor is ordered according to order of occurrence if not numeric

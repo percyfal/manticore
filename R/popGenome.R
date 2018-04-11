@@ -231,35 +231,52 @@ setMethod("genomewide.stats", "GENOME", function(object,
                                                  biallelic.structure=TRUE, pi=TRUE,
                                                  ...) {
     which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok = TRUE)
+
+    functions <- list(detail = detail.stats, neutrality = neutrality.stats, F_ST = F_ST.stats,
+                      diversity = diversity.stats, diversity.between = diversity.stats.between,
+                      fixed.shared = calc.fixed.shared, linkage = linkage.stats, R2 = calc.R2,
+                      recomb = recomb.stats, sweeps = sweeps.stats)
+
+    call.genomewide.stats.function <- function(object, fn, ...) {
+        message(paste0("\napplying analysis ", fn))
+        object <- tryCatch({
+            object <- functions[[fn]](object, ...)
+        }, error = function(err) {
+            message(paste0("\nFailed to apply analysis ", fn))
+            message(err)
+            return(object)
+        })
+        object
+    }
     if ("detail" %in% which) {
-        object <- detail.stats(object, biallelic.structure = biallelic.structure, ...)
+        object <- call.genomewide.stats.function(object, "detail", biallelic.structure = biallelic.structure, ...)
     }
     if ("neutrality" %in% which) {
-        object <- neutrality.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "neutrality", ...)
     }
     if ("F_ST" %in% which) {
-        object <- F_ST.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "F_ST", ...)
     }
     if ("diversity" %in% which) {
-        object <- diversity.stats(object, pi = pi, ...)
+        object <- call.genomewide.stats.function(object, "diversity", pi = pi, ...)
     }
     if ("diversity.between" %in% which) {
-        object <- diversity.stats.between(object, ...)
+        object <- call.genomewide.stats.function(object, "diversity.between", ...)
     }
     if ("fixed.shared" %in% which) {
-        object <- calc.fixed.shared(object, ...)
+        object <- call.genomewide.stats.function(object, "fixed.shared", ...)
     }
     if ("linkage" %in% which) {
-        object <- linkage.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "linkage", ...)
     }
     if ("R2" %in% which) {
-        object <- calc.R2(object, ...)
+        object <- call.genomewide.stats.function(object, "R2", ...)
     }
     if ("recomb" %in% which) {
-        object <- recomb.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "recomb", ...)
     }
     if ("sweeps" %in% which) {
-        object <- sweeps.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "sweeps", ...)
     }
     return (object)
 })

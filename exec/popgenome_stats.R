@@ -79,7 +79,7 @@ load_data <- function(scaffold) {
         return (NA)
     })
     sink()
-    if (!is.na(vcf)) {
+    if (inherits(vcf, "GENOME")) {
         vcf@region.names <- as.character(scaffold)
         vcf <- set.populations(vcf, populations.list, diploid = TRUE)
     }
@@ -116,13 +116,16 @@ if (opt$cpus > 1) {
 }
 
 ## Concatenate data if more than one
+message("Setting GENOME.class from GENOME.classes, length ",
+        length(GENOME.classes))
 if (length(GENOME.classes) > 1) {
     message("Concatenate data")
     GENOME.class <- concatenate.classes(GENOME.classes)
 } else {
     GENOME.class <- GENOME.classes[[1]]
 }
-if (!is.na(GENOME.class)) {
+
+if (inherits(GENOME.class, "GENOME")) {
     message("Setting populations on big class: ", toString(populations.list))
     GENOME.class <- set.populations(GENOME.class, populations.list, diploid = TRUE)
     message("\nCalculating stats for GENOME.class")

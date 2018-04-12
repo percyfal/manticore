@@ -227,7 +227,7 @@ setGeneric("genomewide.stats", function(object, which=character(0), biallelic.st
 setMethod("genomewide.stats", "GENOME", function(object,
                                                  which=c("detail", "neutrality", "F_ST",
                                                          "diversity", "diversity.between",
-                                                         "fixed.shared", "linkage"),
+                                                         "fixed.shared"),
                                                  biallelic.structure=TRUE, pi=TRUE,
                                                  ...) {
     which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok = TRUE)

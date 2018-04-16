@@ -66,9 +66,10 @@ setMethod("gplot", c(data="GStats"),
           function(data, x="feature_id", y="value",
                    type="point",
                    xlim=NULL, ylim=NULL, main=paste(data@statistics, "statistics"),
-                   xlab="window", ylab=NULL, size=1,
+                   xlab="bp", ylab=NULL, size=1,
                    colour=brewer.pal(3, "Dark2"), colour.var="seqnames",
                    wrap=TRUE, wrap.formula="",
+                   pos="coordinate",
                    wrap.ncol=1, compact.facet=TRUE,
                    strip.position="right", scales="free_y",
                    hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
@@ -88,6 +89,15 @@ setMethod("gplot", c(data="GStats"),
     if (!is.numeric(df[[x]])) {
         if (!is.factor(df[[x]])) df[[x]] <- factor(df[[x]], levels = unique(df[[x]]))
     }
+    ## Convert to superscaffold coordinates
+    pos <- match.arg(pos, c("coordinate", "index"))
+    if (pos == "coordinate") {
+        w0 <- width(rowRanges(data))[1]
+        df$pos <- cumsum(width(rowRanges(data))) - w0 + 1 + width(rowRanges(data)) / 2
+        x <- "pos"
+    } else {
+        xlab <- "window"
+    }
     p <- ggplot(df, aes_string(x = x, y = y, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (type == "point") {
@@ -98,7 +108,7 @@ setMethod("gplot", c(data="GStats"),
     if (!is.null(xlab)) p <- p + xlab(xlab)
     if (!is.null(ylab)) p <- p + ylab(ylab)
     if (!is.null(main)) {
-        if (per.site) main <- paste0(main, " (per site)")
+        if (per.site) main <- paste0(main, " (per kb)")
         p <- p + ggtitle(main)
     }
     if (compact.facet) {

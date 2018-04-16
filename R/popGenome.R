@@ -11,6 +11,18 @@ setMethod("GENOMEList", "list",
           function(obj) new("GENOMEList", listData = obj))
 
 
+##' GRanges_OR_NULL
+##'
+##' Create class union of GRanges or NULL
+##'
+##' @export
+##' @rdname GRanges_OR_missing
+##'
+##' @importFrom methods setClassUnion
+##' @importFrom GenomicRanges GRanges
+##'
+setClassUnion("GRanges_OR_missing", c("GRanges", "missing"))
+
 
 ##'
 ##' Retrieve genome stats for a PopGenome GENOME instance. Note that

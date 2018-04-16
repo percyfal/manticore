@@ -15,7 +15,7 @@
 summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...) {
     fun <- match.arg(fun, c("mean", "sd", "median", "var"))
     df <- assay(gs)
-    if (per.site) df <- df / width(gs)
+    if (per.site) df <- df / rowRanges(gs)$sites
     if (!per.region) {
         m <- matrix(apply(df, 2, fun, ...), ncol = length(levels(gs$statistic)))
         ret <- as.data.frame(m, row.names = levels(gs$population))
@@ -65,7 +65,7 @@ setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
     gr <- rowRanges(x)
     y <- as.data.frame(assay(x))
     colnames(y) <- make.names(rownames(colData(x)))
-    if (per.site) y <- y / width(x)
+    if (per.site) y <- y / rowRanges(x)$sites
     values(gr) <- cbind(as.data.frame(values(gr)), y)
     if (long) {
         df <- tidyr::gather(as.data.frame(values(gr)), statistic, value, - c("feature_id", "sites"))

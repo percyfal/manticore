@@ -98,7 +98,7 @@ setMethod("gplot", c(data="GStats"),
     if (!is.null(xlab)) p <- p + xlab(xlab)
     if (!is.null(ylab)) p <- p + ylab(ylab)
     if (!is.null(main)) {
-        if (per.site) main <- paste0(main, " (per site)")
+        if (per.site) main <- paste0(main, " (per kb)")
         p <- p + ggtitle(main)
     }
     if (compact.facet) {

@@ -45,8 +45,9 @@ setClassUnion("GRanges_OR_missing", c("GRanges", "missing"))
 ##' @importFrom tidyselect one_of
 ##' @importFrom utils combn
 ##'
-setMethod("GStats", "GENOMEList",
+setMethod("GStats", signature(object = "GENOMEList", gr = "GRanges_OR_missing"),
           function(object,
+                   gr=NULL,
                    statistics=c("detail"),
                    use.population.names=TRUE,
                    use.region.names=TRUE,
@@ -80,7 +81,7 @@ setMethod("GStats", "GENOMEList",
             if (use.population.names) {
                 rownames(tmp) <- populations
             }
-            tmp <- do.call("rbind", lapply(rownames(tmp), function(x){data.frame(population = x, ranges = rownames(tmp[x,][[1]]), tmp[x,][[1]])}))
+            tmp <- do.call("rbind", lapply(rownames(tmp), function(x){data.frame(population = x, ranges = rownames(tmp[x, ][[1]]), tmp[x, ][[1]])}))
             tmp$seqnames <- name
             rownames(tmp) <- NULL
             gather.exclude <- c("population", "ranges", "seqnames")
@@ -166,8 +167,15 @@ setMethod("GStats", "GENOMEList",
     .values <- subset(data, select = -c(ranges, seqnames))
     .ranges <- GenomicRanges::GRanges(seqnames = S4Vectors::Rle(data$seqnames, rep(1, length(data$seqnames))),
                                       ranges = IRanges::IRanges(start, end = end),
-                                      feature_id = paste(data$seqnames, start, end, ":", sep = " "))
-    .ranges$feature_id <- factor(.ranges$feature_id, levels=unique(.ranges$feature_id))
+                                      feature_id = paste(data$seqnames, start, end, ":", sep = " "),
+                                      sites = 0)
+    .ranges$feature_id <- factor(.ranges$feature_id, levels = unique(.ranges$feature_id))
+    if (is.null(gr)) {
+        .ranges$sites <- width(.ranges)
+    } else {
+        foo <- lapply(.ranges, function(x, gr) {GenomicRanges::intersect(x, gr)}, gr)
+        .ranges$sites <- as.vector(unlist(lapply(.ranges, function(x, gr) {sum(width(GenomicRanges::intersect(x, gr)))}, gr)))
+    }
     rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
                                 rowRanges = .ranges)
     .cdata <- S4Vectors::DataFrame(
@@ -179,7 +187,6 @@ setMethod("GStats", "GENOMEList",
     gs <- new("GStats", rse, statistics = statistics, application = "PopGenome")
     return (gs)
 })
-
 
 ## No need to make these generic; they are not exported
 get.fixed <- function(object, ...) {

@@ -19,7 +19,7 @@ spec <- matrix(
       "scaffold"     , "s", 1, "character",
       "vcf"          , "v", 1, "character",
       "gff"          , "a", 1, "character",
-      "sampleinfo"   , "p", 1, "character",
+      "metadata"     , "m", 1, "character",
       "windowsize"   , "w", 2, "integer",
       "wdir"         , "d", 2, "character",
       "outfile"      , "o", 2, "character",
@@ -58,7 +58,23 @@ if (opt$cpus > 1) {
     library("parallel")
 }
 
+# Get length of scaffold
 ln <- as.numeric(gsub(">", "", gsub(".*length=", "", system(paste0("bcftools view -h ", opt$vcf, " | grep \"ID=", opt$scaffold, ",\""), intern=TRUE))))
+
+# Get samples present in vcf
+samples <- system(paste0("bcftools query -l ", opt$vcf), intern=TRUE)
+
+## Read sample metadata file and group samples by population
+message("Reading sample metadata file ", opt$metadata)
+metadata.df <- read.csv(opt$metadata, stringsAsFactors = FALSE)
+metadata.df <- subset(metadata.df, SM %in% samples)
+if (!("POOL" %in% colnames(metadata.df)))
+    metadata.df$POOL <- FALSE
+
+metadata.list <- as.list(subset(metadata.df, POOL == "False")[, c("SM", "POP")] %>% mutate(i=unlist(lapply(as.list(table(POP)), seq))) %>% spread(POP, SM) %>% select(-i))
+populations.list <- lapply(names(metadata.list), function(x){as.vector(na.omit(metadata.list[[x]]))})
+names(populations.list) <- names(metadata.list)
+
 
 load_data <- function(scaffold) {
     message(paste("\nloading scaffold ", scaffold))
@@ -85,16 +101,6 @@ load_data <- function(scaffold) {
     }
     vcf
 }
-
-## Read sampleinfo file and group samples by population
-message("Reading sampleinfo file ", opt$sampleinfo)
-sampleinfo.df <- read.csv(opt$sampleinfo, stringsAsFactors = FALSE)
-if (!("POOL" %in% colnames(sampleinfo.df)))
-    sampleinfo.df$POOL <- FALSE
-
-sampleinfo.list <- as.list(unique(subset(sampleinfo.df, POOL == "False")[, c("SM", "POP")]) %>% mutate(i=unlist(lapply(as.list(table(POP)), seq))) %>% spread(POP, SM) %>% select(-i))
-populations.list <- lapply(names(sampleinfo.list), function(x){as.vector(na.omit(sampleinfo.list[[x]]))})
-names(populations.list) <- names(sampleinfo.list)
 
 ## Read gff file
 message("Reading annotation file ", opt$gff)

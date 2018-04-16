@@ -68,7 +68,7 @@ setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
     if (per.site) y <- y / width(x)
     values(gr) <- cbind(as.data.frame(values(gr)), y)
     if (long) {
-        df <- tidyr::gather(as.data.frame(values(gr)), statistic, value, -"feature_id")
+        df <- tidyr::gather(as.data.frame(values(gr)), statistic, value, - c("feature_id", "sites"))
         i <- match(df$statistic, make.names(rownames(SummarizedExperiment::colData(x))))
         if (any(is.na(i)))
             stop("names in long data frame do not match those of rownames(colData(x)); check for special characters in population names")

@@ -64,7 +64,8 @@ setGeneric("gplot",
                     strip.position="right", scales="free_y",
                     hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
                     text.size=integer(0), text.x.angle=integer(0),
-                    text.x.hjust=integer(0), which=NULL, ...)
+                    text.x.hjust=integer(0), which=NULL, per.site=FALSE,
+                    zscore=FALSE, ...)
     standardGeneric("gplot"),
     signature="data")
 

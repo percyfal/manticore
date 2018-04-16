@@ -52,6 +52,7 @@
 ##' @param text.x.hjust x text horizontal justification
 ##' @param which statistic to plot
 ##' @param per.site plot statistics normalized by window length
+##' @param zscore Plot Z-scores
 ##' @param ... extra arguments
 ##' @return ggplot
 ##' @author Per Unneberg
@@ -74,7 +75,7 @@ setMethod("gplot", c(data="GStats"),
                    strip.position="right", scales="free_y",
                    hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
                    text.size=14, text.x.angle=45, text.x.hjust=1,
-                   which=NULL, per.site=FALSE,
+                   which=NULL, per.site=FALSE, zscore=FALSE,
                    ...) {
     stopifnot(data@application %in% names(.defaults))
     if (wrap.formula == "")
@@ -98,6 +99,8 @@ setMethod("gplot", c(data="GStats"),
     } else {
         xlab <- "window"
     }
+    ## By default scale by statistic
+    if (zscore) df[[y]] <- unlist(tapply(df[[y]], df$statistic, scale))
     p <- ggplot(df, aes_string(x = x, y = y, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (type == "point") {

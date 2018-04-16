@@ -4,7 +4,7 @@
 ##' populations
 ##'
 ##' @param gs GStats object
-##' @param per.site calculate per site values
+##' @param per.site calculate per site values (kb)
 ##' @param fun summary function
 ##' @param per.region normalize score by window size
 ##' @param ... additional arguments
@@ -15,7 +15,7 @@
 summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...) {
     fun <- match.arg(fun, c("mean", "sd", "median", "var"))
     df <- assay(gs)
-    if (per.site) df <- df / rowRanges(gs)$sites
+    if (per.site) df <- df / rowRanges(gs)$sites * 1000
     if (!per.region) {
         m <- matrix(apply(df, 2, fun, ...), ncol = length(levels(gs$statistic)))
         ret <- as.data.frame(m, row.names = levels(gs$population))
@@ -33,7 +33,7 @@ summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...)
 ##' @param x GStats object
 ##' @param formula formula
 ##' @param FUN function to apply
-##' @param per.site normalize window scores by window length
+##' @param per.site normalize window scores by window length (kb)
 ##' @param ... additional arguments passed to aggregate
 ##'
 ##' @export
@@ -50,7 +50,7 @@ setMethod("aggregate", "GStats", function(x, formula, FUN, per.site=FALSE, ...) 
 ##' values
 ##'
 ##' @param long return long format
-##' @param per.site calculate per site statistics (divide by width)
+##' @param per.site calculate per site statistics (divide by width) per kb
 ##' @return GRanges instance
 ##' @author Per Unneberg
 ##'
@@ -65,7 +65,7 @@ setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
     gr <- rowRanges(x)
     y <- as.data.frame(assay(x))
     colnames(y) <- make.names(rownames(colData(x)))
-    if (per.site) y <- y / rowRanges(x)$sites
+    if (per.site) y <- y / rowRanges(x)$sites * 1000
     values(gr) <- cbind(as.data.frame(values(gr)), y)
     if (long) {
         df <- tidyr::gather(as.data.frame(values(gr)), statistic, value, - c("feature_id", "sites"))

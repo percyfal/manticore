@@ -12,17 +12,22 @@
 ##' @author Per Unneberg
 ##' @export
 ##'
-summary.GStats <- function(gs, per.site=TRUE, fun="mean", per.region=FALSE, ...) {
+summary.GStats <- function(gs, per.site=FALSE, fun="mean", per.region=FALSE, ...) {
     fun <- match.arg(fun, c("mean", "sd", "median", "var"))
     df <- assay(gs)
-    if (per.site) df <- df / rowRanges(gs)$sites * 1000
+    if (per.site) {
+        df <- df / rowRanges(gs)$sites
+    }
+    df[is.infinite(df)] <- NA
+    df[is.nan(as.matrix(df))] <- NA
     if (!per.region) {
-        m <- matrix(apply(df, 2, fun, ...), ncol = length(levels(gs$statistic)))
-        ret <- as.data.frame(m, row.names = levels(gs$population))
+        m <- matrix(apply(df, 2, fun, ...), nrow = length(levels(gs$population)), byrow = TRUE)
+        ret <- as.data.frame(m)
+        rownames(ret) <- levels(gs$population)
         colnames(ret) <- levels(gs$statistic)
     } else {
         m <- do.call("rbind", by(t(df), gs$statistic, function(x) {apply(x, 2, fun, ...)}))
-        ret <- as.data.frame(t(m), row.names = SummarizedExperiment::rowData(gs)$feature_id)
+        ret <- as.data.frame(t(m), row.names = as.character(SummarizedExperiment::rowData(gs)$feature_id))
     }
     ret
 }
@@ -65,10 +70,15 @@ setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
     gr <- rowRanges(x)
     y <- as.data.frame(assay(x))
     colnames(y) <- make.names(rownames(colData(x)))
-    if (per.site) y <- y / rowRanges(x)$sites * 1000
+    if (per.site) {
+        y <- y / rowRanges(x)$sites * 1000
+        y[is.infinite(y)] <- NA
+        y[is.nan(y)] <- NA
+    }
     values(gr) <- cbind(as.data.frame(values(gr)), y)
     if (long) {
-        df <- tidyr::gather(as.data.frame(values(gr)), statistic, value, - c("feature_id", "sites"))
+        exclude <- names(elementMetadata(rowRanges(x)))
+        df <- tidyr::gather(as.data.frame(values(gr)), statistic, value, - exclude)
         i <- match(df$statistic, make.names(rownames(SummarizedExperiment::colData(x))))
         if (any(is.na(i)))
             stop("names in long data frame do not match those of rownames(colData(x)); check for special characters in population names")

@@ -16,7 +16,9 @@ summary.GStats <- function(gs, per.site=FALSE, fun="mean", per.region=FALSE, ...
     fun <- match.arg(fun, c("mean", "sd", "median", "var"))
     df <- assay(gs)
     if (per.site) {
-        df <- df / rowRanges(gs)$sites
+        sites <- rowRanges(gs)$sites
+        sites[sites == 0] <- NA
+        df <- df / sites
     }
     df[is.infinite(df)] <- NA
     df[is.nan(as.matrix(df))] <- NA
@@ -68,13 +70,15 @@ setMethod("aggregate", "GStats", function(x, formula, FUN, per.site=FALSE, ...) 
 ##'
 setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
     gr <- rowRanges(x)
-    y <- as.data.frame(assay(x))
-    colnames(y) <- make.names(rownames(colData(x)))
+    y <- assay(x)
     if (per.site) {
-        y <- y / rowRanges(x)$sites * 1000
-        y[is.infinite(y)] <- NA
-        y[is.nan(y)] <- NA
+        sites <- rowRanges(x)$sites
+        y <- y / sites
     }
+    y[is.infinite(y)] <- NA
+    y[is.nan(y)] <- NA
+    y <- as.data.frame(y)
+    colnames(y) <- make.names(rownames(colData(x)))
     values(gr) <- cbind(as.data.frame(values(gr)), y)
     if (long) {
         exclude <- names(elementMetadata(rowRanges(x)))

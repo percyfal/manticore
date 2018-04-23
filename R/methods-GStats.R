@@ -99,3 +99,30 @@ setMethod("asGRanges", "GStats", function(x, long=TRUE, per.site=FALSE) {
     }
     gr
 })
+
+
+##' Create GStats from GRanges object
+##'
+##' @export
+##'
+##' @importFrom S4Vectors Rle
+setMethod("GStats", signature(object = "GRanges"),
+          function(object,
+                   population,
+                   statistics,
+                   application=NA,
+                   ...) {
+    .values <- values(object)
+    .ranges <- GRanges(seqnames=seqnames(object), ranges=ranges(object), feature_id = paste(seqnames(object), start(object), end(object), ":", sep=" "), sites=0)
+    .ranges$feature_id <- factor(.ranges$feature_id, levels = unique(.ranges$feature_id))
+    rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
+                                rowRanges = .ranges)
+    .cdata <- S4Vectors::DataFrame(
+                             expand.grid(
+                                 statistic = sort(levels(factor(statistics)), decreasing = FALSE),
+                                 population = sort(levels(factor(population)), decreasing = FALSE)),
+                             row.names = colnames(rse))
+    colData(rse) <- .cdata
+    gs <- new("GStats", rse, statistics = statistics, application = application)
+    return (gs)
+})

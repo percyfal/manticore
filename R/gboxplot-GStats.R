@@ -13,6 +13,8 @@
 )
 
 .getOption <- function(application, statistics, key, default) {
+    if (is.na(application))
+        return (default)
     if (!(statistics %in% names(.defaults[[application]])))
         return (default)
     if (!(key %in% names(.defaults[[application]][[statistics]])))
@@ -72,7 +74,6 @@ setMethod("gboxplot", "GStats",
                    text.size=14, text.x.angle=45, text.x.hjust=1,
                    which=NULL, per.site=FALSE,
                    ...) {
-    stopifnot(data@application %in% names(.defaults))
     if (wrap.formula == "")
         wrap.formula <- .getOption(data@application, data@statistics, "wrap.formula", "~ statistic")
     if (is.null(which))

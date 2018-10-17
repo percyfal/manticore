@@ -1,3 +1,22 @@
+nonmodelr v0.0.0.9005 (Release date: 2018-10-17)
+=================================================
+
+Add genome_stats script
+Normalize windows by rowRanges()$sites
+Add zscore parameter
+
+
+nonmodelr v0.0.0.9004 (Release date: 2018-04-10)
+=================================================
+
+Add import of SummarizedExperiment.
+Add aggregate function
+Add asGRanges conversion function
+Represent genomewide data as RangedSummarizedExperiment
+Add GStats plot method
+Add gboxplot
+
+
 nonmodelr v0.0.0.9003 (Release date: 2018-03-13)
 =================================================
 

@@ -11,6 +11,18 @@ setMethod("GENOMEList", "list",
           function(obj) new("GENOMEList", listData = obj))
 
 
+##' GRanges_OR_NULL
+##'
+##' Create class union of GRanges or NULL
+##'
+##' @export
+##' @rdname GRanges_OR_missing
+##'
+##' @importFrom methods setClassUnion
+##' @importFrom GenomicRanges GRanges
+##'
+setClassUnion("GRanges_OR_missing", c("GRanges", "missing"))
+
 
 ##'
 ##' Retrieve genome stats for a PopGenome GENOME instance. Note that
@@ -33,8 +45,9 @@ setMethod("GENOMEList", "list",
 ##' @importFrom tidyselect one_of
 ##' @importFrom utils combn
 ##'
-setMethod("GStats", "GENOMEList",
+setMethod("GStats", signature(object = "GENOMEList", gr = "GRanges_OR_missing"),
           function(object,
+                   gr=NULL,
                    statistics=c("detail"),
                    use.population.names=TRUE,
                    use.region.names=TRUE,
@@ -68,7 +81,7 @@ setMethod("GStats", "GENOMEList",
             if (use.population.names) {
                 rownames(tmp) <- populations
             }
-            tmp <- do.call("rbind", lapply(rownames(tmp), function(x){data.frame(population = x, ranges = rownames(tmp[x,][[1]]), tmp[x,][[1]])}))
+            tmp <- do.call("rbind", lapply(rownames(tmp), function(x){data.frame(population = x, ranges = rownames(tmp[x, ][[1]]), tmp[x, ][[1]])}))
             tmp$seqnames <- name
             rownames(tmp) <- NULL
             gather.exclude <- c("population", "ranges", "seqnames")
@@ -154,8 +167,14 @@ setMethod("GStats", "GENOMEList",
     .values <- subset(data, select = -c(ranges, seqnames))
     .ranges <- GenomicRanges::GRanges(seqnames = S4Vectors::Rle(data$seqnames, rep(1, length(data$seqnames))),
                                       ranges = IRanges::IRanges(start, end = end),
-                                      feature_id = paste(data$seqnames, start, end, ":", sep = " "))
-    .ranges$feature_id <- factor(.ranges$feature_id, levels=unique(.ranges$feature_id))
+                                      feature_id = paste(data$seqnames, start, end, ":", sep = " "),
+                                      sites = 0)
+    .ranges$feature_id <- factor(.ranges$feature_id, levels = unique(.ranges$feature_id))
+    if (is.null(gr)) {
+        .ranges$sites <- width(.ranges)
+    } else {
+        .ranges$sites <- as.vector(unlist(lapply(.ranges, function(x) {scf <- unique(as.character(seqnames(x))); grsub <- gr[as.logical(seqnames(gr) == scf) & start(gr) >= start(x) & end(gr) <= end(x), ]; sum(width(GenomicRanges::intersect(x, grsub)))})))
+    }
     rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
                                 rowRanges = .ranges)
     .cdata <- S4Vectors::DataFrame(
@@ -167,7 +186,6 @@ setMethod("GStats", "GENOMEList",
     gs <- new("GStats", rse, statistics = statistics, application = "PopGenome")
     return (gs)
 })
-
 
 ## No need to make these generic; they are not exported
 get.fixed <- function(object, ...) {
@@ -227,39 +245,56 @@ setGeneric("genomewide.stats", function(object, which=character(0), biallelic.st
 setMethod("genomewide.stats", "GENOME", function(object,
                                                  which=c("detail", "neutrality", "F_ST",
                                                          "diversity", "diversity.between",
-                                                         "fixed.shared", "linkage"),
+                                                         "fixed.shared"),
                                                  biallelic.structure=TRUE, pi=TRUE,
                                                  ...) {
     which <- match.arg(which, c("detail", "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage", "R2", "recomb", "sweeps"), several.ok = TRUE)
+
+    functions <- list(detail = detail.stats, neutrality = neutrality.stats, F_ST = F_ST.stats,
+                      diversity = diversity.stats, diversity.between = diversity.stats.between,
+                      fixed.shared = calc.fixed.shared, linkage = linkage.stats, R2 = calc.R2,
+                      recomb = recomb.stats, sweeps = sweeps.stats)
+
+    call.genomewide.stats.function <- function(object, fn, ...) {
+        message(paste0("\napplying analysis ", fn))
+        object <- tryCatch({
+            object <- functions[[fn]](object, ...)
+        }, error = function(err) {
+            message(paste0("\nFailed to apply analysis ", fn))
+            message(err)
+            return(object)
+        })
+        object
+    }
     if ("detail" %in% which) {
-        object <- detail.stats(object, biallelic.structure = biallelic.structure, ...)
+        object <- call.genomewide.stats.function(object, "detail", biallelic.structure = biallelic.structure, ...)
     }
     if ("neutrality" %in% which) {
-        object <- neutrality.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "neutrality", ...)
     }
     if ("F_ST" %in% which) {
-        object <- F_ST.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "F_ST", ...)
     }
     if ("diversity" %in% which) {
-        object <- diversity.stats(object, pi = pi, ...)
+        object <- call.genomewide.stats.function(object, "diversity", pi = pi, ...)
     }
     if ("diversity.between" %in% which) {
-        object <- diversity.stats.between(object, ...)
+        object <- call.genomewide.stats.function(object, "diversity.between", ...)
     }
     if ("fixed.shared" %in% which) {
-        object <- calc.fixed.shared(object, ...)
+        object <- call.genomewide.stats.function(object, "fixed.shared", ...)
     }
     if ("linkage" %in% which) {
-        object <- linkage.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "linkage", ...)
     }
     if ("R2" %in% which) {
-        object <- calc.R2(object, ...)
+        object <- call.genomewide.stats.function(object, "R2", ...)
     }
     if ("recomb" %in% which) {
-        object <- recomb.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "recomb", ...)
     }
     if ("sweeps" %in% which) {
-        object <- sweeps.stats(object, ...)
+        object <- call.genomewide.stats.function(object, "sweeps", ...)
     }
     return (object)
 })

@@ -10,7 +10,7 @@ genomewide.stats(object, which = character(0), biallelic.structure = TRUE,
   pi = TRUE, ...)
 
 \S4method{genomewide.stats}{GENOME}(object, which = c("detail", "neutrality",
-  "F_ST", "diversity", "diversity.between", "fixed.shared", "linkage"),
+  "F_ST", "diversity", "diversity.between", "fixed.shared"),
   biallelic.structure = TRUE, pi = TRUE, ...)
 }
 \arguments{

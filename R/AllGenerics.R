@@ -3,6 +3,7 @@
 ##' Retrieve genome stats for
 ##'
 ##' @param object An R object
+##' @param gr A GRanges object or missing
 ##' @param statistics statistics to return
 ##' @param use.population.names use population names of object for plotting labels
 ##' @param use.region.names Use the region names as row names
@@ -16,6 +17,7 @@
 ##'
 setGeneric("GStats",
            function(object,
+                    gr=NULL,
                     statistics=character(0),
                     use.population.names=FALSE,
                     use.region.names=FALSE,
@@ -57,11 +59,13 @@ setGeneric("gplot",
                     xlab=NULL, ylab=NULL, size=integer(0),
                     colour=list(), colour.var=character(0),
                     wrap=FALSE, wrap.formula=character(0),
+                    pos=character(0),
                     wrap.ncol=integer(0), compact.facet=TRUE,
                     strip.position="right", scales="free_y",
                     hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
                     text.size=integer(0), text.x.angle=integer(0),
-                    text.x.hjust=integer(0), which=NULL, ...)
+                    text.x.hjust=integer(0), which=NULL, per.site=FALSE,
+                    zscore=FALSE, ...)
     standardGeneric("gplot"),
     signature="data")
 

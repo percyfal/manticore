@@ -13,6 +13,8 @@
 )
 
 .getOption <- function(application, statistics, key, default) {
+    if (is.na(application))
+        return (default)
     if (!(statistics %in% names(.defaults[[application]])))
         return (default)
     if (!(key %in% names(.defaults[[application]][[statistics]])))
@@ -52,6 +54,7 @@
 ##' @param text.x.hjust x text horizontal justification
 ##' @param which statistic to plot
 ##' @param per.site plot statistics normalized by window length
+##' @param zscore Plot Z-scores
 ##' @param ... extra arguments
 ##' @return ggplot
 ##' @author Per Unneberg
@@ -66,16 +69,16 @@ setMethod("gplot", c(data="GStats"),
           function(data, x="feature_id", y="value",
                    type="point",
                    xlim=NULL, ylim=NULL, main=paste(data@statistics, "statistics"),
-                   xlab="window", ylab=NULL, size=1,
+                   xlab="bp", ylab=NULL, size=1,
                    colour=brewer.pal(3, "Dark2"), colour.var="seqnames",
                    wrap=TRUE, wrap.formula="",
+                   pos="coordinate",
                    wrap.ncol=1, compact.facet=TRUE,
                    strip.position="right", scales="free_y",
                    hide.legend=TRUE, hide.xaxis=TRUE, grid=FALSE,
                    text.size=14, text.x.angle=45, text.x.hjust=1,
-                   which=NULL, per.site=FALSE,
+                   which=NULL, per.site=FALSE, zscore=FALSE,
                    ...) {
-    stopifnot(data@application %in% names(.defaults))
     if (wrap.formula == "")
         wrap.formula <- .getOption(data@application, data@statistics, "wrap.formula", "statistic ~ population")
     if (is.null(which))
@@ -88,6 +91,17 @@ setMethod("gplot", c(data="GStats"),
     if (!is.numeric(df[[x]])) {
         if (!is.factor(df[[x]])) df[[x]] <- factor(df[[x]], levels = unique(df[[x]]))
     }
+    ## Convert to superscaffold coordinates
+    pos <- match.arg(pos, c("coordinate", "index"))
+    if (pos == "coordinate") {
+        w0 <- width(rowRanges(data))[1]
+        df$pos <- cumsum(width(rowRanges(data))) - w0 + 1 + width(rowRanges(data)) / 2
+        x <- "pos"
+    } else {
+        xlab <- "window"
+    }
+    ## By default scale by statistic
+    if (zscore) df[[y]] <- unlist(tapply(df[[y]], df$statistic, scale))
     p <- ggplot(df, aes_string(x = x, y = y, colour = colour.var))
     if (wrap) p <- p + facet_wrap(as.formula(wrap.formula), ncol = wrap.ncol, strip.position = strip.position, scales = scales, ...)
     if (type == "point") {
@@ -98,7 +112,6 @@ setMethod("gplot", c(data="GStats"),
     if (!is.null(xlab)) p <- p + xlab(xlab)
     if (!is.null(ylab)) p <- p + ylab(ylab)
     if (!is.null(main)) {
-        if (per.site) main <- paste0(main, " (per site)")
         p <- p + ggtitle(main)
     }
     if (compact.facet) {

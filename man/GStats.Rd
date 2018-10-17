@@ -3,17 +3,21 @@
 \docType{methods}
 \name{GStats}
 \alias{GStats}
-\alias{GStats,GENOMEList-method}
+\alias{GStats,GENOMEList,GRanges_OR_missing-method}
 \title{Create GStats object}
 \usage{
-GStats(object, statistics = character(0), use.population.names = FALSE,
-  use.region.names = FALSE, quiet = FALSE, ...)
+GStats(object, gr = NULL, statistics = character(0),
+  use.population.names = FALSE, use.region.names = FALSE, quiet = FALSE,
+  ...)
 
-\S4method{GStats}{GENOMEList}(object, statistics = c("detail"),
-  use.population.names = TRUE, use.region.names = TRUE, quiet = TRUE, ...)
+\S4method{GStats}{GENOMEList,GRanges_OR_missing}(object, gr = NULL,
+  statistics = c("detail"), use.population.names = TRUE,
+  use.region.names = TRUE, quiet = TRUE, ...)
 }
 \arguments{
 \item{object}{An R object}
+
+\item{gr}{A GRanges object or NULL}
 
 \item{statistics}{statistics to return}
 

@@ -19,7 +19,7 @@ expect_ggplot <- function(gs) {
     eval(bquote(expect_is(p, "ggplot")))
 }
 
-expect_gstats <- function(gs, r.width=c(340000, 10000)) {
+expect_gstats <- function(gs, r.width = c(340000, 10000)) {
     eval(bquote(expect_is(gs, "GStats")))
     eval(bquote(expect_equal(width(gs)[1:2], r.width)))
 }
@@ -32,36 +32,36 @@ test_that("getting summary data ok", {
                         "n.unknowns", "n.valid.sites", "n.polyallelic.sites",
                         "trans.transv.ratio", "seqnames", "ranges", "population"))
 
-    gs <- GStats(scaffolds.gl, "summary")
+    gs <- GStats(scaffolds.gl, statistics = "summary")
     expect_gstats(gs)
 })
 
 test_that("getting detail data ok", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "detail")
+    gs <- GStats(scaffolds.gl, statistics = "detail")
     expect_gstats(gs)
 })
 
 test_that("plotting detail data ok", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "detail")
+    gs <- GStats(scaffolds.gl, statistics = "detail")
     expect_ggplot(gs)
 })
 
 test_that("getting neutrality data ok", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "neutrality")
+    gs <- GStats(scaffolds.gl, statistics = "neutrality")
     expect_gstats(gs)
     ## expect_ggplot(gs)
 })
 
 test_that("getting fixed / shared data ok", {
     check_popgenome()
-    gs.fixed <- GStats(scaffolds.gl, "fixed")
+    gs.fixed <- GStats(scaffolds.gl, statistics = "fixed")
     expect_gstats(gs.fixed)
     ## expect_ggplot(gs.fixed)
 
-    gs.shared <- GStats(scaffolds.gl, "shared")
+    gs.shared <- GStats(scaffolds.gl, statistics = "shared")
     expect_gstats(gs.shared)
     ## expect_ggplot(gs.shared)
 
@@ -70,35 +70,35 @@ test_that("getting fixed / shared data ok", {
 
 test_that("getting segregating sites ok", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "segregating.sites")
+    gs <- GStats(scaffolds.gl, statistics = "segregating.sites")
     expect_gstats(gs)
     ## expect_ggplot(gs)
 })
 
 test_that("getting diversity data ok", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "diversity")
+    gs <- GStats(scaffolds.gl, statistics = "diversity")
     expect_gstats(gs)
     ## expect_ggplot(gs)
 })
 
 test_that("getting diversity.between data works", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "diversity.between")
+    gs <- GStats(scaffolds.gl, statistics = "diversity.between")
     expect_gstats(gs)
     ## expect_ggplot(gs)
 })
 
 test_that("getting F_ST data works", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "F_ST")
+    gs <- GStats(scaffolds.gl, statistics = "F_ST")
     expect_gstats(gs)
     ## expect_ggplot(gs)
 })
 
 test_that("getting F_ST.pairwise data works", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "F_ST.pairwise")
+    gs <- GStats(scaffolds.gl, statistics = "F_ST.pairwise")
     expect_gstats(gs)
     ## expect_ggplot(gs)
 })
@@ -106,13 +106,13 @@ test_that("getting F_ST.pairwise data works", {
 
 test_that("coldata order corresponds to variable order", {
     check_popgenome()
-    gs <- GStats(slides.gl, "detail")
-    cdata <- paste(gs$population, gs$statistic, sep="_")
+    gs <- GStats(slides.gl, statistics = "detail")
+    cdata <- paste(gs$population, gs$statistic, sep = "_")
     expect_equal(rownames(colData(gs)), cdata)
 })
 
 test_that("GStats object with wrong slots fail", {
     check_popgenome()
-    gs <- GStats(scaffolds.gl, "detail")
+    gs <- GStats(scaffolds.gl, statistics = "detail")
     expect_error(gs@foo <- "bar")
 })

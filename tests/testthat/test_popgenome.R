@@ -116,3 +116,10 @@ test_that("GStats object with wrong slots fail", {
     gs <- GStats(scaffolds.gl, statistics = "detail")
     expect_error(gs@foo <- "bar")
 })
+
+test_that("GStats with GRanges argument works", {
+    check_popgenome()
+    gr <- GRanges(seqnames=c("scaffold2"), ranges=IRanges(start=1e5, end=2e5))
+    gs <- GStats(scaffolds.gl, gr)
+    expect_equal(rowRanges(gs)$sites[1], width(gr))
+})

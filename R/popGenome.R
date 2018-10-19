@@ -173,7 +173,17 @@ setMethod("GStats", signature(object = "GENOMEList", gr = "GRanges_OR_missing"),
     if (is.null(gr)) {
         .ranges$sites <- width(.ranges)
     } else {
-        .ranges$sites <- as.vector(unlist(lapply(.ranges, function(x) {scf <- unique(as.character(seqnames(x))); grsub <- gr[as.logical(seqnames(gr) == scf) & start(gr) >= start(x) & end(gr) <= end(x), ]; sum(width(GenomicRanges::intersect(x, grsub)))})))
+        .ranges$sites <- as.vector(
+            unlist(
+                lapply(
+                    seq_along(.ranges),
+                    function(i) {
+                    x  <- .ranges[i]
+                    scf <- unique(as.character(seqnames(x)));
+                    grsub <- gr[as.logical(seqnames(gr) == scf) & start(gr) >= start(x) & end(gr) <= end(x), ];
+                    sum(width(GenomicRanges::intersect(x, grsub)))
+                }
+                )))
     }
     rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
                                 rowRanges = .ranges)

@@ -1,3 +1,3 @@
 library(testthat)
-library(nonmodelr)
-test_check("nonmodelr")
+library(manticore)
+test_check("manticore")

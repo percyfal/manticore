@@ -1,5 +1,5 @@
 context("Test parsing bcftools output, S4")
-fn <- system.file("extdata", "medium.call.stats", package="nonmodelr")
+fn <- system.file("extdata", "medium.call.stats", package="manticore")
 S4stats <- readBcftoolsStats(fn)
 
 test_that("new S4 bcftools instance", {

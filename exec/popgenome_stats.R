@@ -10,7 +10,7 @@
 
 library("getopt")
 library("PopGenome")
-library("nonmodelr")
+library("manticore")
 library("tidyr")
 library("dplyr")
 

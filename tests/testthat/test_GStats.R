@@ -6,7 +6,7 @@ if (!requireNamespace("PopGenome", quietly = TRUE)) {
 if (requireNamespace("PopGenome", quietly = TRUE))
     library("PopGenome")
 
-fn <- system.file("extdata", "popgenome.rda", package = "nonmodelr")
+fn <- system.file("extdata", "popgenome.rda", package = "manticore")
 load(fn)
 scaffolds.gl <- GENOMEList(scaffolds)
 

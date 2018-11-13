@@ -36,7 +36,7 @@ setClassUnion("GRanges_OR_missing", c("GRanges", "missing"))
 ##'
 ##' @examples
 ##' library(PopGenome)
-##' fn <- system.file("extdata", "popgenome.rda", package = "nonmodelr")
+##' fn <- system.file("extdata", "popgenome.rda", package = "manticore")
 ##' load(fn)
 ##' gl <- GENOMEList(scaffolds)
 ##' sessionInfo()

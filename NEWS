@@ -1,7 +1,13 @@
+manticore v0.0.0.9008 (Release date: 2018-11-13)
+=================================================
+
+Fix textConnection issue (#13)
+
+
 manticore v0.0.0.9007 (Release date: 2018-11-13)
 =================================================
 
-Rename to manticore (#13)
+Rename to manticore (#11)
 Fix GStats function (#12)
 
 manticore v0.0.0.9006 (Release date: 2018-10-19)

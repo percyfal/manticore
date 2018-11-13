@@ -91,8 +91,9 @@ read.bcftools.stats <- function(filename, label=NULL) {
     for (x in sections) {
         if (x == "label") next
         header <- gsub("\\[[0-9]+\\]", "", unlist(strsplit(gsub("# ", "", lines[min(grep(paste(x, "\\t", sep=""), lines))]), "\t")))
-        obj[[x]] <- read.delim(textConnection(lines[grepl(paste(x, "\\t", sep = ""), lines)]),
+        obj[[x]] <- read.delim(tc <- textConnection(lines[grepl(paste(x, "\\t", sep = ""), lines)]),
                                header = FALSE, skip = 1, col.names = header)
+        close(tc)
         obj[[x]][x] <- NULL
     }
     close(con)

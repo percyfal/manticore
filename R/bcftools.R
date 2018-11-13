@@ -52,8 +52,14 @@ setMethod("readBcftoolsStats", signature="character", definition=function(filena
     obj <- BcftoolsStats()
     for (x in slotNames(obj)) {
         if (x == "label") next
-        header <- gsub("\\[[0-9]+\\]", "", unlist(strsplit(gsub("# ", "", lines[min(grep(paste(x, "\\t", sep=""), lines))]), "\t")))
-        slot(obj, x, check = TRUE) <- read.delim(textConnection(lines[grepl(paste(x, "\\t", sep=""), lines)]), header=FALSE, skip=1, col.names=header)
+        header <- gsub(
+            "\\[[0-9]+\\]", "",
+            unlist(strsplit(gsub("# ", "", lines[min(grep(paste(x, "\\t", sep = ""), lines))]),
+                            "\t")))
+        slot(obj, x, check = TRUE) <- read.delim(
+            tc <- textConnection(lines[grepl(paste(x, "\\t", sep = ""), lines)]),
+            header = FALSE, skip = 1, col.names = header)
+        close(tc)
         slot(obj, x)[x] <- NULL
     }
     close(con)
@@ -83,9 +89,10 @@ read.bcftools.stats <- function(filename, label=NULL) {
     obj <- list()
     # Loop the labels and convert to data frames
     for (x in sections) {
-        if (x=="label") next
+        if (x == "label") next
         header <- gsub("\\[[0-9]+\\]", "", unlist(strsplit(gsub("# ", "", lines[min(grep(paste(x, "\\t", sep=""), lines))]), "\t")))
-        obj[[x]] <- read.delim(textConnection(lines[grepl(paste(x, "\\t", sep=""), lines)]), header=FALSE, skip=1, col.names=header)
+        obj[[x]] <- read.delim(textConnection(lines[grepl(paste(x, "\\t", sep = ""), lines)]),
+                               header = FALSE, skip = 1, col.names = header)
         obj[[x]][x] <- NULL
     }
     close(con)

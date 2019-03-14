@@ -18,18 +18,20 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 Imports:
-    ggplot2,
-    tidyr,
-    tidyselect,
-    gridExtra,
-    methods,
-    RColorBrewer,
-    SummarizedExperiment (>= 1.6.4),
     GenomicRanges (>= 1.32.0),
     IRanges (>= 2.14.0),
-    S4Vectors
+    RColorBrewer,
+    S4Vectors,
+    SummarizedExperiment (>= 1.6.4),
+    ggplot2,
+    gridExtra,
+    methods,
+    tidyr,
+    tidyselect,
+    viridis
 Suggests:
     PopGenome,
+    adegenet,
     testthat,
     vcfR
 RoxygenNote: 6.0.1

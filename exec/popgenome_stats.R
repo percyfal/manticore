@@ -89,17 +89,16 @@ load_data <- function(scaffold) {
     ## Get length from vcf
     message("Opening vcf file ", opt$vcf)
     vcf <- tryCatch({
-        sink("/dev/null")
         vcf <-readVCF(opt$vcf, 1000, frompos = 1, topos = ln,
                       tid = as.character(scaffold), gffpath = gff_file)
-        sink()
     }, error = function(err) {
         message(paste0("readVCF failed for scaffold ", scaffold, " returning NA"))
         return (NA)
     })
 
-    message("read vcf: ", opt$vcf)
+    message("successfully read vcf: ", opt$vcf)
     if (inherits(vcf, "GENOME")) {
+        message("Setting region names and populations")
         vcf@region.names <- as.character(scaffold)
         vcf <- set.populations(vcf, populations.list, diploid = TRUE)
     }
@@ -132,6 +131,7 @@ if (length(GENOME.classes) > 1) {
     message("Concatenate data")
     GENOME.class <- concatenate.classes(GENOME.classes)
 } else {
+    message("Setting GENOME.class to first (and only) element in GENOME.classes")
     GENOME.class <- GENOME.classes[[1]]
 }
 
@@ -140,6 +140,8 @@ if (inherits(GENOME.class, "GENOME")) {
     GENOME.class <- set.populations(GENOME.class, populations.list, diploid = TRUE)
     message("\nCalculating stats for GENOME.class")
     GENOME.class <- genomewide.stats(GENOME.class)
+} else {
+    message("Class of GENOME.class: ", class(GENOME.class))
 }
 
 ## Provide sliding window

@@ -92,13 +92,15 @@ setMethod("gplot", c(data="GStats"),
         if (!is.factor(df[[x]])) df[[x]] <- factor(df[[x]], levels = unique(df[[x]]))
     }
     ## Convert to superscaffold coordinates
-    pos <- match.arg(pos, c("coordinate", "index"))
+    pos <- match.arg(pos, c("coordinate", "index", "chr"))
     if (pos == "coordinate") {
         w0 <- width(rowRanges(data))[1]
         df$pos <- cumsum(width(rowRanges(data))) - w0 + 1 + width(rowRanges(data)) / 2
         x <- "pos"
-    } else {
+    } else if (pos == "index") {
         xlab <- "window"
+    } else if (pos == "chr") {
+        xlab <- "seqnames"
     }
     ## By default scale by statistic
     if (zscore) df[[y]] <- unlist(tapply(df[[y]], df$statistic, scale))

@@ -173,17 +173,14 @@ setMethod("GStats", signature(object = "GENOMEList", gr = "GRanges_OR_missing"),
     if (is.null(gr)) {
         .ranges$sites <- width(.ranges)
     } else {
-        .ranges$sites <- as.vector(
-            unlist(
-                lapply(
-                    seq_along(.ranges),
-                    function(i) {
-                    x  <- .ranges[i]
-                    scf <- unique(as.character(seqnames(x)));
-                    grsub <- gr[as.logical(seqnames(gr) == scf) & start(gr) >= start(x) & end(gr) <= end(x), ];
-                    sum(width(GenomicRanges::intersect(x, grsub)))
-                }
-                )))
+        .ranges$sites <- NA
+        hits <- findOverlaps(.ranges, gr, ignore.strand = TRUE)
+        sites <- c(by(as.data.frame(hits), as.data.frame(hits)$queryHits,
+                      function(h){
+            sum(width(S4Vectors::intersect(ranges(gr[h$subjectHits]),
+                                           reduce(ranges(.ranges[h$queryHits])))))
+        }))
+        .ranges[as.integer(names(sites))]$sites <- obs
     }
     rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
                                 rowRanges = .ranges)

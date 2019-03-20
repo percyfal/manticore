@@ -1,9 +1,7 @@
-## a <- unlist(slidingWindows(GRanges(seqnames="foo", ranges=IRanges(start=1, end=100000)), 1000, 1000))
-## j.start <- sample(max(end(a)), 100)
-## j.end <- j.start + sample(1000, 100)
-## b <- sort(GRanges(seqnames="foo", ranges=IRanges(start=j.start, end=j.end)))
 overlapByWindows <- function(windows, subject, ignore.strand = TRUE, ...) {
+    message(paste0("looking for overlaps in ", length(windows), " windows"))
     hits <- findOverlaps(windows, subject, ignore.strand = ignore.strand)
+    message(paste0("found ", length(hits), " overlaps"))
     x.start <- apply(
         cbind(
             start(subject[subjectHits(hits)]),

@@ -1,6 +1,6 @@
 .application <- "Popoolation"
-.varianceSlidingColnames <- c("seqnames", "position", "sites", "coverage", "score")
-.varianceSlidingOutputColumns <- c("sites", "coverage", "score")
+.varianceSlidingColnames <- c("seqnames", "position", "segregating.sites", "coverage", "score")
+.varianceSlidingOutputColumns <- c("segregating.sites", "coverage", "score")
 
 ##' readVarianceSliding
 ##'
@@ -58,7 +58,7 @@ VarianceSlidingAssays <- function(input.df, colData = NULL, width = NULL, ...) {
         width <- rawData[[1]][[1]]$position[2] - rawData[[1]][[1]]$position[1]
     data <- data.frame(
         do.call("rbind", lapply(unlist(rawData),
-                                function(x) {
+                                  function(x) {
                              cbind(seqnames = as.character(x$seqnames), position = x$position)})))
     data$position <- as.numeric(as.character(data$position))
     data$start <- data$position - width / 2 + 1
@@ -67,11 +67,9 @@ VarianceSlidingAssays <- function(input.df, colData = NULL, width = NULL, ...) {
 
     ## 2. modify raw data, adding NA elements to missing rows
     .makeGRanges <- function(y) {
-        message("creating GRanges")
         y$start <- y$position - width / 2 + 1
         y$end <- y$position + width / 2
         tmp <- makeGRangesFromDataFrame(y, keep.extra.columns = TRUE)
-        i <- match(gr, tmp)
         i <- match(tmp, gr)
         x <- GRanges(gr)
         for (col in .varianceSlidingOutputColumns) {
@@ -80,7 +78,7 @@ VarianceSlidingAssays <- function(input.df, colData = NULL, width = NULL, ...) {
         }
         x
     }
-    grlist <- bplapply(rawData, function(x) {lapply(x, .makeGRanges)})
+    grlist <- lapply(rawData, function(x) {lapply(x, .makeGRanges)})
     .makeAssayData <- function(x) {
         ManticoreDF(do.call("cbind", lapply(grlist[[x]], function(y){mcols(y)})),
                     measurement.name = x,

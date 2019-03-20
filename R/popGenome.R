@@ -173,14 +173,7 @@ setMethod("GStats", signature(object = "GENOMEList", gr = "GRanges_OR_missing"),
     if (is.null(gr)) {
         .ranges$sites <- width(.ranges)
     } else {
-        .ranges$sites <- NA
-        hits <- findOverlaps(.ranges, gr, ignore.strand = TRUE)
-        sites <- c(by(as.data.frame(hits), as.data.frame(hits)$queryHits,
-                      function(h){
-            sum(width(S4Vectors::intersect(ranges(gr[h$subjectHits]),
-                                           reduce(ranges(.ranges[h$queryHits])))))
-        }))
-        .ranges[as.integer(names(sites))]$sites <- obs
+        .ranges$sites <- overlapByWindows(.ranges, gr)
     }
     rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
                                 rowRanges = .ranges)

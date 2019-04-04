@@ -1,31 +1,43 @@
-.valid.ManticoreRSE <- function(object) {
-    message("Validating ManticoreRSE")
-    message(lapply(assays(object), inherits, "ManticoreDF"))
-    if (length(object)) {
-        if (!(all(unlist(lapply(assays(object), inherits, "ManticoreDF")))))
-            message("All ManticoreRSE assay objects must inherit from ManticoreDF")
-    }
-}
-
 ##' ManticoreRSE
 ##'
 ##' Manticore RangedSummarizedExperiment
 ##'
-##' @param object
-##' @return
 ##' @author Per Unneberg
 ##'
 ##' @import SummarizedExperiment
 ##'
-setClass("ManticoreRSE",
-         contains = c("RangedSummarizedExperiment"))
-
-setValidity2("ManticoreRSE", .valid.ManticoreRSE)
+setClass("ManticoreRSE", contains = c("RangedSummarizedExperiment"))
 
 
-ManticoreRSE <- function(...) {
+.valid.ManticoreRSE <- function(object) {
+    if (length(object)) {
+        ## if (!(all(unlist(lapply(assays(object), inherits, "ManticoreDF"))))) {
+        ##     txt <- sprintf("All ManticoreRSE assay objects must inherit from ManticoreDF")
+        ##     return(txt)
+        ## }
+    }
+    NULL
+}
+
+
+setValidity("ManticoreRSE", .valid.ManticoreRSE)
+
+
+##' ManticoreRSE
+##'
+##' ManticoreRSE initialization function
+##'
+##' @param ... options to be passed to RangedSummarizedExperiment
+##' @param window.size Window size
+##'
+##' @return ManticoreRSE object
+##'
+##' @author Per Unneberg
+##'
+ManticoreRSE <- function(..., window.size = integer()) {
     rse <- SummarizedExperiment(...)
     if (!is(rse, "RangedSummarizedExperiment"))
         stop("ManticoreRSE must be setup as a RangedSummarizedExperiment")
-    as(rse, "ManticoreRSE")
+    mrse <- as(rse, "ManticoreRSE")
+    mrse
 }

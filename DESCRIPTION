@@ -34,4 +34,27 @@ Suggests:
     adegenet,
     testthat,
     vcfR
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
+Collate: methods-manticore.R
+	 AllClasses.R
+	 AllGenerics.R
+	 Windows-class.R
+	 SWindows-class.R
+	 bcftools.R
+	 gboxplot-GStats.R
+	 gplot-GStats.R
+	 ManticoreDF-class.R
+	 ManticoreRSE-class.R
+	 methods-GRanges.R
+	 methods-GStats.R
+	 methods-ManticoreDF.R
+	 methods-ManticoreRSE.R
+	 overlap.R
+	 popGenome.R
+	 popoolation2.R
+	 popoolation.R
+	 stats.R
+	 SWindows-class.R
+	 utils.R
+	 Windows-class.R
+

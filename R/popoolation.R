@@ -2,24 +2,53 @@
 .varianceSlidingColnames <- c("seqnames", "position", "segregating.sites", "coverage", "score")
 .varianceSlidingOutputColumns <- c("segregating.sites", "coverage", "score")
 
-##' readVarianceSliding
-##'
-##' Read VarianceSliding results from popoolation
-##'
-##' @title
-##'
-##'
-##' @return
-##'
-##' @author Per Unneberg
-readVarianceSliding <- function(filename, measure="pi", ...) {
-    message("read popoolation VarianceSliding output for file ", filename)
-    measure <- match.arg(measure, c("pi", "D", "theta"))
+
+.readVarianceSlidingRaw <- function(filename, measure) {
     data <- read.table(filename)
     colnames(data) <- .varianceSlidingColnames
     data$score[data$score == "na"] <- NA
     data$score <- as.numeric(as.character(data$score))
-    ManticoreDF(data, measurement.name = measure, application = .application)
+    data
+}
+
+
+## Convert data.frame to ManticoreRSE object
+.asManticoreRSE <- function(data, window.size, sample, measure) {
+    if (is.null(window.size)) {
+        window.size <- data$position[2] - data$position[1]
+        message("window.size parameter undefined; inferring window size to ", window.size, " from data")
+    }
+    assayData <- list(DataFrame(score=data$score))
+    names(assayData) <- measure
+    data$start <- data$position - window.size / 2 + 1
+    data$end <- data$position + window.size / 2
+    sw <- SWindows(seqnames = data$seqnames, ranges = IRanges(start = data$start, end = data$end),
+                   coverage = data$coverage, segregating.sites = data$segregating.sites,
+                   window.size = window.size)
+    colData = S4Vectors::DataFrame(sample = sample)
+    ManticoreRSE(assays = assayData,
+                 rowRanges = sw, colData = colData, window.size = window.size)
+}
+
+##' readVarianceSliding
+##'
+##' Read VarianceSliding results from popoolation. This function reads
+##' data, adds start and end columns and converts data to a
+##' ManticoreRSE object.
+##'
+##'
+##' @param filename filename to parse
+##' @param window.size window size
+##' @param measure measure
+##'
+##' @return
+##'
+##' @author Per Unneberg
+##'
+readVarianceSliding <- function(filename, measure = "pi", window.size = NULL, sample) {
+    measure <- match.arg(measure, c("pi", "D", "theta"))
+    data <- .readVarianceSlidingRaw(filename, measure)
+    .asManticoreRSE(data, window.size, sample, measure)
 }
 
 
@@ -27,68 +56,43 @@ readVarianceSliding <- function(filename, measure="pi", ...) {
 ##'
 ##' Read multiple VarianceSliding results from popoolation
 ##'
-##' @param input.df Input data fram that must have columns filename, sample, and measure
+##' @param input.df Input data fram that must have columns filename,
+##'     sample, and measure
 ##' @param colData column data that describes the samples
+##' @param window.size window size; if NULL, entire chromosomes are
+##'     implied
+##' @param class arbitrary classification of windows, e.g. to
+##'     autosomes, sex chromosomes etc.
 ##' @param ... extra parameters passed to readVarianceSliding
 ##'
-##' @return ManticoreRSE
+##' @return ManticoreRSE Assays consist of the requested statistics
 ##' @author Per Unneberg
 ##'
-##' @importFrom GenomicRanges makeGRangesFromDataFrame
-##' @importFrom SummarizedExperiment DataFrame
+##' @importFrom GenomicRanges makeGRangesFromDataFrame, GenomicRangesList
+##' @importFrom S4Vectors DataFrame
 ##' @importFrom BiocParallel bplapply
 ##'
-VarianceSlidingAssays <- function(input.df, colData = NULL, width = NULL, ...) {
+VarianceSlidingAssays <- function(input.df, colData = NULL, window.size = NULL, class = NA, ...) {
     stopifnot(inherits(input.df, c("data.frame", "DataFrame")))
     columns <- c("filename", "sample", "measure")
     stopifnot(columns %in% colnames(input.df))
 
     .loadData <- function(x) {
-        measure <- unique(x$measure)
-        data <- bplapply(as.character(x$filename),
-                         function(y) {
-            readVarianceSliding(y, measure = measure, ...)})
-        names(data) <- x$sample
-        data
+        l <- as.list(by(x, x$measure, list))
+        data <- BiocParallel::bplapply(l,
+                                       function(y) {
+                                  readVarianceSliding(as.character(y$filename),
+                                                      measure = as.character(y$measure),
+                                                      window.size,
+                                                      sample = as.character(y$sample),
+                                                      ...)})
+        obj <- data[[1]]
+        for (y in names(data))
+            assay(obj, y) <- assay(data[[y]])
+        colnames(obj) <- "score"
+        obj
     }
-    rawData <- by(input.df, input.df$measure, .loadData)
-
-    ## 1. create GRanges object as union of all sequence positions
-    if (is.null(width))
-        width <- rawData[[1]][[1]]$position[2] - rawData[[1]][[1]]$position[1]
-    data <- data.frame(
-        do.call("rbind", lapply(unlist(rawData),
-                                  function(x) {
-                             cbind(seqnames = as.character(x$seqnames), position = x$position)})))
-    data$position <- as.numeric(as.character(data$position))
-    data$start <- data$position - width / 2 + 1
-    data$end <- data$position + width / 2
-    gr <- unique(makeGRangesFromDataFrame(data))
-
-    ## 2. modify raw data, adding NA elements to missing rows
-    .makeGRanges <- function(y) {
-        y$start <- y$position - width / 2 + 1
-        y$end <- y$position + width / 2
-        tmp <- makeGRangesFromDataFrame(y, keep.extra.columns = TRUE)
-        i <- match(tmp, gr)
-        x <- GRanges(gr)
-        for (col in .varianceSlidingOutputColumns) {
-            mcols(x)[[col]] <- rep(NA, length(gr))
-            mcols(x)[[col]][i[!is.na(i)]] <- mcols(tmp)[[col]]
-        }
-        x
-    }
-    grlist <- lapply(rawData, function(x) {lapply(x, .makeGRanges)})
-    .makeAssayData <- function(x) {
-        ManticoreDF(do.call("cbind", lapply(grlist[[x]], function(y){mcols(y)})),
-                    measurement.name = x,
-                    application = .application)
-    }
-    assayData <- lapply(names(grlist), .makeAssayData)
-    names(assayData) <- names(grlist)
-    if (is.null(colData))
-        colData = DataFrame(sample = input.df$sample, variable = .varianceSlidingOutputColumns)
-    ManticoreRSE(assays = assayData,
-                 rowRanges = gr, colData = colData)
+    rawData <- lapply(as.list(by(input.df, input.df$sample, list)), .loadData)
+    do.call(cbind, rawData)
 }
 

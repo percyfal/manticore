@@ -17,23 +17,12 @@
 setClass("Windows",
          contains = c("GRanges"),
          representation = representation(
-             window.size = "integer",
-             ## coverage = "numeric",
-             ## segregating.sites = "integer",
-             ## sites = "integer"
+             window.size = "integer"
          ),
          prototype = prototype(
-             window.size = integer(),
-             ## coverage = numeric(),
-             ## segregating.sites = integer(),
-             ## sites = integer()
+             window.size = integer()
          )
          )
-
-## setMethod(GenomicRanges:::extraColumnSlotNames, "Windows",
-##           function(x) {
-##     c("coverage", "sites", "segregating.sites")
-## })
 
 ### ----------------------------------------------------------------------
 ### Constructors
@@ -51,8 +40,6 @@ setClass("Windows",
 ##' @author Per Unneberg
 ##'
 Windows <- function(..., window.size = integer())
-                                        #, coverage = numeric(),
-                                        #                   sites = integer())
 {
     gr <- GRanges(...)
     new("Windows", gr, window.size = window.size)

@@ -7,8 +7,8 @@
 \title{Create GStats object}
 \usage{
 GStats(object, gr = NULL, statistics = character(0),
-  use.population.names = FALSE, use.region.names = FALSE, quiet = FALSE,
-  ...)
+  use.population.names = FALSE, use.region.names = FALSE,
+  quiet = FALSE, ...)
 
 \S4method{GStats}{GENOMEList,GRanges_OR_missing}(object, gr = NULL,
   statistics = c("detail"), use.population.names = TRUE,
@@ -17,7 +17,7 @@ GStats(object, gr = NULL, statistics = character(0),
 \arguments{
 \item{object}{An R object}
 
-\item{gr}{A GRanges object or NULL}
+\item{gr}{A GRanges object or missing}
 
 \item{statistics}{statistics to return}
 
@@ -34,12 +34,6 @@ A GStats object
 }
 \description{
 Retrieve genome stats for
-
-Retrieve genome stats for a PopGenome GENOME instance. Note that
-this is only intended for use with some slots/statistical
-operations. The PopGenome function does not work on data that has
-been saved in rda files. They should be saved with save.session,
-but this does not seem to work.
 }
 \examples{
 library(PopGenome)

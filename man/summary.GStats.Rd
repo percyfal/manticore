@@ -4,13 +4,13 @@
 \alias{summary.GStats}
 \title{summary.GStats}
 \usage{
-\method{summary}{GStats}(gs, per.site = TRUE, fun = "mean",
+\method{summary}{GStats}(gs, per.site = FALSE, fun = "mean",
   per.region = FALSE, ...)
 }
 \arguments{
 \item{gs}{GStats object}
 
-\item{per.site}{calculate per site values}
+\item{per.site}{calculate per site values (kb)}
 
 \item{fun}{summary function}
 

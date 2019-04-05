@@ -1,11 +1,5 @@
-dmel.pi <- system.file("extdata", "popoolation/dmel.pi.txt.gz", package = "manticore")
-dmel.D <- system.file("extdata", "popoolation/dmel.D.txt.gz", package = "manticore")
-dmel.theta <- system.file("extdata", "popoolation/dmel.theta.txt.gz", package = "manticore")
-dmel <- list(dmel.pi, dmel.D, dmel.theta)
-names(dmel) <- c("pi", "D", "theta")
-dmel.df <- data.frame(filename = rep(as.character(dmel), 2),
-                      sample = rep(c("A", "B"), each=3),
-                      measure = rep(as.character(names(dmel)), 2))
+dmel.df <- do.call("rbind", apply(expand.grid(c("A", "B"), c("D", "pi", "theta")), 1, function(x){data.frame(x[1], x[2], system.file("extdata", paste0("popoolation/dmel.", x[1], ".", x[2], ".txt.gz"), package="manticore"))}))
+colnames(dmel.df) <- c("sample", "measure", "filename")
 
 context("test popoolation functions")
 

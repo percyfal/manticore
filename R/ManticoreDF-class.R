@@ -7,8 +7,6 @@
 ##' properties be present
 ##'
 ##'
-##' @param object
-##' @return
 ##' @author Per Unneberg
 ##'
 ##' @importFrom S4Vectors DataFrame
@@ -29,7 +27,18 @@ setMethod("initialize", "ManticoreDF", function(.Object, ...) {
     .Object
 })
 
-
+##' ManticoreDF
+##'
+##' ManticoreDF initialization function
+##'
+##' @param ... options to pass to DataFrame
+##' @param measurement.name Measurement name
+##' @param application Application name
+##' @importFrom S4Vectors DataFrame
+##'
+##' @return ManticoreDF object
+##' @author Per Unneberg
+##'
 ManticoreDF <- function(..., measurement.name = character(), application = character()) {
     df <- DataFrame(...)
     x <- as(df, "ManticoreDF")

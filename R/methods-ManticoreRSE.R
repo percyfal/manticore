@@ -59,3 +59,30 @@ summary.ManticoreRSE <- function(obj, which = NULL, fun = "mean",
 setMethod("aggregate", "ManticoreRSE", function(x, formula, FUN, which = NULL, per.site=FALSE, ...) {
     NULL
 })
+
+
+## override cbind; for combining objects with different ranges
+## See https://gist.github.com/PeteHaitch/8993b096cfa7ccd08c13 for discussion
+setMethod("cbind", "ManticoreRSE",
+          function(..., deparse.level = 1) {
+    args <- unname(list(...))
+    .merge <- function(...) {
+        merge(..., all = TRUE)
+    }
+    rr <- do.call(.merge, lapply(args, rowRanges))
+
+    newArgs <- lapply(args, function(x){
+        data <- lapply(assays(x), function(y) {
+            types <- sapply(y, class)
+            n <- length(rr)
+            z <- DataFrame(lapply(types, function(x) {call(x, n)}))
+            z[1:n,] <- NA
+            colnames(z) <- colnames(y)
+            i <- match(rowRanges(x), rr)
+            z[i[!is.na(i)],] <- y
+            z})
+        SummarizedExperiment(rowRanges = rr, colData = colData(x), assays = data)
+    })
+    sexp <- do.call(cbind, newArgs)
+    ManticoreRSE(rowRanges = rowRanges(sexp), colData = colData(sexp), assays = assays(sexp), window.size = rr@window.size)
+})

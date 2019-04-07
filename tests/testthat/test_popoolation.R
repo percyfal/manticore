@@ -4,7 +4,9 @@ colnames(dmel.df) <- c("sample", "measure", "filename")
 context("test popoolation functions")
 
 test_that("readVarianceSliding works", {
-    tmp <- lapply(names(dmel), function(x) {readVarianceSliding(dmel[[x]], x)})
+    dmel <- as.list(as.character(subset(dmel.df, sample == "A")$filename))
+    names(dmel) <- subset(dmel.df, sample == "A")$measure
+    tmp <- lapply(names(dmel), function(x) {readVarianceSliding(dmel[[x]], x, sample = "A")})
 })
 
 

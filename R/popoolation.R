@@ -76,6 +76,7 @@ VarianceSlidingAssays <- function(input.df, colData = NULL, window.size = NULL, 
     stopifnot(inherits(input.df, c("data.frame", "DataFrame")))
     columns <- c("filename", "sample", "measure")
     stopifnot(columns %in% colnames(input.df))
+    input.df <- droplevels(input.df)
 
     .loadData <- function(x) {
         l <- as.list(by(x, x$measure, list))

@@ -86,3 +86,16 @@ setMethod("cbind", "ManticoreRSE",
     sexp <- do.call(cbind, newArgs)
     ManticoreRSE(rowRanges = rowRanges(sexp), colData = colData(sexp), assays = assays(sexp), window.size = rr@window.size)
 })
+
+
+## For plotting; select assay and column and convert to data fram together with rowRanges
+setMethod("as.data.frame", "ManticoreRSE",
+          function(x, row.names = NULL, optional = FALSE,
+                   long = FALSE,
+                   ...) {
+    assayData <- as.data.frame(assays(x))
+    colnames(assayData)[1:2] <- c("group", "assay")
+    if (long)
+        assayData <- gather(assayData, select = c(-group, -assay))
+    cbind(rowRanges(x), assayData)
+})

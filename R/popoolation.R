@@ -18,14 +18,16 @@
         window.size <- data$position[2] - data$position[1]
         message("window.size parameter undefined; inferring window size to ", window.size, " from data")
     }
-    assayData <- list(DataFrame(score=data$score))
+    df <- DataFrame(score=data$score)
+    colnames(df) <- sample
+    assayData <- list(df)
     names(assayData) <- measure
     data$start <- data$position - window.size / 2 + 1
     data$end <- data$position + window.size / 2
     sw <- SWindows(seqnames = data$seqnames, ranges = IRanges(start = data$start, end = data$end),
                    coverage = data$coverage, segregating.sites = data$segregating.sites,
                    window.size = window.size)
-    colData = S4Vectors::DataFrame(sample = sample)
+    colData <- S4Vectors::DataFrame(sample = sample)
     ManticoreRSE(assays = assayData,
                  rowRanges = sw, colData = colData, window.size = window.size)
 }
@@ -90,7 +92,6 @@ VarianceSlidingAssays <- function(input.df, colData = NULL, window.size = NULL, 
         obj <- data[[1]]
         for (y in names(data))
             assay(obj, y) <- assay(data[[y]])
-        colnames(obj) <- "score"
         obj
     }
     rawData <- lapply(as.list(by(input.df, input.df$sample, list)), .loadData)

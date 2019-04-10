@@ -46,6 +46,18 @@ setGeneric("GENOMEList", function(obj, ...) standardGeneric("GENOMEList"))
 ##'
 setGeneric("asGRanges", function(x, ...) standardGeneric("asGRanges"))
 
+##' sites
+##'
+##' Get the number of sites for an object
+##' 
+##' @param obj 
+##' @return Vector
+##' @author Per Unneberg
+##'
+##' @export
+##' @rdname sites
+##' 
+setGeneric("sites", function(obj) standardGeneric("sites"))
 
 ##' Generic plot function
 ##'

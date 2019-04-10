@@ -57,7 +57,9 @@ summary.ManticoreRSE <- function(obj, which = NULL, fun = "mean",
 ##' @export
 ##'
 setMethod("aggregate", "ManticoreRSE", function(x, formula, FUN, which = NULL, per.site=FALSE, ...) {
-    NULL
+    df <- as.data.frame(x, ...)
+    res <- aggregate(formula, df, FUN, ...)
+    res
 })
 
 
@@ -98,4 +100,24 @@ setMethod("as.data.frame", "ManticoreRSE",
     if (long)
         assayData <- gather(assayData, select = c(-group, -assay))
     cbind(rowRanges(x), assayData)
+})
+
+setAs("ManticoreRSE", "GRanges", function(from) {
+    assayData <- as.data.frame(assays(from))
+    colnames(assayData)[1:2] <- c("group", "assay")
+    gr <- rep(rowRanges(from), nrow(assayData) / length(rowRanges(from)))
+    mcols(gr) <- assayData
+    gr
+})
+
+
+setMethod("sites", "ManticoreRSE",
+          function(obj) {sites(rowRanges(obj))})
+
+
+setMethod("normalize", "ManticoreRSE", function(object, ...) {
+    dfl <- DataFrameList(lapply(assayNames(object), function(x){DataFrame(as.matrix(assay(object, x)) / sites(object)) }))
+    names(dfl) <- assayNames(object)
+    assays(object) <- dfl
+    object
 })

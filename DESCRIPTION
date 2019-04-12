@@ -45,9 +45,7 @@ Collate: methods-manticore.R
 	 gplot-GStats.R
 	 ManticoreDF-class.R
 	 ManticoreRSE-class.R
-	 methods-GRanges.R
 	 methods-GStats.R
-	 methods-ManticoreDF.R
 	 methods-ManticoreRSE.R
 	 overlap.R
 	 popGenome.R
@@ -55,6 +53,8 @@ Collate: methods-manticore.R
 	 popoolation.R
 	 stats.R
 	 SWindows-class.R
+	 methods-SWindows.R
 	 utils.R
 	 Windows-class.R
+	 methods-Windows.R
 

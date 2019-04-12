@@ -4,18 +4,23 @@
 \alias{readVarianceSliding}
 \title{readVarianceSliding}
 \usage{
-readVarianceSliding(filename, measure = "pi")
+readVarianceSliding(filename, measure = "pi", window.size = NULL,
+  sample)
 }
 \arguments{
 \item{filename}{filename to parse}
 
 \item{measure}{measure}
+
+\item{window.size}{window size}
 }
 \value{
 
 }
 \description{
-Read VarianceSliding results from popoolation
+Read VarianceSliding results from popoolation. This function reads
+data, adds start and end columns and converts data to a
+ManticoreRSE object.
 }
 \author{
 Per Unneberg

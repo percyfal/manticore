@@ -2,7 +2,7 @@
 ##'
 ##' Get the number of sites
 ##'
-##' @param obj
+##' @param obj SWindows object
 ##' @return Vector
 ##'
 ##' @author Per Unneberg

@@ -70,7 +70,6 @@ readVarianceSliding <- function(filename, measure = "pi", window.size = NULL, sa
 ##' @return ManticoreRSE Assays consist of the requested statistics
 ##' @author Per Unneberg
 ##'
-##' @importFrom GenomicRanges makeGRangesFromDataFrame, GenomicRangesList
 ##' @importFrom S4Vectors DataFrame
 ##' @importFrom BiocParallel bplapply
 ##'

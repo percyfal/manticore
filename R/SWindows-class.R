@@ -32,6 +32,16 @@ setClass("SWindows",
          )
          )
 
+
+##' parallelSlotNames
+##'
+##'
+##'
+##' @param x SWindows object
+##'
+##' @author Per Unneberg
+##' @importFrom S4Vectors parallelSlotNames
+##'
 setMethod("parallelSlotNames", "SWindows",
           function(x) c("coverage", "sites", "segregating.sites", callNextMethod())
           )

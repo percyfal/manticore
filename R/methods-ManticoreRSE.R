@@ -107,6 +107,8 @@ setAs("ManticoreRSE", "GRanges", function(from) {
     colnames(assayData)[1:2] <- c("group", "assay")
     gr <- rep(rowRanges(from), nrow(assayData) / length(rowRanges(from)))
     mcols(gr) <- assayData
+    if (length(names(mcols(from))) > 0)
+        mcols(gr)[names(mcols(from))] <- mcols(from)
     gr
 })
 
@@ -114,7 +116,18 @@ setAs("ManticoreRSE", "GRanges", function(from) {
 setMethod("sites", "ManticoreRSE",
           function(obj) {sites(rowRanges(obj))})
 
-
+##' normalize
+##'
+##' normalize window scores by number of good sites per window
+##'
+##' @param object ManticoreRSE object
+##' @param ...
+##'
+##' @return normalized ManticoreRSE object
+##' @author Per Unneberg
+##'
+##' @importFrom BiocGenerics normalize
+##'
 setMethod("normalize", "ManticoreRSE", function(object, ...) {
     dfl <- DataFrameList(lapply(assayNames(object), function(x){DataFrame(as.matrix(assay(object, x)) / sites(object)) }))
     names(dfl) <- assayNames(object)

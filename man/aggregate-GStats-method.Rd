@@ -14,7 +14,7 @@
 
 \item{FUN}{function to apply}
 
-\item{per.site}{normalize window scores by window length}
+\item{per.site}{normalize window scores by window length (kb)}
 
 \item{...}{additional arguments passed to aggregate}
 }

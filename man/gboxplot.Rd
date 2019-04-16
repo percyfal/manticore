@@ -6,22 +6,24 @@
 \alias{gboxplot,GStats-method}
 \title{Generic boxplot function}
 \usage{
-gboxplot(data, formula = character(0), type = character(0), xlim = NULL,
-  ylim = NULL, main = NULL, xlab = NULL, ylab = NULL, colour = list(),
-  colour.var = character(0), wrap = FALSE, wrap.formula = chacarter(0),
-  wrap.ncol = integer(0), compact.facet = TRUE, strip.position = "right",
-  scales = "free_y", hide.legend = TRUE, grid = FALSE,
-  text.size = integer(0), text.x.angle = integer(0),
-  text.x.hjust = integer(0), which = NULL, ...)
+gboxplot(data, formula = character(0), type = character(0),
+  xlim = NULL, ylim = NULL, main = NULL, xlab = NULL,
+  ylab = NULL, colour = list(), colour.var = character(0),
+  wrap = FALSE, wrap.formula = chacarter(0), wrap.ncol = integer(0),
+  compact.facet = TRUE, strip.position = "right", scales = "free_y",
+  hide.legend = TRUE, grid = FALSE, text.size = integer(0),
+  text.x.angle = integer(0), text.x.hjust = integer(0), which = NULL,
+  ...)
 
 \S4method{gboxplot}{GStats}(data, formula = "value ~ population",
-  type = "box", xlim = NULL, ylim = NULL, main = paste(data@statistics,
-  "statistics"), xlab = "group", ylab = NULL, colour = brewer.pal(3,
-  "Dark2"), colour.var = "seqnames", wrap = FALSE, wrap.formula = "",
+  type = "box", xlim = NULL, ylim = NULL,
+  main = paste(data@statistics, "statistics"), xlab = "group",
+  ylab = NULL, colour = brewer.pal(3, "Dark2"),
+  colour.var = "seqnames", wrap = FALSE, wrap.formula = "",
   wrap.ncol = 1, compact.facet = TRUE, strip.position = "right",
-  scales = "free_y", hide.legend = TRUE, grid = FALSE, text.size = 14,
-  text.x.angle = 45, text.x.hjust = 1, which = NULL, per.site = FALSE,
-  ...)
+  scales = "free_y", hide.legend = TRUE, grid = FALSE,
+  text.size = 14, text.x.angle = 45, text.x.hjust = 1,
+  which = NULL, per.site = FALSE, ...)
 }
 \arguments{
 \item{data}{long format from GStats function}
@@ -76,8 +78,6 @@ gboxplot(data, formula = character(0), type = character(0), xlim = NULL,
 ggplot object
 }
 \description{
-Generic boxplot function
-
 Make a box/violin plot of data
 }
 \author{

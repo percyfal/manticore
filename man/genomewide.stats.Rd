@@ -6,11 +6,11 @@
 \alias{genomewide.stats,GENOME-method}
 \title{genomewide.stats}
 \usage{
-genomewide.stats(object, which = character(0), biallelic.structure = TRUE,
-  pi = TRUE, ...)
+genomewide.stats(object, which = character(0),
+  biallelic.structure = TRUE, pi = TRUE, ...)
 
-\S4method{genomewide.stats}{GENOME}(object, which = c("detail", "neutrality",
-  "F_ST", "diversity", "diversity.between", "fixed.shared"),
+\S4method{genomewide.stats}{GENOME}(object, which = c("detail",
+  "neutrality", "F_ST", "diversity", "diversity.between", "fixed.shared"),
   biallelic.structure = TRUE, pi = TRUE, ...)
 }
 \arguments{
@@ -28,8 +28,6 @@ genomewide.stats(object, which = character(0), biallelic.structure = TRUE,
 Updated object
 }
 \description{
-genomewide.stats
-
 Calculate genome wide statistics
 }
 \author{

@@ -6,16 +6,17 @@
 \alias{plot_region_stats,GRanges-method}
 \title{plot_region_stats}
 \usage{
-plot_region_stats(object, x.var = "width", wrap = TRUE, agg.fun = c("sum",
-  "mean"), text.size = 12, which = NULL, label.outlier = FALSE,
-  label.format = "short", n.se = 5, label.hjust = 1, label.vjust = 1,
-  level = 0.99, method = "loess", scales = "free_y", ...)
-
-\S4method{plot_region_stats}{GRanges}(object, x.var = "width", wrap = TRUE,
+plot_region_stats(object, x.var = "width", wrap = TRUE,
   agg.fun = c("sum", "mean"), text.size = 12, which = NULL,
   label.outlier = FALSE, label.format = "short", n.se = 5,
   label.hjust = 1, label.vjust = 1, level = 0.99, method = "loess",
   scales = "free_y", ...)
+
+\S4method{plot_region_stats}{GRanges}(object, x.var = "width",
+  wrap = TRUE, agg.fun = c("sum", "mean"), text.size = 12,
+  which = NULL, label.outlier = FALSE, label.format = "short",
+  n.se = 5, label.hjust = 1, label.vjust = 1, level = 0.99,
+  method = "loess", scales = "free_y", ...)
 }
 \arguments{
 \item{object}{object}

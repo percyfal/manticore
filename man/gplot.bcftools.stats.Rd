@@ -4,8 +4,9 @@
 \alias{gplot.bcftools.stats}
 \title{plot.bcftools.stats}
 \usage{
-gplot.bcftools.stats(obj, which = c("SN", "TSTV", "SiS", "AF", "QUAL", "IDD",
-  "ST", "DP"), ncol = 2, text.size = 12, theme.default = theme_bw(), ...)
+gplot.bcftools.stats(obj, which = c("SN", "TSTV", "SiS", "AF", "QUAL",
+  "IDD", "ST", "DP"), ncol = 2, text.size = 12,
+  theme.default = theme_bw(), ...)
 }
 \arguments{
 \item{obj}{bcftools.stats object}

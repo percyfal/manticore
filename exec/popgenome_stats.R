@@ -7,7 +7,6 @@
 ## Description:
 ## Calculate genome statistics for a vcf file with PopGenome
 ##
-
 library("getopt")
 library("PopGenome")
 library("manticore")
@@ -59,7 +58,10 @@ if (opt$cpus > 1) {
 }
 
 # Get length of scaffold
-ln <- as.numeric(gsub(">", "", gsub(".*length=", "", system(paste0("bcftools view -h ", opt$vcf, " | grep \"ID=", opt$scaffold, ",\""), intern=TRUE))))
+ln <- as.numeric(gsub(".*length=(\\d+).*", "\\1", system(paste0("bcftools view -h ", opt$vcf, " | grep \"ID=", opt$scaffold, ",\""), intern=TRUE)))
+message("Inferred scaffold length: ", ln)
+if (is.na(ln))
+    warning("cannot infer scaffold length")
 
 # Get samples present in vcf
 samples <- system(paste0("bcftools query -l ", opt$vcf), intern=TRUE)
@@ -86,16 +88,17 @@ load_data <- function(scaffold) {
     }}
     ## Get length from vcf
     message("Opening vcf file ", opt$vcf)
-    sink("/dev/null")
     vcf <- tryCatch({
         vcf <-readVCF(opt$vcf, 1000, frompos = 1, topos = ln,
                       tid = as.character(scaffold), gffpath = gff_file)
     }, error = function(err) {
-        message("Scaffold not in vcf; returning NA")
+        message(paste0("readVCF failed for scaffold ", scaffold, " returning NA"))
         return (NA)
     })
-    sink()
+
+    message("successfully read vcf: ", opt$vcf)
     if (inherits(vcf, "GENOME")) {
+        message("Setting region names and populations")
         vcf@region.names <- as.character(scaffold)
         vcf <- set.populations(vcf, populations.list, diploid = TRUE)
     }
@@ -128,6 +131,7 @@ if (length(GENOME.classes) > 1) {
     message("Concatenate data")
     GENOME.class <- concatenate.classes(GENOME.classes)
 } else {
+    message("Setting GENOME.class to first (and only) element in GENOME.classes")
     GENOME.class <- GENOME.classes[[1]]
 }
 
@@ -136,6 +140,8 @@ if (inherits(GENOME.class, "GENOME")) {
     GENOME.class <- set.populations(GENOME.class, populations.list, diploid = TRUE)
     message("\nCalculating stats for GENOME.class")
     GENOME.class <- genomewide.stats(GENOME.class)
+} else {
+    message("Class of GENOME.class: ", class(GENOME.class))
 }
 
 ## Provide sliding window

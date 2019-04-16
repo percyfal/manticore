@@ -9,21 +9,23 @@
 gplot(data, x = NULL, y = NULL, type = "point", xlim = NULL,
   ylim = NULL, main = NULL, xlab = NULL, ylab = NULL,
   size = integer(0), colour = list(), colour.var = character(0),
-  wrap = FALSE, wrap.formula = character(0), wrap.ncol = integer(0),
-  compact.facet = TRUE, strip.position = "right", scales = "free_y",
-  hide.legend = TRUE, hide.xaxis = TRUE, grid = FALSE,
-  text.size = integer(0), text.x.angle = integer(0),
-  text.x.hjust = integer(0), which = NULL, ...)
+  wrap = FALSE, wrap.formula = character(0), pos = character(0),
+  wrap.ncol = integer(0), compact.facet = TRUE,
+  strip.position = "right", scales = "free_y", hide.legend = TRUE,
+  hide.xaxis = TRUE, grid = FALSE, text.size = integer(0),
+  text.x.angle = integer(0), text.x.hjust = integer(0), which = NULL,
+  per.site = FALSE, zscore = FALSE, ...)
 
 \S4method{gplot}{GStats}(data, x = "feature_id", y = "value",
   type = "point", xlim = NULL, ylim = NULL,
-  main = paste(data@statistics, "statistics"), xlab = "window",
+  main = paste(data@statistics, "statistics"), xlab = "bp",
   ylab = NULL, size = 1, colour = brewer.pal(3, "Dark2"),
   colour.var = "seqnames", wrap = TRUE, wrap.formula = "",
-  wrap.ncol = 1, compact.facet = TRUE, strip.position = "right",
-  scales = "free_y", hide.legend = TRUE, hide.xaxis = TRUE,
-  grid = FALSE, text.size = 14, text.x.angle = 45, text.x.hjust = 1,
-  which = NULL, per.site = FALSE, ...)
+  pos = "coordinate", wrap.ncol = 1, compact.facet = TRUE,
+  strip.position = "right", scales = "free_y", hide.legend = TRUE,
+  hide.xaxis = TRUE, grid = FALSE, text.size = 14,
+  text.x.angle = 45, text.x.hjust = 1, which = NULL,
+  per.site = FALSE, zscore = FALSE, ...)
 }
 \arguments{
 \item{data}{GStats object}
@@ -76,16 +78,16 @@ gplot(data, x = NULL, y = NULL, type = "point", xlim = NULL,
 
 \item{which}{statistic to plot}
 
-\item{...}{extra arguments}
-
 \item{per.site}{plot statistics normalized by window length}
+
+\item{zscore}{Plot Z-scores}
+
+\item{...}{extra arguments}
 }
 \value{
 ggplot
 }
 \description{
-Generic plot function
-
 Plot GStats objects
 }
 \section{Methods (by class)}{

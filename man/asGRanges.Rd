@@ -17,14 +17,12 @@ asGRanges(x, ...)
 
 \item{long}{return long format}
 
-\item{per.site}{calculate per site statistics (divide by width)}
+\item{per.site}{calculate per site statistics (divide by width) per kb}
 }
 \value{
 GRanges instance
 }
 \description{
-Convert object to GRanges
-
 Convert GStats object to GRanges with values filled by data assay
 values
 }

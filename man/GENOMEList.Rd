@@ -16,7 +16,5 @@ GENOMEList(obj, ...)
 \item{...}{additional arguments}
 }
 \description{
-GENOMEList
-
 Convert list to GENOMEList
 }

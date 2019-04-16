@@ -1,0 +1,11 @@
+Using input	p1_p2.sync
+Using output	p1_p2.fet
+Using min-count	6
+Using min-coverage	50
+Using max-coverage	200
+Using window-size	1
+Using step-size	1
+using window summary method	multiply
+Using min-covered-fraction	0
+Using test	0
+Using help	0

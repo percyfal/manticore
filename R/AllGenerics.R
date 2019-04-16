@@ -49,14 +49,15 @@ setGeneric("asGRanges", function(x, ...) standardGeneric("asGRanges"))
 ##' sites
 ##'
 ##' Get the number of sites for an object
-##' 
-##' @param obj 
-##' @return Vector
+##'
+##' @param obj A data object, typically containing coordinates and
+##'     number of sites per coordinate
+##' @return A Vector of sites
 ##' @author Per Unneberg
 ##'
 ##' @export
 ##' @rdname sites
-##' 
+##'
 setGeneric("sites", function(obj) standardGeneric("sites"))
 
 ##' Generic plot function

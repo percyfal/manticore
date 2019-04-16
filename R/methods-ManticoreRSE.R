@@ -1,3 +1,12 @@
+##' @rdname methods-ManticoreRSE
+##' @title methods-ManticoreRSE
+##'
+##' @aliases ManticoreRSE, methods-ManticoreRSE
+##'
+##' @description Methods that act on objects of class ManticoreRSE
+##'
+
+
 ##' summary.ManticoreRSE
 ##'
 ##' Summarize the statistics of a ManticoreRSE object
@@ -93,12 +102,19 @@ setMethod("cbind", "ManticoreRSE",
 ## For plotting; select assay and column and convert to data fram together with rowRanges
 setMethod("as.data.frame", "ManticoreRSE",
           function(x, row.names = NULL, optional = FALSE,
-                   long = FALSE,
+                   long = FALSE, expand = FALSE,
                    ...) {
     assayData <- as.data.frame(assays(x))
     colnames(assayData)[1:2] <- c("group", "assay")
     if (long)
         assayData <- gather(assayData, select = c(-group, -assay))
+    if (expand) {
+        i <- match(assayData$key, rownames(colData(x)))
+        expand.df <- DataFrame(colData(x)[i,])
+        if (ncol(expand.df) == 1)
+            colnames(expand.df) <- names(colData(x))
+        assayData <- cbind(assayData, as.data.frame(expand.df))
+    }
     cbind(rowRanges(x), assayData)
 })
 
@@ -112,7 +128,11 @@ setAs("ManticoreRSE", "GRanges", function(from) {
     gr
 })
 
-
+##' sites
+##'
+##'
+##' @describeIn sites Get sites for a ManticoreRSE object
+##'
 setMethod("sites", "ManticoreRSE",
           function(obj) {sites(rowRanges(obj))})
 
@@ -126,6 +146,8 @@ setMethod("sites", "ManticoreRSE",
 ##' @return normalized ManticoreRSE object
 ##' @author Per Unneberg
 ##'
+##' @rdname normalize
+##'
 ##' @importFrom BiocGenerics normalize
 ##'
 setMethod("normalize", "ManticoreRSE", function(object, ...) {
@@ -133,4 +155,108 @@ setMethod("normalize", "ManticoreRSE", function(object, ...) {
     names(dfl) <- assayNames(object)
     assays(object) <- dfl
     object
+})
+
+##' @rdname methods-ManticoreRSE
+##' @aliases plot
+##' @description Plot assay scores versus chromosome position
+##' @export
+##'
+##'
+##' @param x A ManticoreRSE object
+##' @param y optional
+##' @param ... arguments to pass to ggplot2
+##' @param mapping aesthetic mapping
+##' @param size point/line size
+##' @param type plot type
+##' @param long use long data frame representation of x
+##' @param expand expand colData
+##' @param wrap wrap plot expression
+##' @param strip.position where to align strip
+##' @param ncol number of columns in wrap plot
+##' @param scales wrap scales
+##' @param show.legend whether or not to show legend
+##' @param assays what assays to include
+##'
+##'
+setMethod("plot", signature=c("ManticoreRSE", "missing"),
+          function(x, y, ..., mapping = aes(x = pos, y = value), size = .4,
+                   type = "p", long = TRUE, expand = TRUE, wrap = NULL,
+                   strip.position = "left", ncol = 1, scales = "free_x",
+                   show.legend = FALSE, assays = NULL, color.fun = scale_color_viridis,
+                   n.levels = 2) {
+    type <- match.arg(type, c("p", "l"))
+    if (!("index" %in% colnames(as.data.frame(rowRanges(x)))))
+        rowRanges(x) <- makeCoordinates(rowRanges(x))
+
+    if (!("colour" %in% names(mapping)))
+        rowRanges(x) <- addSeqnamesColor(rowRanges(x), n.levels = n.levels)
+
+    data <- as.data.frame(x, long = long, expand = expand)
+    if (!is.null(assays))
+        data <- data[data$assay %in% assays, ]
+    p <- ggplot(data, mapping = mapping, ...)
+    if (!("colour" %in% names(mapping)))
+        p <- p + aes(colour = colour)
+    if (type == "p") {
+        p <- p + geom_point(size = size, show.legend = show.legend)
+    } else if (type == "l") {
+        p <- p + geom_line(size = size, show.legend = show.legend)
+    }
+    ## Add color if n.levels
+    p <- p + color.fun(n.levels, discrete=TRUE)
+    if (is.null(wrap) & long)
+        wrap <- . ~ assay
+    if (!is.null(wrap))
+        p <- p + facet_wrap(wrap, scales = scales,
+                            ncol = ncol, strip.position = strip.position)
+    p
+})
+
+##' @rdname methods-ManticoreRSE
+##' @aliases plot
+##' @description Scatter plot assay scores from different ManticoreRSE
+##'     objects
+##' @export
+##' @param x ManticoreRSE object
+##' @param y ManticoreRSE object
+##' @param ... parameters to pass to ggplot
+##' @param mapping aesthetic mapping
+##' @param size plot size
+##' @param show.legend show legend
+##' @param wrap wrap expression
+##' @param scales wrap coordinate scales
+##' @param ncol number of wrap columns
+##' @param strip.position strip position
+##' @param assays which assays to plot
+##' @param long use long data frame representations
+##' @param expand expand rowRanges columns
+##'
+setMethod("plot", signature=c("ManticoreRSE", "ManticoreRSE"),
+          function(x, y, ..., mapping = aes(x = x, y = y),
+                   size = .5, show.legend = FALSE, wrap = NULL,
+                   scales = "fixed", ncol = 1, strip.position = "left",
+                   assays = NULL, long = TRUE, expand = TRUE) {
+    x <- subsetByOverlaps(x, y)
+    y <- subsetByOverlaps(y, x)
+    ## Assume identical columns
+    z <- x
+    assayData <- c(assays(x), assays(y))
+    assays(z) <- assayData
+    data <- as.data.frame(z, long = long, expand = expand)
+    ## Map group to x and y
+    i.x <- data$group %in% seq(1, length(assays(x)))
+    data$group <- "y"
+    data$group[i.x] <- "x"
+    if (!is.null(assays))
+        data <- data[data$assay %in% assays, ]
+    data <- data %>% spread(group, value)
+    p <- ggplot(data, mapping = mapping, ...)
+    p <- p + geom_point(size = size, show.legend = show.legend)
+    if (is.null(wrap) & long)
+        wrap <- . ~ assay
+    if (!is.null(wrap))
+        p <- p + facet_wrap(wrap, scales = scales,
+                            ncol = ncol, strip.position = strip.position)
+    p
 })

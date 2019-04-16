@@ -1,12 +1,8 @@
 ##' sites
 ##'
-##' Get the number of sites
-##'
-##' @param obj SWindows object
-##' @return Vector
-##'
-##' @author Per Unneberg
 ##' @export
+##'
+##' @describeIn sites Get sites for an SWindows object
 ##'
 setMethod("sites", "SWindows", function(obj) {
     x <- integer()

@@ -12,8 +12,8 @@
 }
 
 
-## Convert data.frame to ManticoreRSE object
-.asManticoreRSE <- function(data, window.size, sample, measure) {
+## Convert data.frame to WindowedSummarizedExperiment object
+.asWindowedSummarizedExperiment <- function(data, window.size, sample, measure) {
     if (is.null(window.size)) {
         window.size <- data$position[2] - data$position[1]
         message("window.size parameter undefined; inferring window size to ", window.size, " from data")
@@ -28,15 +28,15 @@
                    coverage = data$coverage, segregating.sites = data$segregating.sites,
                    window.size = window.size)
     colData <- S4Vectors::DataFrame(sample = sample)
-    ManticoreRSE(assays = assayData,
-                 rowRanges = sw, colData = colData, window.size = window.size)
+    WindowedSummarizedExperiment(assays = assayData,
+                 rowRanges = sw, colData = colData)
 }
 
 ##' readVarianceSliding
 ##'
 ##' Read VarianceSliding results from popoolation. This function reads
 ##' data, adds start and end columns and converts data to a
-##' ManticoreRSE object.
+##' WindowedSummarizedExperiment object.
 ##'
 ##'
 ##' @param filename filename to parse
@@ -47,14 +47,14 @@
 ##' fn <- system.file("extdata", "popoolation", "dmel.A.D.txt.gz", package = "manticore")
 ##' readVarianceSliding(fn, measure = "D", sample = "A")
 ##'
-##' @return ManticoreRSE object of one assay
+##' @return WindowedSummarizedExperiment object of one assay
 ##'
 ##' @author Per Unneberg
 ##'
 readVarianceSliding <- function(filename, measure = "pi", window.size = NULL, sample) {
     measure <- match.arg(measure, c("pi", "D", "theta"))
     data <- .readVarianceSlidingRaw(filename)
-    .asManticoreRSE(data, window.size, sample, measure)
+    .asWindowedSummarizedExperiment(data, window.size, sample, measure)
 }
 
 
@@ -71,7 +71,7 @@ readVarianceSliding <- function(filename, measure = "pi", window.size = NULL, sa
 ##'     autosomes, sex chromosomes etc.
 ##' @param ... extra parameters passed to readVarianceSliding
 ##'
-##' @return ManticoreRSE Assays consist of the requested statistics
+##' @return WindowedSummarizedExperiment Assays consist of the requested statistics
 ##' @author Per Unneberg
 ##'
 ##' @importFrom S4Vectors DataFrame

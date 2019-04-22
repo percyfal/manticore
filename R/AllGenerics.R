@@ -101,3 +101,14 @@ setGeneric("gboxplot",
                     text.x.hjust=integer(0), which=NULL, ...)
     standardGeneric("gboxplot"),
     signature="data")
+
+
+##' Generic window.size function
+##'
+##' @export
+##' @rdname window.size
+##'
+setGeneric("window.size",
+           function(obj)
+    standardGeneric("window.size"),
+    signature="obj")

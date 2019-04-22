@@ -15,8 +15,13 @@
     colnames(df) <- sample
     assayData <- list(df)
     names(assayData) <- assay
-    data$start <- data$position - window.size / 2 + 1
-    data$end <- data$position + window.size / 2
+    if (window.size > 1) {
+        data$start <- data$position - window.size / 2 + 1
+        data$end <- data$position + window.size / 2
+    } else {
+        data$start <- data$position
+        data$end <- data$position
+    }
     sw <- SWindows(seqnames = data$seqnames, ranges = IRanges(start = data$start, end = data$end),
                    coverage = data$coverage, segregating.sites = data$segregating.sites,
                    window.size = window.size)

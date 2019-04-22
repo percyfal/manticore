@@ -1,0 +1,10 @@
+Using input	p1_p2_p1_p2.sync
+Using output	p1_p2_p1_p2.cmh
+Using min-count	12
+Using min-coverage	50
+Using max-coverage	200
+Using population	1-2,3-4
+Using min-pvalue	1
+Remove temporary files	0
+Using test	0
+Using help	0

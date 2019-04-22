@@ -3,7 +3,7 @@
 .varianceSlidingOutputColumns <- c("segregating.sites", "coverage", "score")
 
 
-.readVarianceSlidingRaw <- function(filename, measure) {
+.readVarianceSlidingRaw <- function(filename) {
     data <- read.table(filename)
     colnames(data) <- .varianceSlidingColnames
     data$score[data$score == "na"] <- NA
@@ -43,13 +43,17 @@
 ##' @param window.size window size
 ##' @param measure measure
 ##'
-##' @return
+##' @examples
+##' fn <- system.file("extdata", "popoolation", "dmel.A.D.txt.gz", package = "manticore")
+##' readVarianceSliding(fn, measure = "D", sample = "A")
+##'
+##' @return ManticoreRSE object of one assay
 ##'
 ##' @author Per Unneberg
 ##'
 readVarianceSliding <- function(filename, measure = "pi", window.size = NULL, sample) {
     measure <- match.arg(measure, c("pi", "D", "theta"))
-    data <- .readVarianceSlidingRaw(filename, measure)
+    data <- .readVarianceSlidingRaw(filename)
     .asManticoreRSE(data, window.size, sample, measure)
 }
 
@@ -72,6 +76,12 @@ readVarianceSliding <- function(filename, measure = "pi", window.size = NULL, sa
 ##'
 ##' @importFrom S4Vectors DataFrame
 ##' @importFrom BiocParallel bplapply
+##'
+##' @examples
+##' dmel.df <- data.frame(filename = list.files(system.file("extdata", "popoolation", package = "manticore"), full.names = TRUE),
+##'                       sample = c(rep("A", 3), rep("B", 3)), measure = rep(c("D", "pi", "theta"), 2))
+##' mrse <- VarianceSlidingAssays(dmel.df)
+##'
 ##'
 VarianceSlidingAssays <- function(input.df, colData = NULL, window.size = NULL, class = NA, ...) {
     stopifnot(inherits(input.df, c("data.frame", "DataFrame")))

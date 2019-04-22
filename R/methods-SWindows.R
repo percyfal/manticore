@@ -14,3 +14,13 @@ setMethod("sites", "SWindows", function(obj) {
         NULL
     x
 })
+
+##' @rdname window.size
+##' @description Get window.size from a Windows object
+##'
+##' @param obj Windows object
+##'
+setMethod("window.size", "SWindows",
+          function(obj) {
+    return (obj@window.size)
+})

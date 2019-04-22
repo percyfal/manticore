@@ -46,3 +46,14 @@ addSeqnamesColor <- function(x, mapping = NULL, n.levels = 2) {
     mcols(x)$colour <- as.factor(mcols(x)$colour)
     return(x)
 }
+
+
+##' @rdname window.size
+##' @description Get window.size from a Windows object
+##'
+##' @param obj Windows object
+##'
+setMethod("window.size", "Windows",
+          function(obj) {
+    return (obj@window.size)
+})

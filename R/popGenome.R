@@ -1,3 +1,11 @@
+##' @rdname popGenome
+##' @title popGenome
+##'
+##' @description Methods and utilities for dealing with popGenome
+##'     results
+##'
+
+
 ##' GENOMEList
 ##'
 ##' Convert list to GENOMEList
@@ -10,7 +18,6 @@
 setMethod("GENOMEList", "list",
           function(obj) new("GENOMEList", listData = obj))
 
-
 ##' GRanges_OR_NULL
 ##'
 ##' Create class union of GRanges or NULL
@@ -22,6 +29,178 @@ setMethod("GENOMEList", "list",
 ##' @importFrom GenomicRanges GRanges
 ##'
 setClassUnion("GRanges_OR_missing", c("GRanges", "missing"))
+
+
+.population.data.frame <- function(x) {
+    y <- do.call(rbind, x)
+    n <- nrow(y) / length(rownames(x))
+    cbind(population = rep(rownames(x), each = n), seqnames = rownames(y), y)
+}
+
+.make.assay.list <- function(x) {
+    y <- do.call(rbind, lapply(x, .population.data.frame))
+    z <- as.data.frame(y) %>% gather("key", "value", -one_of(c("seqnames", "population"))) %>% tidyr::spread("population", value)
+    lapply(split(z, z$key), function(x) {y <- as.data.frame(x)[, !(colnames(x) %in% exclude)]; rownames(y) <- NULL; y})
+}
+
+
+setGeneric("PopGenome",
+           function(object, ...) signature("GENOMEList"))
+
+
+
+
+setMethod("PopGenome", "GENOMEList",
+          function(object,
+                   statistics=c("detail", "neutrality", "fixed", "shared", "diversity",
+                                "diversity.between", "F_ST", "F_ST.pairwise"),
+                   use.population.names=TRUE,
+                   use.region.names=TRUE,
+                   quiet=TRUE,
+                   window.size = NULL,
+                   seqinfo = NULL,
+                   ...) {
+    if (!requireNamespace("PopGenome", quietly = TRUE))
+            stop(paste0("Package \"PopGenome\" needed for this function to work. Please install it."),
+                 call. = FALSE)
+    statistics <- match.arg(statistics, c("detail", "neutrality",
+                                          "fixed", "shared",
+                                          "diversity",
+                                          "diversity.between", "F_ST",
+                                          "F_ST.pairwise",
+                                          "linkage", "sweeps",
+                                          "recomb"),
+                            several.ok = TRUE)
+    population.statistics <- c("detail", "neutrality", "diversity", "linkage", "sweeps", "recomb")
+    #pairs <- combn(populations, 2, function(x){paste(x, collapse = "/")})
+    fun <- list(detail = get.detail, neutrality = get.neutrality,
+                fixed = get.fixed, shared = get.shared,
+                diversity = get.diversity, diversity.between = get.diversity.between,
+                F_ST = get.F_ST, F_ST.pairwise = get.F_ST.pairwise, linkage = get.linkage,
+                sweeps = get.sweeps, recomb = get.recomb)
+
+    assayData <- S4Vectors::SimpleList()
+    colData <- S4Vectors::DataFrame(populations = names(object[[1]]@populations))
+
+    ## Generate WSE for populations data
+    rowRanges.df <- DataFrame()
+    for (name in names(object)) {
+        obj <- object[[name]]
+
+        ## Find out if slide data or not
+        if (length(obj@SLIDE.POS) == 0) {
+            if (!quiet) message("collecting summary data")
+            rowRanges.df <- rbind(rowRanges.df, DataFrame(seqnames = name, start = 1, end = get.n.sites(obj)))
+        } else {
+            ranges <- as.data.frame(do.call("rbind", strsplit(obj@region.names, " ")),
+                                    stringsAsFactors = FALSE)[c(1,2,4)]
+            colnames(ranges) <- c("seqnames", "start", "end")
+            rowRanges.df <- rbind(rowRanges.df, DataFrame(ranges))
+        }
+    }
+
+    if (!quiet) message("collecting segregating sites")
+    assayData$segregating.sites <- as.data.frame(do.call(rbind, lapply(object, get.segregating.sites)))
+
+    for (stat in statistics) {
+        if (!(stat %in% population.statistics))
+            next
+        if (!quiet) message("collecting ", stat, " results")
+       assayData <- c(assayData, .make.assay.list(lapply(object, fun[[stat]])))
+    }
+
+    rowRanges <- Windows(seqnames = rowRanges.df$seqnames, ranges = IRanges(start = as.integer(rowRanges.df$start),
+                                                                            end = as.integer(rowRanges.df$end)))
+    if (!is.null(seqinfo))
+        seqinfo(rowRanges) <- seqinfo
+    WindowedSummarizedExperiment(assays = assayData, rowRanges = rowRanges, colData = colData)
+        ## if (statistics %in% c("detail", "neutrality", "diversity", "linkage", "sweeps", "recomb")) {
+        ##     ## Result is matrix with populations as row names
+        ##     tmp <- f(object[[name]])
+        ##     if (use.population.names) {
+        ##         rownames(tmp) <- populations
+        ##     }
+        ##     tmp <- do.call("rbind", lapply(rownames(tmp), function(x){data.frame(population = x, ranges = rownames(tmp[x, ][[1]]), tmp[x, ][[1]])}))
+        ##     tmp$seqnames <- name
+        ##     rownames(tmp) <- NULL
+        ##     gather.exclude <- c("population", "ranges", "seqnames")
+        ## } else if (statistics %in% c("fixed", "shared", "diversity.between")) {
+        ##     ## Result is data frame with population pairs in columns
+        ##     tmp <- as.data.frame(f(object[[name]], ...))
+        ##     if (use.population.names) {
+        ##         colnames(tmp) <- pairs
+        ##     }
+        ##     tmp$seqnames <- name
+        ##     tmp$ranges <- ranges
+        ##     tmp$key <- statistics
+        ##     gather.key <- "population"
+        ##     gather.exclude <- c("ranges", "seqnames", "key")
+        ## } else if (statistics %in% c("F_ST.pairwise")) {
+        ##     ## Result is matrix with statistics as row names
+        ##     tmp <- f(object[[name]])
+        ##     col.names <- colnames(tmp[[1]])
+        ##     tmp <- do.call(
+        ##         "rbind", lapply(rownames(tmp),
+        ##                         function(x) {
+        ##                      data.frame(key = x, ranges = ranges, tmp[x, ])}))
+        ##     if (use.population.names) {
+        ##         colnames(tmp)[3:dim(tmp)[2]] <- pairs
+        ##     } else {
+        ##         colnames(tmp)[3:dim(tmp)[2]] <- col.names
+        ##     }
+        ##     tmp$seqnames <- name
+        ##     gather.key <- "population"
+        ##     gather.exclude <- c("key", "ranges", "seqnames")
+        ## } else if (statistics %in% c("F_ST")) {
+        ##     ## Result is matrix with statistics in column, regions in rows
+        ##     tmp <- as.data.frame(f(object[[name]]))
+        ##     tmp$ranges <- ranges
+        ##     tmp$seqnames <- name
+        ##     tmp$population <- "__all__"
+        ##     gather.exclude <- c("ranges", "seqnames", "population")
+        ## } else if (statistics %in% c("segregating.sites")) {
+        ##     ## Result is matrix with populations in columns
+        ##     tmp <- as.data.frame(f(object[[name]]))
+        ##     if (use.population.names) {
+        ##         colnames(tmp) <- populations
+        ##     }
+        ##     tmp$ranges <- ranges
+        ##     tmp$seqnames <- name
+        ##     tmp$key <- statistics
+        ##     gather.key <- "population"
+        ##     gather.exclude <- c("ranges", "seqnames", "key")
+        ## } else {
+        ##     stop("shouldn't end up here")
+        ## }
+        ## if (!quiet) message("Adding data for ", name)
+        ## res <- rbind(res, tmp)
+
+    ## Fix factors
+    ## res$seqnames <- factor(res$seqnames, levels = unique(res$seqnames))
+    ## res$ranges <- factor(res$ranges, levels = unique(res$ranges))
+    ## res <- res %>% tidyr::gather(gather.key, "value", -one_of(gather.exclude))
+    ## colnames(res)[which(colnames(res) == "gather.key")] <- gather.key
+    ## res$population <- factor(res$population, levels = unique(res$population))
+    ## res$key <- factor(res$key, levels = unique(res$key))
+
+    ##assayData <- data.frame(lapply(split(res, res$key), function(x) {x$value}))
+    ## data <- res %>% tidyr::unite("population_statistics", population, key) %>%
+    ##     tidyr::spread("population_statistics", value)
+    ## ## Parse the start/stop positions; we assume the format "name start - end :"
+
+    ## data.ranges <- strsplit(as.character(res$ranges), " ")
+    ## data <- unique(as.data.frame(do.call("rbind", data.ranges), stringsAsFactors = FALSE))[c(1,2,4)]
+    ## colnames(data) <- c("seqnames", "start", "end")
+    ## data$start <- as.numeric(data$start)
+    ## data$end <- as.numeric(data$end)
+    ## if (is.null(window.size)) {
+    ##     window.size <- data[1,]$end - data[1,]$start + 1
+    ##     message("window.size parameter undefined; inferring window size to ", window.size, " from data")
+    ## }
+    ## w <- Windows(seqnames = data$seqnames, ranges = IRanges(start = data$start, end = data$end),
+    ##              window.size = as.integer(window.size))
+    ## res
+})
 
 
 ##'
@@ -219,6 +398,11 @@ get.F_ST.pairwise <- function(object, which, ...) {
 get.segregating.sites <- function(object, ...) {
     return (object@n.segregating.sites)
 }
+
+get.n.sites <- function(object) {
+    return (get.sum.data(object)[1])
+}
+
 
 
 ##' genomewide.stats

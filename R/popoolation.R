@@ -20,7 +20,7 @@
     }
     df <- DataFrame(score=data$score)
     colnames(df) <- sample
-    assayData <- list(df)
+    assayData <- S4Vectors::SimpleList(df)
     names(assayData) <- measure
     data$start <- data$position - window.size / 2 + 1
     data$end <- data$position + window.size / 2

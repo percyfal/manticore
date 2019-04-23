@@ -22,10 +22,17 @@ autosomes, sex chromosomes etc.}
 \item{...}{extra parameters passed to readVarianceSliding}
 }
 \value{
-ManticoreRSE Assays consist of the requested statistics
+WindowedSummarizedExperiment Assays consist of the requested statistics
 }
 \description{
 Read multiple VarianceSliding results from popoolation
+}
+\examples{
+dmel.df <- data.frame(filename = list.files(system.file("extdata", "popoolation", package = "manticore"), full.names = TRUE),
+                      sample = c(rep("A", 3), rep("B", 3)), measure = rep(c("D", "pi", "theta"), 2))
+mrse <- VarianceSlidingAssays(dmel.df)
+
+
 }
 \author{
 Per Unneberg

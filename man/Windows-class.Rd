@@ -26,12 +26,14 @@ Windows object
 }
 \description{
 Windows object to represent windowed analyses. Contains a slot for
-window size.
+window size. Note that edge effects are allowed such that the last
+windows may be smaller than the actual window size.
 
 Create Windows class
 
 Windows object to represent windowed analyses. Contains a slot for
-window size.
+window size. Note that edge effects are allowed such that the last
+windows may be smaller than the actual window size.
 
 Create Windows class
 }

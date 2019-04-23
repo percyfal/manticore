@@ -15,12 +15,17 @@ readVarianceSliding(filename, measure = "pi", window.size = NULL,
 \item{window.size}{window size}
 }
 \value{
-
+WindowedSummarizedExperiment object of one assay
 }
 \description{
 Read VarianceSliding results from popoolation. This function reads
 data, adds start and end columns and converts data to a
-ManticoreRSE object.
+WindowedSummarizedExperiment object.
+}
+\examples{
+fn <- system.file("extdata", "popoolation", "dmel.A.D.txt.gz", package = "manticore")
+readVarianceSliding(fn, measure = "D", sample = "A")
+
 }
 \author{
 Per Unneberg

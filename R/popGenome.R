@@ -54,7 +54,8 @@ setClassUnion("Seqinfo_OR_missing", c("Seqinfo", "missing"))
 
 .make.population.assay.list <- function(x) {
     y <- do.call(rbind, lapply(x, .population.data.frame))
-    z <- as.data.frame(y) %>% gather("key", "value", -one_of(c("seqnames", "population"))) %>% tidyr::spread("population", value)
+    z <- as.data.frame(y) %>% gather("key", "value", -tidyselect::one_of(c("seqnames", "population"))) %>% tidyr::spread("population", value)
+    exclude = c("key", "seqnames")
     lapply(split(z, z$key), function(x) {y <- as.data.frame(x)[, !(colnames(x) %in% exclude)]; rownames(y) <- NULL; y})
 }
 
@@ -70,6 +71,7 @@ setClassUnion("Seqinfo_OR_missing", c("Seqinfo", "missing"))
         z <- as.data.frame(do.call("rbind", lapply(x, .pairs.data.frame)))
     else
         z <- as.data.frame(cbind(key = stat, do.call(rbind, x)))
+    exclude = c("key", "seqnames")
     lapply(split(z, z$key), function(x) {y <- as.data.frame(x)[, !(colnames(x) %in% exclude)]; rownames(y) <- NULL; y})
 }
 
@@ -81,7 +83,7 @@ setClassUnion("Seqinfo_OR_missing", c("Seqinfo", "missing"))
 ##' @param object an R object
 ##'
 setGeneric("PopGenome",
-           function(object, seqinfo, ...) standardGeneric("PopGenome"))
+           function(object, seqinfo = NULL, ...) standardGeneric("PopGenome"))
 
 
 ##' @rdname PopGenome
@@ -161,11 +163,11 @@ setMethod("PopGenome", signature("GENOMEList", "Seqinfo_OR_missing"),
        assayData <- c(assayData, .make.population.assay.list(lapply(object, fun[[stat]])))
     }
     if (is.null(window.size)) {
-        window.size <- as.integer(ranges$end[1]) - as.integer(ranges$start[1]) + 1
+        window.size <- as.integer(ranges$end[1]) - as.integer(ranges$start[1]) + as.integer(1)
         message("window.size parameter undefined; inferring window size to ", window.size, " from data")
     }
-    rowRanges <- Windows(seqnames = rowRanges.df$seqnames, ranges = IRanges(start = as.integer(rowRanges.df$start),
-                                                                            end = as.integer(rowRanges.df$end)),
+    rowRanges <- Windows(seqnames = rowRanges.df$seqnames, ranges = IRanges::IRanges(start = as.integer(rowRanges.df$start),
+                                                                                     end = as.integer(rowRanges.df$end)),
                          window.size = window.size)
 
     if (!is.null(seqinfo))

@@ -10,6 +10,10 @@ if (requireNamespace("PopGenome", quietly = TRUE))
 fn <- system.file("extdata", "popgenome.rda", package = "manticore")
 load(fn)
 
-
-
 context("Test PopGenome methods")
+
+test_that("parsing slide data is ok", {
+    check_popgenome()
+    wselist <- PopGenome(slides)
+
+})

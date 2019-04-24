@@ -24,7 +24,7 @@
     names(assayData) <- measure
     data$start <- data$position - window.size / 2 + 1
     data$end <- data$position + window.size / 2
-    sw <- SWindows(seqnames = data$seqnames, ranges = IRanges(start = data$start, end = data$end),
+    sw <- SWindows(seqnames = data$seqnames, ranges = IRanges::IRanges(start = data$start, end = data$end),
                    coverage = data$coverage, segregating.sites = data$segregating.sites,
                    window.size = window.size)
     colData <- S4Vectors::DataFrame(sample = sample)

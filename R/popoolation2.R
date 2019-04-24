@@ -13,7 +13,7 @@
     sample <- gsub("=.+", "", df[1,])
     df <- DataFrame(sapply(df, function(x){as.numeric(gsub(".+=", "", x))}))
     colnames(df) <- sample
-    assayData <- list(df)
+    assayData <- S4Vectors::SimpleList(df)
     names(assayData) <- assay
     if (window.size > 1) {
         data$start <- data$position - window.size / 2 + 1
@@ -22,7 +22,7 @@
         data$start <- data$position
         data$end <- data$position
     }
-    sw <- SWindows(seqnames = data$seqnames, ranges = IRanges(start = data$start, end = data$end),
+    sw <- SWindows(seqnames = data$seqnames, ranges = IRanges::IRanges(start = data$start, end = data$end),
                    coverage = data$coverage, segregating.sites = data$segregating.sites,
                    window.size = window.size)
     colData <- S4Vectors::DataFrame(sample = sample)
@@ -43,7 +43,7 @@
     colnames(df) <- header[(n.mcol + 1):length(header)]
     assayData <- list(df)
     names(assayData) <- assay
-    gr <- GRanges(seqnames = data$seqnames, ranges = IRanges(start = data$position, end = data$position))
+    gr <- GRanges(seqnames = data$seqnames, ranges = IRanges::IRanges(start = data$position, end = data$position))
     mcols(gr) <- data[3:n.mcol]
     colData <- S4Vectors::DataFrame(colnames = header[(n.mcol + 1):length(header)])
     SummarizedExperiment(assays = assayData,

@@ -31,6 +31,20 @@ setMethod("GENOMEList", "list",
 setClassUnion("GRanges_OR_missing", c("GRanges", "missing"))
 
 
+##' @rdname Seqinfo_OR_missing
+##'
+##' @description Class union of Seqinfo or missing
+##'
+##' @export
+##'
+##' @importFrom methods setClassUnion
+##' @importFrom GenomeInfoDb Seqinfo
+##'
+setClassUnion("Seqinfo_OR_missing", c("Seqinfo", "missing"))
+
+
+
+## Interntal functions
 .population.data.frame <- function(x) {
     y <- do.call(rbind, x)
     n <- nrow(y) / length(rownames(x))
@@ -59,23 +73,42 @@ setClassUnion("GRanges_OR_missing", c("GRanges", "missing"))
 }
 
 
-
+##' @rdname PopGenome
+##'
+##' @description Function for reading PopGenome results
+##'
+##' @param object an R object
+##'
 setGeneric("PopGenome",
-           function(object, ...) signature("GENOMEList"))
+           function(object, ...) standardGeneric("PopGenome"))
 
 
-
-
-setMethod("PopGenome", "GENOMEList",
+##' @rdname PopGenome
+##'
+##' @description Process a GENOMEList object and return a list
+##'     containing WindowedSummarizedExperiment objects
+##'
+##' @param object GENOMEList
+##' @param statistics Which statistics to parse
+##' @param quiet don't print info messages
+##' @param window.size Set window size if unable to infer
+##'
+##' @examples
+##' library(PopGenome)
+##' fn <- system.file("extdata", "popgenome.rda", package = "manticore")
+##' load(fn)
+##' wselist <- PopGenome(gl)
+##'
+##' @return list
+##' @author Per Unneberg
+##'
+setMethod("PopGenome", signature(object = "GENOMEList", seqinfo = "Seqinfo_OR_missing"),
           function(object,
-                   statistics=c("detail", "neutrality", "fixed", "shared", "diversity",
-                                "diversity.between", "F_ST", "F_ST.pairwise"),
-                   use.population.names=TRUE,
-                   use.region.names=TRUE,
-                   quiet=TRUE,
-                   window.size = NULL,
                    seqinfo = NULL,
-                   ...) {
+                   statistics = c("detail", "neutrality", "fixed", "shared", "diversity",
+                                "diversity.between", "F_ST", "F_ST.pairwise"),
+                   quiet = TRUE,
+                   window.size = NULL) {
     if (!requireNamespace("PopGenome", quietly = TRUE))
             stop(paste0("Package \"PopGenome\" needed for this function to work. Please install it."),
                  call. = FALSE)
@@ -125,9 +158,13 @@ setMethod("PopGenome", "GENOMEList",
         if (!quiet) message("collecting ", stat, " population results")
        assayData <- c(assayData, .make.population.assay.list(lapply(object, fun[[stat]])))
     }
-
+    if (is.null(window.size)) {
+        window.size <- as.integer(ranges$end[1]) - as.integer(ranges$start[1]) + 1
+        message("window.size parameter undefined; inferring window size to ", window.size, " from data")
+    }
     rowRanges <- Windows(seqnames = rowRanges.df$seqnames, ranges = IRanges(start = as.integer(rowRanges.df$start),
-                                                                            end = as.integer(rowRanges.df$end)))
+                                                                            end = as.integer(rowRanges.df$end)),
+                         window.size = window.size)
 
     if (!is.null(seqinfo))
         seqinfo(rowRanges) <- seqinfo
@@ -365,10 +402,9 @@ get.n.sites <- function(object) {
 
 
 
-##' genomewide.stats
+##' @rdname genomewide.stats
 ##'
 ##' @export
-##' @rdname genomewide.stats
 ##'
 setGeneric("genomewide.stats", function(object, which=character(0), biallelic.structure=TRUE,
                                         pi=TRUE, ...) standardGeneric("genomewide.stats"))

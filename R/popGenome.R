@@ -32,13 +32,14 @@ setClassUnion("GRanges_OR_missing", c("GRanges", "missing"))
 
 
 ##' @rdname Seqinfo_OR_missing
+##' @title Seqinfo_OR_missing
 ##'
 ##' @description Class union of Seqinfo or missing
 ##'
 ##' @export
 ##'
 ##' @importFrom methods setClassUnion
-##' @importFrom GenomeInfoDb Seqinfo
+##' @import GenomeInfoDb
 ##'
 setClassUnion("Seqinfo_OR_missing", c("Seqinfo", "missing"))
 
@@ -74,16 +75,17 @@ setClassUnion("Seqinfo_OR_missing", c("Seqinfo", "missing"))
 
 
 ##' @rdname PopGenome
-##'
+##'@title Popgenome
 ##' @description Function for reading PopGenome results
 ##'
 ##' @param object an R object
 ##'
 setGeneric("PopGenome",
-           function(object, ...) standardGeneric("PopGenome"))
+           function(object, seqinfo, ...) standardGeneric("PopGenome"))
 
 
 ##' @rdname PopGenome
+##'
 ##'
 ##' @description Process a GENOMEList object and return a list
 ##'     containing WindowedSummarizedExperiment objects
@@ -102,7 +104,7 @@ setGeneric("PopGenome",
 ##' @return list
 ##' @author Per Unneberg
 ##'
-setMethod("PopGenome", signature(object = "GENOMEList", seqinfo = "Seqinfo_OR_missing"),
+setMethod("PopGenome", signature("GENOMEList", "Seqinfo_OR_missing"),
           function(object,
                    seqinfo = NULL,
                    statistics = c("detail", "neutrality", "fixed", "shared", "diversity",
@@ -199,169 +201,6 @@ setMethod("PopGenome", signature(object = "GENOMEList", seqinfo = "Seqinfo_OR_mi
          all = wse.all)
 })
 
-
-##'
-##' Retrieve genome stats for a PopGenome GENOME instance. Note that
-##' this is only intended for use with some slots/statistical
-##' operations. The PopGenome function does not work on data that has
-##' been saved in rda files. They should be saved with save.session,
-##' but this does not seem to work.
-##'
-##' @export
-##' @rdname GStats
-##'
-##' @examples
-##' library(PopGenome)
-##' fn <- system.file("extdata", "popgenome.rda", package = "manticore")
-##' load(fn)
-##' gl <- GENOMEList(scaffolds)
-##' sessionInfo()
-##' gs <- GStats(gl)
-##'
-##' @importFrom tidyselect one_of
-##' @importFrom utils combn
-##'
-setMethod("GStats", signature(object = "GENOMEList", gr = "GRanges_OR_missing"),
-          function(object,
-                   gr=NULL,
-                   statistics=c("detail"),
-                   use.population.names=TRUE,
-                   use.region.names=TRUE,
-                   quiet=TRUE,
-                   ...) {
-    if (!requireNamespace("PopGenome", quietly = TRUE))
-            stop(paste0("Package \"PopGenome\" needed for this function to work. Please install it."),
-                 call. = FALSE)
-
-    statistics <- match.arg(statistics, c("summary", "detail", "neutrality",
-                                "fixed", "shared", "diversity",
-                                "diversity.between", "F_ST",
-                                "F_ST.pairwise", "segregating.sites",
-                                "linkage", "sweeps", "recomb"))
-    res <- data.frame()
-    populations <- names(object[[1]]@populations)
-    pairs <- combn(populations, 2, function(x){paste(x, collapse = "/")})
-    fun <- list(summary = get.sum.data, detail = get.detail, neutrality = get.neutrality,
-                fixed = get.fixed, shared = get.shared,
-                diversity = get.diversity, diversity.between = get.diversity.between,
-                F_ST = get.F_ST, F_ST.pairwise = get.F_ST.pairwise, linkage = get.linkage,
-                sweeps = get.sweeps, recomb = get.recomb, segregating.sites = get.segregating.sites)
-
-    f <- fun[[statistics]]
-    gather.key = "key"
-    for (name in names(object)) {
-        ranges <- object[[name]]@region.names
-        if (statistics %in% c("detail", "neutrality", "diversity", "linkage", "sweeps", "recomb")) {
-            ## Result is matrix with populations as row names
-            tmp <- f(object[[name]])
-            if (use.population.names) {
-                rownames(tmp) <- populations
-            }
-            tmp <- do.call("rbind", lapply(rownames(tmp), function(x){data.frame(population = x, ranges = rownames(tmp[x, ][[1]]), tmp[x, ][[1]])}))
-            tmp$seqnames <- name
-            rownames(tmp) <- NULL
-            gather.exclude <- c("population", "ranges", "seqnames")
-        } else if (statistics %in% c("fixed", "shared", "diversity.between")) {
-            ## Result is data frame with population pairs in columns
-            tmp <- as.data.frame(f(object[[name]], ...))
-            if (use.population.names) {
-                colnames(tmp) <- pairs
-            }
-            tmp$seqnames <- name
-            tmp$ranges <- ranges
-            tmp$key <- statistics
-            gather.key <- "population"
-            gather.exclude <- c("ranges", "seqnames", "key")
-        } else if (statistics %in% c("F_ST.pairwise")) {
-            ## Result is matrix with statistics as row names
-            tmp <- f(object[[name]])
-            col.names <- colnames(tmp[[1]])
-            tmp <- do.call(
-                "rbind", lapply(rownames(tmp),
-                                function(x) {
-                             data.frame(key = x, ranges = ranges, tmp[x, ])}))
-            if (use.population.names) {
-                colnames(tmp)[3:dim(tmp)[2]] <- pairs
-            } else {
-                colnames(tmp)[3:dim(tmp)[2]] <- col.names
-            }
-            tmp$seqnames <- name
-            gather.key <- "population"
-            gather.exclude <- c("key", "ranges", "seqnames")
-        } else if (statistics %in% c("summary")) {
-            ## Result is matrix with statistics in columns, region in rows
-            if (!quiet) message("Analyzing ", statistics, " data")
-            tmp <- as.data.frame(f(object[[name]]))
-            tmp$seqnames <- name
-            tmp$ranges <- ranges
-            tmp$population <- "__all__"
-            gather.exclude <- c("seqnames", "ranges", "population")
-        } else if (statistics %in% c("F_ST")) {
-            ## Result is matrix with statistics in column, regions in rows
-            tmp <- as.data.frame(f(object[[name]]))
-            tmp$ranges <- ranges
-            tmp$seqnames <- name
-            tmp$population <- "__all__"
-            gather.exclude <- c("ranges", "seqnames", "population")
-        } else if (statistics %in% c("segregating.sites")) {
-            ## Result is matrix with populations in columns
-            tmp <- as.data.frame(f(object[[name]]))
-            if (use.population.names) {
-                colnames(tmp) <- populations
-            }
-            tmp$ranges <- ranges
-            tmp$seqnames <- name
-            tmp$key <- statistics
-            gather.key <- "population"
-            gather.exclude <- c("ranges", "seqnames", "key")
-        } else {
-            stop("shouldn't end up here")
-        }
-        if (!quiet) message("Adding data for ", name)
-        res <- rbind(res, tmp)
-    }
-
-    ## Fix factors
-    res$seqnames <- factor(res$seqnames, levels = unique(res$seqnames))
-    res$ranges <- factor(res$ranges, levels = unique(res$ranges))
-    res <- res %>% tidyr::gather(gather.key, "value", -one_of(gather.exclude))
-    colnames(res)[which(colnames(res) == "gather.key")] <- gather.key
-    res$population <- factor(res$population, levels = unique(res$population))
-    res$key <- factor(res$key, levels = unique(res$key))
-
-    data <- res %>% tidyr::unite("population_statistics", population, key) %>%
-        tidyr::spread("population_statistics", value)
-    ## Parse the start/stop positions; we assume the format "name start - end :"
-    data.ranges <- strsplit(as.character(data$ranges), " ")
-    if (all(lapply(data.ranges, length) == 5)) {
-        start <- unlist(lapply(data.ranges, function(x) {as.integer(x[[2]])}))
-        end <- unlist(lapply(data.ranges, function(x) {as.integer(x[[4]])}))
-    } else {
-        start <- as.integer(rep(1, length(data.ranges)))
-        end <- as.integer(unlist(lapply(data$seqnames, function(x) {object[[as.character(x)]]@n.sites})))
-    }
-    .values <- subset(data, select = -c(ranges, seqnames))
-    .ranges <- GenomicRanges::GRanges(seqnames = S4Vectors::Rle(data$seqnames, rep(1, length(data$seqnames))),
-                                      ranges = IRanges::IRanges(start, end = end),
-                                      feature_id = paste(data$seqnames, start, end, ":", sep = " "),
-                                      sites = 0)
-    .ranges$feature_id <- factor(.ranges$feature_id, levels = unique(.ranges$feature_id))
-    if (is.null(gr)) {
-        .ranges$sites <- width(.ranges)
-    } else {
-        .ranges$sites <- overlapByWindows(.ranges, gr)
-    }
-    rse <- SummarizedExperiment(assays = list(data = as.matrix(.values)),
-                                rowRanges = .ranges)
-    .cdata <- S4Vectors::DataFrame(
-        expand.grid(
-            statistic = sort(levels(res$key), decreasing = FALSE),
-            population = sort(levels(res$population), decreasing = FALSE)),
-        row.names = colnames(rse))
-    colData(rse) <- .cdata
-    gs <- new("GStats", rse, statistics = statistics, application = "PopGenome")
-    return (gs)
-})
 
 ## No need to make these generic; they are not exported
 get.fixed <- function(object, ...) {

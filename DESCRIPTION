@@ -43,10 +43,7 @@ Collate: methods-manticore.R
 	 Windows-class.R
 	 SWindows-class.R
 	 bcftools.R
-	 gboxplot-GStats.R
-	 gplot-GStats.R
 	 ManticoreDF-class.R
-	 methods-GStats.R
 	 overlap.R
 	 popGenome.R
 	 popoolation2.R

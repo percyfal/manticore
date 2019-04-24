@@ -26,7 +26,11 @@ setClass("WindowedSummarizedExperiment", contains = c("RangedSummarizedExperimen
 setValidity("WindowedSummarizedExperiment", .valid.WindowedSummarizedExperiment)
 
 
-##' Windowedsummarizedexperiment
+setGeneric("WindowedSummarizedExperiment",
+           function(assays, ...) standardGeneric("WindowedSummarizedExperiment"))
+
+
+##' WindowedSummarizedExperiment
 ##'
 ##' WindowedSummarizedExperiment initialization function
 ##'
@@ -36,10 +40,11 @@ setValidity("WindowedSummarizedExperiment", .valid.WindowedSummarizedExperiment)
 ##'
 ##' @author Per Unneberg
 ##'
-WindowedSummarizedExperiment <- function(...) {
-    rse <- SummarizedExperiment(...)
+setMethod("WindowedSummarizedExperiment", "SimpleList",
+          function(assays, ...) {
+    rse <- SummarizedExperiment(assays, ...)
     if (!is(rse, "RangedSummarizedExperiment"))
         stop("WindowedSummarizedExperiment must be setup as a RangedSummarizedExperiment")
     wse <- as(rse, "WindowedSummarizedExperiment")
     wse
-}
+})

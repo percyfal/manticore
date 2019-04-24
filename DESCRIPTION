@@ -38,15 +38,12 @@ RoxygenNote: 6.1.1
 Collate: methods-manticore.R
 	 AllClasses.R
 	 AllGenerics.R
+	 WindowedSummarizedExperiment.R
+	 methods-WindowedSummarizedExperiment.R
 	 Windows-class.R
 	 SWindows-class.R
 	 bcftools.R
-	 gboxplot-GStats.R
-	 gplot-GStats.R
 	 ManticoreDF-class.R
-	 ManticoreRSE-class.R
-	 methods-GStats.R
-	 methods-ManticoreRSE.R
 	 overlap.R
 	 popGenome.R
 	 popoolation2.R

@@ -27,15 +27,21 @@ makeCoordinates <- function(x, mapping = NULL) {
     x
 }
 
+
+setGeneric("addSeqnamesColor",
+           function(object, ...) standardGeneric("addSeqnamesColor"))
+
+##' @rdname addSeqnamesColor
 ##' @title addSeqnamesColor
-##'
 ##' @description Add color mapping to seqnames
 ##'
-##' @param x
+##' @param object GRanges
+##'
 ##' @return updated Windows object with color column
 ##' @author Per Unneberg
 ##'
-addSeqnamesColor <- function(x, mapping = NULL, n.levels = 2) {
+setMethod("addSeqnamesColor", "GRanges",
+          function(object, mapping = NULL, n.levels = 2) {
     if ("colour" %in% names(x))
         return(x)
     if (is.null(mapping)) {
@@ -45,7 +51,7 @@ addSeqnamesColor <- function(x, mapping = NULL, n.levels = 2) {
     }
     mcols(x)$colour <- as.factor(mcols(x)$colour)
     return(x)
-}
+})
 
 
 ##' @rdname window.size

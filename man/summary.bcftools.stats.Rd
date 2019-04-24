@@ -4,7 +4,7 @@
 \alias{summary.bcftools.stats}
 \title{summary.bcftools.stats}
 \usage{
-\method{summary}{bcftools.stats}(obj)
+summary.bcftools.stats(obj)
 }
 \arguments{
 \item{obj}{bcftools.stats object}

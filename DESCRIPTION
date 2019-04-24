@@ -1,6 +1,6 @@
 Package: manticore
 Title: Utility functions for analysis of non model organism data
-Version: 0.0.0.9008
+Version: 0.0.0.9009
 Authors@R: person("Per", "Unneberg", email = "per.unneberg@scilifelab.se", role = c("aut", "cre"))
 Description: manticore provides utility functions for dealing with
     output from various R packages that analyse variation
@@ -43,10 +43,7 @@ Collate: methods-manticore.R
 	 Windows-class.R
 	 SWindows-class.R
 	 bcftools.R
-	 gboxplot-GStats.R
-	 gplot-GStats.R
 	 ManticoreDF-class.R
-	 methods-GStats.R
 	 overlap.R
 	 popGenome.R
 	 popoolation2.R

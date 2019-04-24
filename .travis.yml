@@ -5,3 +5,7 @@ sudo: false
 cache: packages
 r: bioc-release
 warnings_are_errors: false
+addons:
+  apt:
+    packages:
+      - libudunits2-dev

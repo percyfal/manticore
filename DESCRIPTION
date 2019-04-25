@@ -18,6 +18,9 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 Imports:
+    BiocGenerics,
+    BiocParallel,
+    GenomeInfoDb,
     GenomicRanges (>= 1.32.0),
     IRanges (>= 2.14.0),
     RColorBrewer,

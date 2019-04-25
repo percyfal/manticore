@@ -46,7 +46,6 @@ Collate: methods-manticore.R
 	 Windows-class.R
 	 SWindows-class.R
 	 bcftools.R
-	 ManticoreDF-class.R
 	 overlap.R
 	 popGenome.R
 	 popoolation2.R

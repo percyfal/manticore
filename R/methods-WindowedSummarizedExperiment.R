@@ -145,11 +145,25 @@ setAs("WindowedSummarizedExperiment", "GRanges", function(from) {
 ##' @describeIn sites Get sites for a WindowedSummarizedExperiment object
 ##'
 setMethod("sites", "WindowedSummarizedExperiment",
-          function(obj) {sites(rowRanges(obj))})
+          function(obj) {
+    if (inherits(rowRanges(obj), "SWindows")) {
+        sites(rowRanges(obj))
+    } else if (".sites" %in% assayNames(obj)) {
+        assay(obj, ".sites")
+    } else if (".coverage" %in% assayNames(obj)) {
+        y <- DataFrame(apply(assay(obj, ".coverage"), 2, function(x) {x * width(obj)}))
+        colnames(y) <- colnames(assay(obj, ".coverage"))
+        y
+    } else {
+        warning("no .coverage or .sites assay for object")
+    }
+})
 
 ##' normalize
 ##'
-##' normalize window scores by number of good sites per window
+##' normalize window scores by number of good sites per window.
+##' "hidden" assays whose name begin with a dot are excluded from
+##' normalization.
 ##'
 ##' @param object WindowedSummarizedExperiment object
 ##' @param ...
@@ -162,8 +176,14 @@ setMethod("sites", "WindowedSummarizedExperiment",
 ##' @importFrom BiocGenerics normalize
 ##'
 setMethod("normalize", "WindowedSummarizedExperiment", function(object, ...) {
-    dfl <- DataFrameList(lapply(assayNames(object), function(x){DataFrame(as.matrix(assay(object, x)) / sites(object)) }))
-    names(dfl) <- assayNames(object)
+    assaylist <- assayNames(object)
+    dfl <- DataFrameList(
+        lapply(assaylist, function(x) {
+            if (grepl("^\\..+", x))
+                return(assay(object, x))
+            DataFrame(as.matrix(assay(object, x)) / as.matrix(sites(object)))
+        }))
+    names(dfl) <- assaylist
     assays(object) <- dfl
     object
 })

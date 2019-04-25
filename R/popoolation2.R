@@ -1,7 +1,7 @@
 .application <- "Popoolation2"
 
 
-.readPopoolation2.fet.fst <- function(filename, assay, window.size = NULL) {
+.readPopoolation2.fet.fst <- function(filename, assay, window.size = NULL, ...) {
     data <- read.table(filename)
     df <- as.data.frame(sapply(data[6:ncol(data)], as.character), stringsAsFactors = FALSE)
     data <- data[1:(ncol(data) - 1)]
@@ -13,24 +13,20 @@
     sample <- gsub("=.+", "", df[1,])
     df <- DataFrame(sapply(df, function(x){as.numeric(gsub(".+=", "", x))}))
     colnames(df) <- sample
-    assayData <- S4Vectors::SimpleList(df)
-    names(assayData) <- assay
-    if (window.size > 1) {
-        data$start <- data$position - window.size / 2 + 1
-        data$end <- data$position + window.size / 2
-    } else {
-        data$start <- data$position
-        data$end <- data$position
-    }
-    sw <- SWindows(seqnames = data$seqnames, ranges = IRanges::IRanges(start = data$start, end = data$end),
-                   coverage = data$coverage, segregating.sites = data$segregating.sites,
-                   window.size = window.size)
+    coverage.df <- DataFrame(coverage = data$coverage)
+    colnames(coverage.df) <- sample
+    segregating.sites.df <- DataFrame(segregating.sites = data$segregating.sites)
+    colnames(segregating.sites.df) <- sample
+    assayData <- S4Vectors::SimpleList(df, coverage.df, segregating.sites.df)
+    names(assayData) <- c(assay, ".coverage", ".segregating.sites")
+    w <- Windows(seqnames = data$seqnames, ranges = IRanges::IRanges(start = data$position, end = data$position),
+                 window.size = window.size, ...)
     colData <- S4Vectors::DataFrame(sample = sample)
     WindowedSummarizedExperiment(assays = assayData,
-                                 rowRanges = sw, colData = colData)
+                                 rowRanges = w, colData = colData)
 }
 
-.readPopoolation2.pwc.rc <- function(filename, assay) {
+.readPopoolation2.pwc.rc <- function(filename, assay, ...) {
     if (assay == "pwc")
         n.mcol <- 8
     else
@@ -43,7 +39,7 @@
     colnames(df) <- header[(n.mcol + 1):length(header)]
     assayData <- list(df)
     names(assayData) <- assay
-    gr <- GRanges(seqnames = data$seqnames, ranges = IRanges::IRanges(start = data$position, end = data$position))
+    gr <- GRanges(seqnames = data$seqnames, ranges = IRanges::IRanges(start = data$position, end = data$position), ...)
     mcols(gr) <- data[3:n.mcol]
     colData <- S4Vectors::DataFrame(colnames = header[(n.mcol + 1):length(header)])
     SummarizedExperiment(assays = assayData,
@@ -65,15 +61,15 @@
 ##' @author Per Unneberg
 ##'
 ##'
-readPopoolation2 <- function(filename, assay = "fet", window.size = NULL) {
+readPopoolation2 <- function(filename, assay = "fet", window.size = NULL, ...) {
     assay <- match.arg(assay, c("fet", "fst", "cmh", "pwc", "rc"))
     .parsers <- list(fet = .readPopoolation2.fet.fst,
                      fst = .readPopoolation2.fet.fst,
                      pwc = .readPopoolation2.pwc.rc,
                      rc = .readPopoolation2.pwc.rc)
     if (assay %in% c("fet", "fst")) {
-        return(.readPopoolation2.fet.fst(filename, assay, window.size))
+        return(.readPopoolation2.fet.fst(filename, assay, window.size, ...))
     } else if (assay %in% c("rc", "pwc")) {
-        return(.readPopoolation2.pwc.rc(filename, assay))
+        return(.readPopoolation2.pwc.rc(filename, assay, ...))
     }
 }

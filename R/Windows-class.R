@@ -42,6 +42,11 @@ setClass("Windows",
 ##'
 Windows <- function(..., window.size = integer())
 {
-    gr <- GRanges(...)
-    new("Windows", gr, window.size = window.size)
+    gr <- trim(suppressWarnings(GRanges(...)))
+    if (!length(window.size)) {
+        window.size <- start(gr)[2] - start(gr)[1]
+    }
+    start(gr) <- start(gr) - window.size / 2 + 1
+    end(gr) <- end(gr) + window.size / 2
+    new("Windows", gr, window.size = as.integer(window.size))
 }

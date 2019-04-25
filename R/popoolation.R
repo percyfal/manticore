@@ -47,6 +47,7 @@
 ##' @author Per Unneberg
 ##'
 readVarianceSliding <- function(filename, measure = "pi", sample, seqinfo = NULL, window.size = integer(), ...) {
+    args <- list(...)
     measure <- match.arg(measure, c("pi", "D", "theta"))
     data <- .readVarianceSlidingRaw(filename)
     assayData <- .getAssayData(data, sample, measure)
@@ -59,9 +60,15 @@ readVarianceSliding <- function(filename, measure = "pi", sample, seqinfo = NULL
         w <- Windows(seqnames = data$seqnames,
                      ranges = IRanges::IRanges(start = data$position, end = data$position),
                      window.size = window.size)
-    colData <- S4Vectors::DataFrame(sample = sample)
-    WindowedSummarizedExperiment(assays = assayData, rowRanges = w,
-                                 colData = colData)
+    if ("colData" %in% names(args))
+        colData <- args$colData
+    else
+        colData <- S4Vectors::DataFrame(sample = sample)
+    wse <- WindowedSummarizedExperiment(assays = assayData, rowRanges = w,
+                                        colData = colData)
+    if ("rowData" %in% names(args))
+        rowData(wse) <- args$rowData
+    wse
 }
 
 
@@ -71,7 +78,6 @@ readVarianceSliding <- function(filename, measure = "pi", sample, seqinfo = NULL
 ##'
 ##' @param input.df Input data fram that must have columns filename,
 ##'     sample, and measure
-##' @param colData column data that describes the samples
 ##' @param window.size window size; if NULL, entire chromosomes are
 ##'     implied
 ##' @param class arbitrary classification of windows, e.g. to
@@ -90,7 +96,7 @@ readVarianceSliding <- function(filename, measure = "pi", sample, seqinfo = NULL
 ##' mrse <- VarianceSlidingAssays(dmel.df)
 ##'
 ##'
-VarianceSlidingAssays <- function(input.df, colData = NULL, window.size = NULL, class = NA, ...) {
+VarianceSlidingAssays <- function(input.df, window.size = NULL, class = NA, ...) {
     stopifnot(inherits(input.df, c("data.frame", "DataFrame")))
     columns <- c("filename", "sample", "measure")
     stopifnot(columns %in% colnames(input.df))

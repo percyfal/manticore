@@ -12,24 +12,17 @@
 }
 
 
-## Convert data.frame to WindowedSummarizedExperiment object
-.asWindowedSummarizedExperiment <- function(data, window.size, sample, measure) {
-    if (is.null(window.size)) {
-        window.size <- data$position[2] - data$position[1]
-        message("window.size parameter undefined; inferring window size to ", window.size, " from data")
-    }
+## Convert data.frame to AssayData and data for rowRanges
+.getAssayData <- function(data, sample, measure) {
     df <- DataFrame(score=data$score)
     colnames(df) <- sample
-    assayData <- S4Vectors::SimpleList(df)
-    names(assayData) <- measure
-    data$start <- data$position - window.size / 2 + 1
-    data$end <- data$position + window.size / 2
-    sw <- SWindows(seqnames = data$seqnames, ranges = IRanges::IRanges(start = data$start, end = data$end),
-                   coverage = data$coverage, segregating.sites = data$segregating.sites,
-                   window.size = window.size)
-    colData <- S4Vectors::DataFrame(sample = sample)
-    WindowedSummarizedExperiment(assays = assayData,
-                 rowRanges = sw, colData = colData)
+    coverage.df <- DataFrame(coverage = data$coverage)
+    colnames(coverage.df) <- sample
+    segregating.sites.df <- DataFrame(segregating.sites = data$segregating.sites)
+    colnames(segregating.sites.df) <- sample
+    assayData <- S4Vectors::SimpleList(df, coverage.df, segregating.sites.df)
+    names(assayData) <- c(measure, ".coverage", ".segregating.sites")
+    assayData
 }
 
 ##' readVarianceSliding
@@ -40,8 +33,10 @@
 ##'
 ##'
 ##' @param filename filename to parse
-##' @param window.size window size
 ##' @param measure measure
+##' @param sample sample name
+##' @param seqinfo Seqinfo object
+##' @param window.size window size
 ##'
 ##' @examples
 ##' fn <- system.file("extdata", "popoolation", "dmel.A.D.txt.gz", package = "manticore")
@@ -51,10 +46,22 @@
 ##'
 ##' @author Per Unneberg
 ##'
-readVarianceSliding <- function(filename, measure = "pi", window.size = NULL, sample) {
+readVarianceSliding <- function(filename, measure = "pi", sample, seqinfo = NULL, window.size = integer(), ...) {
     measure <- match.arg(measure, c("pi", "D", "theta"))
     data <- .readVarianceSlidingRaw(filename)
-    .asWindowedSummarizedExperiment(data, window.size, sample, measure)
+    assayData <- .getAssayData(data, sample, measure)
+
+    if (!is.null(seqinfo))
+        w <- Windows(seqnames = data$seqnames,
+                     ranges = IRanges::IRanges(start = data$position, end = data$position),
+                     window.size = window.size, seqinfo = seqinfo)
+    else
+        w <- Windows(seqnames = data$seqnames,
+                     ranges = IRanges::IRanges(start = data$position, end = data$position),
+                     window.size = window.size)
+    colData <- S4Vectors::DataFrame(sample = sample)
+    WindowedSummarizedExperiment(assays = assayData, rowRanges = w,
+                                 colData = colData)
 }
 
 

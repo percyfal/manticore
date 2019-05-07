@@ -74,34 +74,40 @@ setMethod("cbind", "WindowedSummarizedExperiment",
 })
 
 
-## For plotting; select assay and column and convert to data fram together with rowRanges
+
+##' @rdname as.data.frame
+##' @title as.data.frame
+##'
+##' @description Function to coerce to a data frame, if possible.
+##'
+##' @param x The object to coerce
+##' @param row.names See ‘?base::as.data.frame’ for a description
+##' @param optional See ‘?base::as.data.frame’ for a description
+##' @param long Stack assays
+##' @param expand Include colData information as extra columns. Only works for long format.
+##'
+##' @return data.frame
+##' @author Per Unneberg
 setMethod("as.data.frame", "WindowedSummarizedExperiment",
           function(x, row.names = NULL, optional = FALSE,
-                   long = FALSE, expand = FALSE,
-                   ...) {
-    assayData <- as.data.frame(assays(x))
+                   long = FALSE, expand = FALSE) {
+    assaylist <- assayNames(x)[!grepl("^\\..+", assayNames(x))]
+    assayData <- as.data.frame(assays(x)[assaylist])
+
     colnames(assayData)[1:2] <- c("group", "assay")
-    if (long)
+    if (long) {
         assayData <- gather(assayData, select = c(-group, -assay))
-    if (expand) {
-        i <- match(assayData$key, rownames(colData(x)))
-        expand.df <- DataFrame(colData(x)[i,])
-        if (ncol(expand.df) == 1)
-            colnames(expand.df) <- names(colData(x))
-        assayData <- cbind(assayData, as.data.frame(expand.df))
+        if (expand) {
+            i <- match(assayData$key, rownames(colData(x)))
+            expand.df <- DataFrame(colData(x)[i,])
+            if (ncol(expand.df) == 1)
+                colnames(expand.df) <- names(colData(x))
+            assayData <- cbind(assayData, as.data.frame(expand.df))
+        }
     }
     cbind(rowRanges(x), assayData)
 })
 
-setAs("WindowedSummarizedExperiment", "GRanges", function(from) {
-    assayData <- as.data.frame(assays(from))
-    colnames(assayData)[1:2] <- c("group", "assay")
-    gr <- rep(rowRanges(from), nrow(assayData) / length(rowRanges(from)))
-    mcols(gr) <- assayData
-    if (length(names(mcols(from))) > 0)
-        mcols(gr)[names(mcols(from))] <- mcols(from)
-    gr
-})
 
 ##' sites
 ##'

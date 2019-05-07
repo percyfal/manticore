@@ -52,14 +52,9 @@ readVarianceSliding <- function(filename, measure = "pi", sample, seqinfo = NULL
     data <- .readVarianceSlidingRaw(filename)
     assayData <- .getAssayData(data, sample, measure)
 
-    if (!is.null(seqinfo))
-        w <- Windows(seqnames = data$seqnames,
-                     ranges = IRanges::IRanges(start = data$position, end = data$position),
-                     window.size = window.size, seqinfo = seqinfo)
-    else
-        w <- Windows(seqnames = data$seqnames,
-                     ranges = IRanges::IRanges(start = data$position, end = data$position),
-                     window.size = window.size)
+    w <- Windows(seqnames = data$seqnames,
+                 ranges = IRanges::IRanges(start = data$position, end = data$position),
+                 window.size = window.size, seqinfo = seqinfo)
     if ("colData" %in% names(args))
         colData <- args$colData
     else

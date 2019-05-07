@@ -17,74 +17,38 @@ setMethod("window.size", "WindowedSummarizedExperiment",
     return (rowRanges(obj)@window.size)
 })
 
-
-##' summary.WindowedSummarizedExperiment
-##'
-##' Summarize the statistics of a WindowedSummarizedExperiment object
-##'
-##'
-##' @param obj WindowedSummarizedExperiment object
-##' @param which which assay to summarize
-##' @param fun summary function
-##' @param formula formula to calculate
-##' @param per.region normalize score by window size
-##' @param ... additional arguments
-##'
-##' @return a data frame
-##' @author Per Unneberg
-##' @export
-##'
-summary.WindowedSummarizedExperiment <- function(obj, which = NULL, fun = "mean",
-                                 per.site = FALSE,
-                                 per.region = FALSE,
-                                 variable = "score", sites = "sites",
-                                 ...) {
-    fun <- match.arg(fun, c("mean", "sd", "median", "var"))
-    if (is.null(which))
-        which <- names(assays(obj))
-    else
-        which <- match.arg(which, names(assays(obj)), several.ok = TRUE)
-    cData <- colData(obj)
-    .getData <- function(y, measure) {
-        data <- subset(assay(y, measure), select = rownames(cData)[cData$variable == variable])
-        if (per.site) {
-            sites <- subset(assay(y, measure), select = rownames(cData)[cData$variable == sites])
-            sites[sites == 0] <- NA
-            data <- data / sites
-        }
-        data
-    }
-    y <- do.call("rbind", lapply(which, function(x) {
-                              if (!per.region)
-                                  apply(.getData(obj, x), 2, fun, ...)
-                              else
-                                  do.call("rbind", tapply(obj, seqnames(obj), function(y) {apply(.getData(y, x), 2, fun, ...)}))
-                          }))
-    if (!per.region)
-        rownames(y) <- which
-    y
-}
-
-
 ##' Aggregate WindowedSummarizedExperiment statistics
 ##'
 ##' @param x WindowedSummarizedExperiment object
 ##' @param formula formula
 ##' @param FUN function to apply
-##' @param per.site normalize window scores by window length (kb)
 ##' @param ... additional arguments passed to aggregate
 ##'
 ##' @export
 ##'
-setMethod("aggregate", "WindowedSummarizedExperiment", function(x, formula, FUN, which = NULL, per.site=FALSE, ...) {
+setMethod("aggregate", "WindowedSummarizedExperiment", function(x, formula, FUN, ...) {
     df <- as.data.frame(x, ...)
     res <- aggregate(formula, df, FUN, ...)
     res
 })
 
 
-## override cbind; for combining objects with different ranges
-## See https://gist.github.com/PeteHaitch/8993b096cfa7ccd08c13 for discussion
+##' @rdname cbind
+##'
+##' @title cbind
+##'
+##' @description Combine objects with different ranges. For details
+##'     and inspiration, see
+##'     https://gist.github.com/PeteHaitch/8993b096cfa7ccd08c13 for
+##'     discussion. Missing rows are filled with NA values.
+##'
+##' @param ... Parameters to pass to merge function
+##' @param deparse.level See ‘?base::cbind’ for a description of this argument.
+##'
+##' @return A new WindowedSummarizedExperiment object with merged (union) rowRanges
+##' @author Per Unneberg
+##'
+##'
 setMethod("cbind", "WindowedSummarizedExperiment",
           function(..., deparse.level = 1) {
     args <- unname(list(...))

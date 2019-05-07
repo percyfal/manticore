@@ -45,18 +45,22 @@ setClassUnion("Seqinfo_OR_missing", c("Seqinfo", "missing"))
 
 
 
-## Interntal functions
+## Internal functions
 .population.data.frame <- function(x) {
     y <- do.call(rbind, x)
     n <- nrow(y) / length(rownames(x))
     cbind(population = rep(rownames(x), each = n), seqnames = rownames(y), y)
 }
 
-.make.population.assay.list <- function(x) {
+.make.population.assay.list <- function(x, colData) {
     y <- do.call(rbind, lapply(x, .population.data.frame))
     z <- as.data.frame(y) %>% gather("key", "value", -tidyselect::one_of(c("seqnames", "population"))) %>% tidyr::spread("population", value)
     exclude = c("key", "seqnames")
-    lapply(split(z, z$key), function(x) {y <- as.data.frame(x)[, !(colnames(x) %in% exclude)]; rownames(y) <- NULL; y})
+    lapply(split(z, z$key), function(x) {
+        y <- as.data.frame(x)[, !(colnames(x) %in% exclude)];
+        rownames(y) <- NULL;
+        colnames(y) <- rownames(colData);
+        DataFrame(apply(y, 2, as.numeric))})
 }
 
 
@@ -66,24 +70,30 @@ setClassUnion("Seqinfo_OR_missing", c("Seqinfo", "missing"))
     cbind(key = rep(rownames(x), each = n), y)
 }
 
-.make.pairs.assay.list <- function(x, stat) {
+.make.pairs.assay.list <- function(x, stat, colData) {
     if (stat == "F_ST.pairwise")
         z <- as.data.frame(do.call("rbind", lapply(x, .pairs.data.frame)))
     else
         z <- as.data.frame(cbind(key = stat, do.call(rbind, x)))
     exclude = c("key", "seqnames")
-    lapply(split(z, z$key), function(x) {y <- as.data.frame(x)[, !(colnames(x) %in% exclude)]; rownames(y) <- NULL; y})
+    lapply(split(z, z$key), function(x) {
+        y <- as.data.frame(x)[, !(colnames(x) %in% exclude)];
+        rownames(y) <- NULL;
+        y <- DataFrame(apply(y, 2, as.numeric));
+        colnames(y) <- rownames(colData);
+        y
+    })
 }
 
 
 ##' @rdname PopGenome
-##'@title Popgenome
+##' @title Popgenome
 ##' @description Function for reading PopGenome results
 ##'
 ##' @param object an R object
 ##'
 setGeneric("PopGenome",
-           function(object, seqinfo = NULL, ...) standardGeneric("PopGenome"))
+           function(object, seqinfo = NULL, gr = NULL, ...) standardGeneric("PopGenome"))
 
 
 ##' @rdname PopGenome

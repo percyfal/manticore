@@ -4,14 +4,11 @@
 \alias{VarianceSlidingAssays}
 \title{VarianceSlidingAssays}
 \usage{
-VarianceSlidingAssays(input.df, colData = NULL, window.size = NULL,
-  class = NA, ...)
+VarianceSlidingAssays(input.df, window.size = NULL, class = NA, ...)
 }
 \arguments{
 \item{input.df}{Input data fram that must have columns filename,
 sample, and measure}
-
-\item{colData}{column data that describes the samples}
 
 \item{window.size}{window size; if NULL, entire chromosomes are
 implied}

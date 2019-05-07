@@ -7,7 +7,7 @@
 ##' @param subject subject
 ##' @param ignore.strand whether or not to ignore strand
 ##'
-##' @return
+##' @return list where element i represents the number of overlapping bases for window i
 ##' @author Per Unneberg
 ##'
 ##'

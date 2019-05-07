@@ -4,13 +4,17 @@
 \alias{readVarianceSliding}
 \title{readVarianceSliding}
 \usage{
-readVarianceSliding(filename, measure = "pi", window.size = NULL,
-  sample)
+readVarianceSliding(filename, measure = "pi", sample, seqinfo = NULL,
+  window.size = integer(), ...)
 }
 \arguments{
 \item{filename}{filename to parse}
 
 \item{measure}{measure}
+
+\item{sample}{sample name}
+
+\item{seqinfo}{Seqinfo object}
 
 \item{window.size}{window size}
 }

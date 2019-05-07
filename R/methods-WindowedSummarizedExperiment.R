@@ -151,7 +151,10 @@ setMethod("normalize", "WindowedSummarizedExperiment", function(object, ...) {
         lapply(assaylist, function(x) {
             if (grepl("^\\..+", x))
                 return(assay(object, x))
-            DataFrame(as.matrix(assay(object, x)) / as.matrix(sites(object)))
+            if (is.null(dim(sites(object))))
+                DataFrame( as.matrix(assay(object, x)) / (sites(object) %*% t.default(rep(1, ncol(assay(object, x))))))
+            else
+                DataFrame(as.matrix(assay(object, x)) / as.matrix(sites(object)))
         }))
     names(dfl) <- assaylist
     assays(object) <- dfl

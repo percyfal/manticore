@@ -106,6 +106,7 @@ setGeneric("PopGenome",
 ##' @param statistics Which statistics to parse
 ##' @param quiet don't print info messages
 ##' @param window.size Set window size if unable to infer
+##' @param ... extra parameters passed to WindowedSummarizedExperiment
 ##'
 ##' @examples
 ##' library(PopGenome)
@@ -116,16 +117,19 @@ setGeneric("PopGenome",
 ##' @return list
 ##' @author Per Unneberg
 ##'
-setMethod("PopGenome", signature("GENOMEList", "Seqinfo_OR_missing"),
+setMethod("PopGenome", signature("GENOMEList", "Seqinfo_OR_missing", "GRanges_OR_missing"),
           function(object,
                    seqinfo = NULL,
+                   gr = NULL,
                    statistics = c("detail", "neutrality", "fixed", "shared", "diversity",
                                 "diversity.between", "F_ST", "F_ST.pairwise"),
                    quiet = TRUE,
-                   window.size = NULL) {
+                   window.size = NULL,
+                   ...) {
     if (!requireNamespace("PopGenome", quietly = TRUE))
             stop(paste0("Package \"PopGenome\" needed for this function to work. Please install it."),
                  call. = FALSE)
+    args <- list(...)
     statistics <- match.arg(statistics, c("detail", "neutrality",
                                           "fixed", "shared",
                                           "diversity",
@@ -143,7 +147,9 @@ setMethod("PopGenome", signature("GENOMEList", "Seqinfo_OR_missing"),
                 sweeps = get.sweeps, recomb = get.recomb)
 
     assayData <- S4Vectors::SimpleList()
-    colData <- S4Vectors::DataFrame(populations = names(object[[1]]@populations))
+    colData <- S4Vectors::DataFrame(population = names(object[[1]]@populations),
+                                    alias = paste("pop", 1:length(object[[1]]@populations)))
+    rownames(colData) <- colData$population
 
     ## Generate WSE for populations data
     rowRanges.df <- DataFrame()
@@ -164,38 +170,43 @@ setMethod("PopGenome", signature("GENOMEList", "Seqinfo_OR_missing"),
 
     if (!quiet) message("collecting segregating sites")
     segregating.sites <- as.data.frame(do.call(rbind, lapply(object, get.segregating.sites)))
-    assayData$segregating.sites <- segregating.sites
+    colnames(segregating.sites) <- rownames(colData)
+    assayData$segregating.sites <- DataFrame(segregating.sites)
 
     for (stat in statistics) {
         if (!(stat %in% population.statistics))
             next
         if (!quiet) message("collecting ", stat, " population results")
-       assayData <- c(assayData, .make.population.assay.list(lapply(object, fun[[stat]])))
+       assayData <- c(assayData, .make.population.assay.list(lapply(object, fun[[stat]]), colData))
     }
     if (is.null(window.size)) {
         window.size <- as.integer(ranges$end[1]) - as.integer(ranges$start[1]) + as.integer(1)
         message("window.size parameter undefined; inferring window size to ", window.size, " from data")
     }
-    rowRanges <- Windows(seqnames = rowRanges.df$seqnames, ranges = IRanges::IRanges(start = as.integer(rowRanges.df$start),
-                                                                                     end = as.integer(rowRanges.df$end)),
-                         window.size = window.size)
-
-    if (!is.null(seqinfo))
-        seqinfo(rowRanges) <- seqinfo
+    rowRanges <- Windows(seqnames = rowRanges.df$seqnames,
+                         ranges = IRanges::IRanges(start = as.integer(rowRanges.df$start),
+                                                   end = as.integer(rowRanges.df$end)),
+                         window.size = window.size, seqinfo = seqinfo)
+    if (!is.null(gr))
+        rowRanges <- SWindows(rowRanges, sites = as.integer(overlapByWindows(rowRanges, gr)))
     wse.population <- WindowedSummarizedExperiment(assays = assayData, rowRanges = rowRanges, colData = colData)
+    if ("rowData" %in% names(args))
+        rowData(wse.population) <- args$rowData
 
     ## Get population pairs
     poppairs <- combn(names(object[[1]]@populations), 2, function(x){paste(x, collapse = "/")})
-    colData <- S4Vectors::DataFrame(population.pairs = poppairs)
-    rownames(colData) <- combn(seq(length(poppairs)), 2, function(x) {paste0("pop", x[1], "/", "pop", x[2])})
-    assayData <- S4Vectors::SimpleList()
+    alias <- combn(seq(length(poppairs)), 2, function(x) {paste0("pop", x[1], "/", "pop", x[2])})
+    colData <- S4Vectors::DataFrame(population.pair = poppairs, alias = alias)
+    rownames(colData) <- poppairs
     for (stat in statistics) {
         if (!(stat %in% pairs.statistics))
             next
         if (!quiet) message("collecting ", stat, " pairwise results")
-        assayData <- c(assayData, .make.pairs.assay.list(lapply(object, fun[[stat]]), stat))
+        assayData <- S4Vectors::SimpleList(.make.pairs.assay.list(lapply(object, fun[[stat]]), stat, colData))
     }
     wse.pair <- WindowedSummarizedExperiment(assays = assayData, rowRanges = rowRanges, colData = colData)
+    if ("rowData" %in% names(args))
+        rowData(wse.pair) <- args$rowData
 
 
     colData <- S4Vectors::DataFrame(all = "all")
@@ -208,6 +219,9 @@ setMethod("PopGenome", signature("GENOMEList", "Seqinfo_OR_missing"),
         assayData <- c(assayData, data.list)
     }
     wse.all <- WindowedSummarizedExperiment(assays = assayData, rowRanges = rowRanges, colData = colData)
+    if ("rowData" %in% names(args))
+        rowData(wse.all) <- args$rowData
+
     list(population = wse.population,
          pair = wse.pair,
          all = wse.all)

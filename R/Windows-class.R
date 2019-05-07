@@ -46,8 +46,10 @@ Windows <- function(..., window.size = integer())
     if (!length(window.size)) {
         window.size <- start(gr)[2] - start(gr)[1]
     }
-    start(gr) <- start(gr) - window.size / 2 + 1
-    end(gr) <- end(gr) + window.size / 2
+    if (all(start(gr) == end(gr))) {
+        start(gr) <- start(gr) - window.size / 2 + 1
+        end(gr) <- end(gr) + window.size / 2
+    }
     gr <- trim(gr)
     new("Windows", gr, window.size = as.integer(window.size))
 }

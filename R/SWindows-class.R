@@ -43,13 +43,13 @@ setClass("SWindows",
 ##' @importFrom S4Vectors parallelSlotNames
 ##'
 setMethod("parallelSlotNames", "SWindows",
-          function(x) c("coverage", "sites", "segregating.sites", callNextMethod())
+          function(x) c("coverage", "sites", callNextMethod())
           )
 
 
 setMethod(GenomicRanges:::extraColumnSlotNames, "SWindows",
           function(x) {
-    c("coverage", "sites", "segregating.sites")
+    c("coverage", "sites")
 })
 
 ### ----------------------------------------------------------------------
@@ -57,31 +57,27 @@ setMethod(GenomicRanges:::extraColumnSlotNames, "SWindows",
 ###
 
 
-##' SWindows constructor
+##' @title SWindows constructor
 ##'
-##' Create an SWindows object
+##' @description Create an SWindows object
 ##'
 ##' @param ... arguments to pass on to parent class Windows
 ##' @param coverage coverage per window
 ##' @param sites number of good sites per window
-##' @param segregating.sites number of segregating sites per window
 ##'
 ##' @rdname SWindows-class
 ##' @return SWindows class
 ##' @author Per Unneberg
 ##'
 SWindows <- function(..., coverage = numeric(),
-                     sites = integer(),
-                     segregating.sites = integer())
+                     sites = integer())
 {
     w <- Windows(...)
     if (missing(coverage))
         coverage <- rep(NA, length(w))
     if (missing(sites))
         sites <- rep(NA, length(w))
-    if (missing(segregating.sites))
-        segregating.sites <- rep(NA, length(w))
-    new("SWindows", w, coverage = coverage, sites = sites, segregating.sites = segregating.sites)
+    new("SWindows", w, coverage = coverage, sites = sites)
 }
 
 

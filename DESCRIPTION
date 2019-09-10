@@ -51,9 +51,7 @@ Collate: methods-manticore.R
 	 popoolation2.R
 	 popoolation.R
 	 stats.R
-	 SWindows-class.R
 	 methods-SWindows.R
 	 utils.R
-	 Windows-class.R
 	 methods-Windows.R
 
